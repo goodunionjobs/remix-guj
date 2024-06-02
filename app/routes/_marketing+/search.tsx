@@ -31,6 +31,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 }
 
 type SearchProps = {
+	// TODO: Figure out where to find type
+	// @ts-ignore
 	serverState?: InstantSearchServerState
 	serverUrl?: string
 }
@@ -64,6 +66,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 	)
 }
 
+// @ts-ignore
 function Hit({ hit }) {
 	return JSON.stringify(hit.job)
 }
