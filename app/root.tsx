@@ -20,6 +20,7 @@ import {
 import { withSentry } from '@sentry/remix'
 import { useRef } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import DynamicLinks from 'remix-utils'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { SearchBar } from './components/search-bar.tsx'
@@ -72,6 +73,7 @@ export const links: LinksFunction = () => {
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	// TODO: Fix up
 	return [
 		{ title: data ? 'Epic Notes' : 'Error | Epic Notes' },
 		{ name: 'description', content: `Your own captain's log` },
@@ -120,6 +122,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	return json(
 		{
+			// TODO: Remove user and all mention in loaders
 			user,
 			requestInfo: {
 				hints: getHints(request),
@@ -194,9 +197,10 @@ function App() {
 	const nonce = useNonce()
 	const user = useOptionalUser()
 	const theme = useTheme()
-	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
-	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+	// TODO: DELETE
+	// const matches = useMatches()
+	// const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	// const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
 	const allowIndexing = data.ENV.ALLOW_INDEXING !== 'false'
 	useToast(data.toast)
 
@@ -208,22 +212,44 @@ function App() {
 			env={data.ENV}
 		>
 			<div className="flex h-screen flex-col justify-between">
-				<header className="container py-6">
-					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-						<Logo />
-						<div className="ml-auto hidden max-w-sm flex-1 sm:block">
-							{searchBar}
+				<div className="flex items-center justify-center bg-blue-700 pt-0.5  text-white sm:py-1">
+					<span>
+						<a href="https://www.ukrainefreedomproject.org/">
+							Help Provide Humanitarian Aid to Ukraine 🇺🇦
+						</a>
+					</span>
+				</div>
+				<header className="px-3.5 py-6 sm:container">
+					<nav className="flex items-center justify-between gap-1">
+						<div className="flex justify-between gap-2">
+							<Logo />
+							<Link to="/" className="hidden self-center md:block">
+								<div className="font-light">Good</div>
+								<div className="font-bold">Union Jobs</div>
+							</Link>
+							<div className="ml-4 flex h-10 w-10 items-center justify-center self-center rounded-full bg-gray-300 dark:bg-slate-500">
+								<ThemeSwitch
+									userPreference={data.requestInfo.userPrefs.theme}
+								/>
+							</div>
 						</div>
-						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="lg">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
+						{/* // TODO Add back later. Cool to look up users */}
+						{/* {isOnSearchPage ? null : (
+							<div className="ml-auto max-w-sm flex-1 pr-10">
+								<SearchBar status="idle" />
+							</div>
+						)} */}
+						<div className="flex flex-row gap-4">
+							<div className="flex items-center gap-10">
+								{user ? (
+									<UserDropdown />
+								) : (
+									<Button asChild variant="default" size="lg">
+										<Link to="/login">Log In</Link>
+									</Button>
+								)}
+							</div>
 						</div>
-						<div className="block w-full sm:hidden">{searchBar}</div>
 					</nav>
 				</header>
 
@@ -232,10 +258,16 @@ function App() {
 				</div>
 
 				<div className="container flex justify-between pb-5">
-					<Logo />
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+					<div className="flex justify-between gap-1">
+						<Logo />
+						<Link to="/" className="hidden self-center md:block">
+							<div className="font-light">Good</div>
+							<div className="font-bold">Union Jobs</div>
+						</Link>
+					</div>
 				</div>
 			</div>
+
 			<EpicToaster closeButton position="top-center" theme={theme} />
 			<EpicProgress />
 		</Document>
@@ -244,13 +276,15 @@ function App() {
 
 function Logo() {
 	return (
-		<Link to="/" className="group grid leading-snug">
-			<span className="font-light transition group-hover:-translate-x-1">
-				epic
-			</span>
-			<span className="font-bold transition group-hover:translate-x-1">
-				notes
-			</span>
+		<Link to="/" className="rounded-full bg-blue-500">
+			<img
+				src="/favicons/512x512.png"
+				alt="good union jobs logo"
+				// TODO Fix this to be dynamic
+				// multiply by 0.4 of logo.png to get size used now
+				width={60.8}
+				height={56}
+			/>
 		</Link>
 	)
 }

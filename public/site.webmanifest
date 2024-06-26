@@ -1,6 +1,6 @@
 {
-	"name": "Epic Notes",
-	"short_name": "Epic Notes",
+	"name": "Good Union Jobs",
+	"short_name": "Good Union Jobs",
 	"start_url": "/",
 	"icons": [
 		{
@@ -14,7 +14,7 @@
 			"type": "image/png"
 		}
 	],
-	"theme_color": "#A9ADC1",
+	"theme_color": "#ff8c00",
 	"background_color": "#1f2028",
 	"display": "standalone"
 }

@@ -1,0 +1,1 @@
+- Finish site.webmanifest and renaming images used
