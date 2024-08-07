@@ -29,8 +29,9 @@ lease:
     key: 'epic-stack-litefs/${FLY_APP_NAME}'
 
 exec:
-  - cmd: npx drizzle-kit migrate
-    if-candidate: true
+  # TODO: Create our own way of applying migrations
+  # - cmd: npx drizzle-kit migrate
+  #   if-candidate: true
 
   # Set the journal mode for the database to WAL. This reduces concurrency deadlock issues
   - cmd: sqlite3 $DATABASE_PATH "PRAGMA journal_mode = WAL;"
