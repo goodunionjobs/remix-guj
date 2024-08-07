@@ -6,8 +6,9 @@ FROM node:20-bookworm-slim as base
 # set for base and all layer that inherit from it
 ENV NODE_ENV production
 
-# Install openssl for Prisma
-RUN apt-get update && apt-get install -y fuse3 openssl sqlite3 ca-certificates
+# Install necessary packages
+# HACK: If doesn't work look into openssl missing!
+RUN apt-get update && apt-get install -y fuse3 sqlite3 ca-certificates
 
 # Install all node_modules, including dev dependencies
 FROM base as deps
@@ -36,9 +37,6 @@ WORKDIR /myapp
 
 COPY --from=deps /myapp/node_modules /myapp/node_modules
 
-ADD prisma .
-RUN npx prisma generate
-
 ADD . .
 
 # Mount the secret and set it as an environment variable and run the build
@@ -59,8 +57,6 @@ ENV CACHE_DATABASE_PATH="$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
 ENV INTERNAL_PORT="8080"
 ENV PORT="8081"
 ENV NODE_ENV="production"
-# For WAL support: https://github.com/prisma/prisma-engines/issues/4675#issuecomment-1914383246
-ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK = "1"
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
@@ -68,12 +64,10 @@ RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-c
 WORKDIR /myapp
 
 COPY --from=production-deps /myapp/node_modules /myapp/node_modules
-COPY --from=build /myapp/node_modules/.prisma /myapp/node_modules/.prisma
 
 COPY --from=build /myapp/server-build /myapp/server-build
 COPY --from=build /myapp/build /myapp/build
 COPY --from=build /myapp/package.json /myapp/package.json
-COPY --from=build /myapp/prisma /myapp/prisma
 COPY --from=build /myapp/app/components/ui/icons /myapp/app/components/ui/icons
 
 # prepare for litefs

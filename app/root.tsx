@@ -37,9 +37,7 @@ import { Icon, href as iconsHref } from './components/ui/icon.tsx'
 import { EpicToaster } from './components/ui/sonner.tsx'
 import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
-import { getUserId, logout } from './utils/auth.server.ts'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
-import { prisma } from './utils/db.server.ts'
 import { getEnv } from './utils/env.server.ts'
 import { honeypot } from './utils/honeypot.server.ts'
 import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
@@ -82,48 +80,52 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const timings = makeTimings('root loader')
-	const userId = await time(() => getUserId(request), {
-		timings,
-		type: 'getUserId',
-		desc: 'getUserId in root',
-	})
 
-	const user = userId
-		? await time(
-				() =>
-					prisma.user.findUniqueOrThrow({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							image: { select: { id: true } },
-							roles: {
-								select: {
-									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
-									},
-								},
-							},
-						},
-						where: { id: userId },
-					}),
-				{ timings, type: 'find user', desc: 'find user in root' },
-			)
-		: null
-	if (userId && !user) {
-		console.info('something weird happened')
-		// something weird happened... The user is authenticated but we can't find
-		// them in the database. Maybe they were deleted? Let's log them out.
-		await logout({ request, redirectTo: '/' })
-	}
+	//TODO: Check into user part here...not likely needed for us since Kinde is doing authentication on our end
+
+	// const userId = await time(() => getUserId(request), {
+	// 	timings,
+	// 	type: 'getUserId',
+	// 	desc: 'getUserId in root',
+	// })
+	//
+	// const user = userId
+	// 	? await time(
+	// 			() =>
+	// 				prisma.user.findUniqueOrThrow({
+	// 					select: {
+	// 						id: true,
+	// 						name: true,
+	// 						username: true,
+	// 						image: { select: { id: true } },
+	// 						roles: {
+	// 							select: {
+	// 								name: true,
+	// 								permissions: {
+	// 									select: { entity: true, action: true, access: true },
+	// 								},
+	// 							},
+	// 						},
+	// 					},
+	// 					where: { id: userId },
+	// 				}),
+	// 			{ timings, type: 'find user', desc: 'find user in root' },
+	// 		)
+	// 	: null
+	// if (userId && !user) {
+	// 	console.info('something weird happened')
+	// 	// something weird happened... The user is authenticated but we can't find
+	// 	// them in the database. Maybe they were deleted? Let's log them out.
+	// 	await logout({ request, redirectTo: '/' })
+	// }
+
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const honeyProps = honeypot.getInputProps()
 
 	return json(
 		{
-			// TODO: Remove user and all mention in loaders
-			user,
+			// TODO: look at above todo
+			// user,
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),
@@ -219,6 +221,7 @@ function App() {
 						</a>
 					</span>
 				</div>
+
 				<header className="px-3.5 py-6 sm:container">
 					<nav className="flex items-center justify-between gap-1">
 						<div className="flex justify-between gap-2">
@@ -240,13 +243,18 @@ function App() {
 							</div>
 						)} */}
 						<div className="flex flex-row gap-4">
-							<div className="flex items-center gap-10">
+							<div className="flex items-center gap-2">
 								{user ? (
 									<UserDropdown />
 								) : (
-									<Button asChild variant="default" size="lg">
-										<Link to="/login">Log In</Link>
-									</Button>
+									<>
+										<Button asChild variant="outline" size="lg">
+											<Link to={'/kinde-auth/register'}>Register</Link>
+										</Button>
+										<Button asChild variant="default" size="lg">
+											<Link to={'/kinde-auth/login'}>Login</Link>
+										</Button>
+									</>
 								)}
 							</div>
 						</div>
@@ -351,7 +359,10 @@ function UserDropdown() {
 					>
 						<Form action="/logout" method="POST" ref={formRef}>
 							<Icon className="text-body-md" name="exit">
-								<button type="submit">Logout</button>
+								<button type="submit">
+									{/* //TODO: Work on making this look like the format of login/register button */}
+									<Link to={'/kinde-auth/logout'}>Logout</Link>;
+								</button>
 							</Icon>
 						</Form>
 					</DropdownMenuItem>

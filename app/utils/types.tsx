@@ -1,12 +1,13 @@
 import type { Hit as InstantSearchHit, BaseHit } from 'instantsearch.js'
 import { type InstantSearchServerState } from 'react-instantsearch'
-import type {
-	City,
-	Country,
-	EmployerImage,
-	Search,
-	SearchPayload,
-} from '@prisma/client'
+//TODO: Look into below and implement if important
+// import type {
+// 	City,
+// 	Country,
+// 	EmployerImage,
+// 	Search,
+// 	SearchPayload,
+// } from '@prisma/client'
 
 interface Job {
 	position: string
@@ -109,24 +110,24 @@ interface OGMeta<T extends OGProps> {
 //   content: string;
 // }
 
-type Company = {
-	id: number
-	EmployerImage: EmployerImage
-	description: string
-	Address: {
-		street: string | null
-		City: City
-		State: State
-		Country: Country
-	}
-}
+// type Company = {
+// 	id: number
+// 	EmployerImage: EmployerImage
+// 	description: string
+// 	Address: {
+// 		street: string | null
+// 		City: City
+// 		State: State
+// 		Country: Country
+// 	}
+// }
 
-export type CompanyLoaderData = {
-	companyName: string
-	company: Company
-	jobs: Company[]
-	links: string[]
-}
+// export type CompanyLoaderData = {
+// 	companyName: string
+// 	company: Company
+// 	jobs: Company[]
+// 	links: string[]
+// }
 
 type DefaultMetaProps = [
 	TitleMeta,
@@ -145,7 +146,7 @@ type AlgoliaHit<T extends Record<string, any>> = T & {
 	// commonField: string;
 }
 
-export type HitProps = {
+type HitProps = {
 	hit: InstantSearchHit<
 		AlgoliaHit<{
 			objectID: string
@@ -165,14 +166,14 @@ export type HitProps = {
 	>
 }
 
-type PrismaHitProps = {
-	hit: Search & {
-		employer: string
-		image: string[]
-		// Add additional fields specific to Prisma data
-		// ...
-	}
-}
+// type PrismaHitProps = {
+// 	hit: Search & {
+// 		employer: string
+// 		image: string[]
+// 		// Add additional fields specific to Prisma data
+// 		// ...
+// 	}
+// }
 
 export type {
 	Job,
@@ -187,5 +188,5 @@ export type {
 	CategoriesLoaderData,
 	DefaultMetaProps,
 	HitProps,
-	PrismaHitProps,
+	// PrismaHitProps,
 }

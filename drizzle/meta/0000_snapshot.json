@@ -1,0 +1,1023 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.seniorities": {
+      "name": "seniorities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "seniorities_name_unique": {
+          "columns": [
+            "name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "seniorities_name_unique"
+        }
+      }
+    },
+    "public.states": {
+      "name": "states",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "states_name_unique": {
+          "columns": [
+            "name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "states_name_unique"
+        }
+      }
+    },
+    "public.addresses": {
+      "name": "addresses",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "street": {
+          "name": "street",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city_id": {
+          "name": "city_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state_id": {
+          "name": "state_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country_id": {
+          "name": "country_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "address_city_state_country_unique_index": {
+          "name": "address_city_state_country_unique_index",
+          "columns": [
+            {
+              "expression": "city_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "state_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "country_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "country_id_index": {
+          "name": "country_id_index",
+          "columns": [
+            {
+              "expression": "country_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "state_id_index": {
+          "name": "state_id_index",
+          "columns": [
+            {
+              "expression": "state_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.cities": {
+      "name": "cities",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cities_name_unique": {
+          "columns": [
+            "name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "cities_name_unique"
+        }
+      }
+    },
+    "public.countries": {
+      "name": "countries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(25)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "countries_name_unique": {
+          "columns": [
+            "name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "countries_name_unique"
+        }
+      }
+    },
+    "public.employer": {
+      "name": "employer",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "public_id": {
+          "name": "public_id",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "guild_id": {
+          "name": "guild_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "originalLink": {
+          "name": "originalLink",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "s3_link": {
+          "name": "s3_link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "employers_unique_index": {
+          "name": "employers_unique_index",
+          "columns": [
+            {
+              "expression": "name",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "guild_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "guild_id_index": {
+          "name": "guild_id_index",
+          "columns": [
+            {
+              "expression": "guild_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.guilds": {
+      "name": "guilds",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "search_type": {
+          "name": "search_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_scraped": {
+          "name": "date_scraped",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "guilds_name_unique": {
+          "columns": [
+            "name"
+          ],
+          "nullsNotDistinct": false,
+          "name": "guilds_name_unique"
+        }
+      }
+    },
+    "public.categories": {
+      "name": "categories",
+      "schema": "",
+      "columns": {
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.industries": {
+      "name": "industries",
+      "schema": "",
+      "columns": {
+        "industry_id": {
+          "name": "industry_id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "node": {
+          "name": "node",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_name": {
+          "name": "category_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "industries_category_name_categories_name_fk": {
+          "name": "industries_category_name_categories_name_fk",
+          "tableFrom": "industries",
+          "tableTo": "categories",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "category_name"
+          ],
+          "columnsTo": [
+            "name"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "industries_label_unique": {
+          "columns": [
+            "label"
+          ],
+          "nullsNotDistinct": false,
+          "name": "industries_label_unique"
+        },
+        "industries_description_unique": {
+          "columns": [
+            "description"
+          ],
+          "nullsNotDistinct": false,
+          "name": "industries_description_unique"
+        }
+      }
+    },
+    "public.jobs": {
+      "name": "jobs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "public_id": {
+          "name": "public_id",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descrip_url": {
+          "name": "descrip_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "min_salary": {
+          "name": "min_salary",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_salary": {
+          "name": "max_salary",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employment_type": {
+          "name": "employment_type",
+          "type": "employment_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pay_type": {
+          "name": "pay_type",
+          "type": "pay_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seniority_id": {
+          "name": "seniority_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employer_id": {
+          "name": "employer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address_id": {
+          "name": "address_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_stamp": {
+          "name": "date_stamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_stamp": {
+          "name": "time_stamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "post_length": {
+          "name": "post_length",
+          "type": "postLengthType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "post_paid": {
+          "name": "post_paid",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "job_address_id_index": {
+          "name": "job_address_id_index",
+          "columns": [
+            {
+              "expression": "address_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "job_employer_id_index": {
+          "name": "job_employer_id_index",
+          "columns": [
+            {
+              "expression": "employer_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "job_seniority_id_index": {
+          "name": "job_seniority_id_index",
+          "columns": [
+            {
+              "expression": "employer_id",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "job_time_stamp_index": {
+          "name": "job_time_stamp_index",
+          "columns": [
+            {
+              "expression": "time_stamp",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "timestamp_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "jobs_public_id_unique": {
+          "columns": [
+            "public_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "jobs_public_id_unique"
+        },
+        "jobs_url_unique": {
+          "columns": [
+            "url"
+          ],
+          "nullsNotDistinct": false,
+          "name": "jobs_url_unique"
+        }
+      }
+    },
+    "public.job_functions": {
+      "name": "job_functions",
+      "schema": "",
+      "columns": {
+        "code_id": {
+          "name": "code_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "job_functions_description_unique": {
+          "columns": [
+            "description"
+          ],
+          "nullsNotDistinct": false,
+          "name": "job_functions_description_unique"
+        }
+      }
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "kinde_user_id": {
+          "name": "kinde_user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_kinde_user_id_unique": {
+          "columns": [
+            "kinde_user_id"
+          ],
+          "nullsNotDistinct": false,
+          "name": "users_kinde_user_id_unique"
+        },
+        "users_email_unique": {
+          "columns": [
+            "email"
+          ],
+          "nullsNotDistinct": false,
+          "name": "users_email_unique"
+        }
+      }
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "expiration_date": {
+          "name": "expiration_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.jobs_to_industries": {
+      "name": "jobs_to_industries",
+      "schema": "",
+      "columns": {
+        "job_id": {
+          "name": "job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "industry_id": {
+          "name": "industry_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "jobs_to_industries_job_id_jobs_id_fk": {
+          "name": "jobs_to_industries_job_id_jobs_id_fk",
+          "tableFrom": "jobs_to_industries",
+          "tableTo": "jobs",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "jobs_to_industries_industry_id_industries_industry_id_fk": {
+          "name": "jobs_to_industries_industry_id_industries_industry_id_fk",
+          "tableFrom": "jobs_to_industries",
+          "tableTo": "industries",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "industry_id"
+          ],
+          "columnsTo": [
+            "industry_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "jobs_to_industries_job_id_industry_id_pk": {
+          "name": "jobs_to_industries_job_id_industry_id_pk",
+          "columns": [
+            "job_id",
+            "industry_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.jobs_to_job_functions": {
+      "name": "jobs_to_job_functions",
+      "schema": "",
+      "columns": {
+        "job_id": {
+          "name": "job_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_function_id": {
+          "name": "job_function_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "jobs_to_job_functions_job_id_jobs_id_fk": {
+          "name": "jobs_to_job_functions_job_id_jobs_id_fk",
+          "tableFrom": "jobs_to_job_functions",
+          "tableTo": "jobs",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "jobs_to_job_functions_job_function_id_job_functions_code_id_fk": {
+          "name": "jobs_to_job_functions_job_function_id_job_functions_code_id_fk",
+          "tableFrom": "jobs_to_job_functions",
+          "tableTo": "job_functions",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "job_function_id"
+          ],
+          "columnsTo": [
+            "code_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "jobs_to_job_functions_job_id_job_function_id_pk": {
+          "name": "jobs_to_job_functions_job_id_job_function_id_pk",
+          "columns": [
+            "job_id",
+            "job_function_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.users_to_categories": {
+      "name": "users_to_categories",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_name": {
+          "name": "category_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "users_to_categories_user_id_users_id_fk": {
+          "name": "users_to_categories_user_id_users_id_fk",
+          "tableFrom": "users_to_categories",
+          "tableTo": "users",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "users_to_categories_category_name_categories_name_fk": {
+          "name": "users_to_categories_category_name_categories_name_fk",
+          "tableFrom": "users_to_categories",
+          "tableTo": "categories",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "category_name"
+          ],
+          "columnsTo": [
+            "name"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "users_to_categories_user_id_category_name_pk": {
+          "name": "users_to_categories_user_id_category_name_pk",
+          "columns": [
+            "user_id",
+            "category_name"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {
+    "public.employment_type": {
+      "name": "employment_type",
+      "values": [
+        "Full-time",
+        "Part-time",
+        "Contract",
+        "Temporary",
+        "Volunteer",
+        "Other"
+      ],
+      "schema": "public"
+    },
+    "public.payType": {
+      "name": "payType",
+      "values": [
+        "hr",
+        "yr"
+      ],
+      "schema": "public"
+    },
+    "public.pay_type": {
+      "name": "pay_type",
+      "values": [
+        "hr",
+        "yr"
+      ],
+      "schema": "public"
+    },
+    "public.postLengthType": {
+      "name": "postLengthType",
+      "values": [
+        "week",
+        "month"
+      ],
+      "schema": "public"
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}

@@ -1,5 +1,5 @@
 import { json, type LoaderFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { useLoaderData, Link } from '@remix-run/react'
 import algoliasearch from 'algoliasearch/lite'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
 import { renderToString } from 'react-dom/server'
