@@ -33,6 +33,10 @@ FROM base as build
 ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
 
+# Use the following environment variables to configure Sentry
+ENV SENTRY_ORG="good-union-jobs"
+ENV SENTRY_PROJECT="remix-guj"
+
 WORKDIR /myapp
 
 COPY --from=deps /myapp/node_modules /myapp/node_modules
