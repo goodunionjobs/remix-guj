@@ -1,13 +1,16 @@
 // import { type Connection, type Password, type User } from '@prisma/client'
-// import { redirect } from '@remix-run/node'
+import { redirect } from '@remix-run/node'
 // import bcrypt from 'bcryptjs'
 // import { Authenticator } from 'remix-auth'
-// import { safeRedirect } from 'remix-utils/safe-redirect'
+import { eq } from 'drizzle-orm'
+import { safeRedirect } from 'remix-utils/safe-redirect'
 // import { connectionSessionStorage, providers } from './connections.server.ts'
 // import { prisma } from './db.server.ts'
-// import { combineHeaders, downloadFile } from './misc.tsx'
+import { sessions } from '../../drizzle/schema.ts'
+import { db } from './db.server.ts'
+import { combineHeaders, downloadFile } from './misc.tsx'
 // import { type ProviderUser } from './providers/provider.ts'
-// import { authSessionStorage } from './session.server.ts'
+import { authSessionStorage } from './session.server.ts'
 
 //TODO: Should not be needed. Do not need anything for authentication. And session expiration possible in Kinde.
 // Remove fully when app functioning
@@ -16,7 +19,7 @@
 // export const getSessionExpirationDate = () =>
 // 	new Date(Date.now() + SESSION_EXPIRATION_TIME)
 //
-// export const sessionKey = 'sessionId'
+export const sessionKey = 'sessionId'
 //
 // export const authenticator = new Authenticator<ProviderUser>(
 // 	connectionSessionStorage,
@@ -185,35 +188,38 @@
 // 	return session
 // }
 //
-// export async function logout(
-// 	{
-// 		request,
-// 		redirectTo = '/',
-// 	}: {
-// 		request: Request
-// 		redirectTo?: string
-// 	},
-// 	responseInit?: ResponseInit,
-// ) {
-// 	const authSession = await authSessionStorage.getSession(
-// 		request.headers.get('cookie'),
-// 	)
-// 	const sessionId = authSession.get(sessionKey)
-// 	// if this fails, we still need to delete the session from the user's browser
-// 	// and it doesn't do any harm staying in the db anyway.
-// 	if (sessionId) {
-// 		// the .catch is important because that's what triggers the query.
-// 		// learn more about PrismaPromise: https://www.prisma.io/docs/orm/reference/prisma-client-reference#prismapromise-behavior
-// 		void prisma.session.deleteMany({ where: { id: sessionId } }).catch(() => {})
-// 	}
-// 	throw redirect(safeRedirect(redirectTo), {
-// 		...responseInit,
-// 		headers: combineHeaders(
-// 			{ 'set-cookie': await authSessionStorage.destroySession(authSession) },
-// 			responseInit?.headers,
-// 		),
-// 	})
-// }
+export async function logout(
+	{
+		request,
+		redirectTo = '/',
+	}: {
+		request: Request
+		redirectTo?: string
+	},
+	responseInit?: ResponseInit,
+) {
+	const authSession = await authSessionStorage.getSession(
+		request.headers.get('cookie'),
+	)
+	const sessionId = authSession.get(sessionKey)
+	// if this fails, we still need to delete the session from the user's browser
+	// and it doesn't do any harm staying in the db anyway.
+	if (sessionId) {
+		// Use Drizzle to delete the session
+		void db
+			.delete(sessions)
+			.where(eq(sessions.id, sessionId))
+			.execute()
+			.catch(() => {})
+	}
+	throw redirect(safeRedirect(redirectTo), {
+		...responseInit,
+		headers: combineHeaders(
+			{ 'set-cookie': await authSessionStorage.destroySession(authSession) },
+			responseInit?.headers,
+		),
+	})
+}
 //
 // export async function getPasswordHash(password: string) {
 // 	const hash = await bcrypt.hash(password, 10)
