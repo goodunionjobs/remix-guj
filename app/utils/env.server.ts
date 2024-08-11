@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 const schema = z.object({
 	NODE_ENV: z.enum(['production', 'development', 'test'] as const),
+	// TODO: Figure out why adding R2_STORAGE_DOMAIN causes issues
 	DATABASE_PATH: z.string(),
 	DATABASE_URL: z.string(),
 	SESSION_SECRET: z.string(),
@@ -9,7 +10,7 @@ const schema = z.object({
 	HONEYPOT_SECRET: z.string(),
 	CACHE_DATABASE_PATH: z.string(),
 	// If you plan on using Sentry, uncomment this line
-	// SENTRY_DSN: z.string(),
+	SENTRY_DSN: z.string(),
 	// If you plan to use Resend, uncomment this line
 	RESEND_API_KEY: z.string(),
 	// If you plan to use GitHub auth, remove the default:

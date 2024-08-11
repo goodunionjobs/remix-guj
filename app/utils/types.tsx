@@ -150,18 +150,26 @@ type HitProps = {
 	hit: InstantSearchHit<
 		AlgoliaHit<{
 			objectID: string
-			url: string
-			job: string
-			datestamp: number
-			description: string
-			color: number | undefined
-			city: string
-			state: string
-			salary: string
-			employment: string
-			employmentType: string
+			title: string
 			employer: string
-			image: string[]
+			employerImage: string
+			union?: string
+			url: string
+			descripUrl: string
+			minSalary?: number
+			maxSalary?: number
+			payType?: string
+			employmentType: string
+			state: string
+			city: string
+			datestamp: number
+			jobFunctions: string[]
+			industries: string[]
+			//TODO: Look over including these below?
+			color?: number
+			salary?: string
+			employment?: string
+			image?: string[]
 		}>
 	>
 }

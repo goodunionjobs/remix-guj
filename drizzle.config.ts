@@ -26,6 +26,6 @@ export default defineConfig({
 	out: './drizzle',
 	schema: './drizzle/schema.ts',
 	dbCredentials: {
-		url: process.env.NEON_DATABASE_URL!,
+		url: process.env.DATABASE_URL!,
 	},
 })

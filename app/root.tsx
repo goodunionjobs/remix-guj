@@ -73,7 +73,7 @@ export const links: LinksFunction = () => {
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	// TODO: Fix up
 	return [
-		{ title: data ? 'Epic Notes' : 'Error | Epic Notes' },
+		{ title: data ? 'Good Union Jobs' : 'Error | Good Union Jobs' },
 		{ name: 'description', content: `Your own captain's log` },
 	]
 }
@@ -214,13 +214,13 @@ function App() {
 			env={data.ENV}
 		>
 			<div className="flex h-screen flex-col justify-between">
-				<div className="flex items-center justify-center bg-blue-700 pt-0.5  text-white sm:py-1">
-					<span>
-						<a href="https://www.ukrainefreedomproject.org/">
-							Help Provide Humanitarian Aid to Ukraine 🇺🇦
-						</a>
-					</span>
-				</div>
+				{/* <div className="flex items-center justify-center bg-blue-700 pt-0.5  text-white sm:py-1"> */}
+				{/* 	<span> */}
+				{/* 		<a href="https://www.ukrainefreedomproject.org/"> */}
+				{/* 			Help Provide Humanitarian Aid to Ukraine 🇺🇦 */}
+				{/* 		</a> */}
+				{/* 	</span> */}
+				{/* </div> */}
 
 				<header className="px-3.5 py-6 sm:container">
 					<nav className="flex items-center justify-between gap-1">

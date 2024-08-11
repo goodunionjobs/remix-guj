@@ -31,6 +31,7 @@ export async function sendEmail({
 	| { html: string; text: string; react?: never }
 	| { react: ReactElement; html?: never; text?: never }
 )) {
+	//TODO: Change this to actual resend domain used
 	const from = 'hello@epicstack.dev'
 
 	const email = {

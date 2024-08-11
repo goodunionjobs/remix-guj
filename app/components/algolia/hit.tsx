@@ -10,28 +10,24 @@ import { BodyText } from '../body-text.tsx'
 import { FinalTime } from '../final-time.tsx'
 import { divBlock } from '../job-posts/jobblockcss.ts'
 import { LogoImage } from '../logo-image.tsx'
-// import { generateJobPostingStructuredData } from '~/utils/json-schema.tsx'
 
 export function Hit({ hit }: HitProps) {
-	//TODO: Make function
-	// const descripFetcher = useFetcher<typeof jobDescripLoader>()
-	// const [showResults, setShowResults] = useState(false)
-	// const [fetchedObjectIds, setFetchedObjectIds] = useState<
-	// 	Record<string, boolean>
-	// >({})
-	//
-	// const onClick = (objectID: string, job: string) => {
-	// 	setShowResults(!showResults)
-	// 	window.history.replaceState({}, '', `/jobs/${objectID}-${job}`)
-	//
-	// 	if (objectID && !fetchedObjectIds[objectID]) {
-	// 		descripFetcher.load('/resources/download-job-descrip')
-	// 		setFetchedObjectIds(prev => ({ ...prev, [objectID]: true }))
-	// 	}
-	// }
+	const [showResults, setShowResults] = useState(false)
+	const descriptionFetcher = useFetcher()
 
-	const handleButtonClick = (event: { stopPropagation: () => void }) => {
-		event.stopPropagation()
+	const onClick = () => {
+		setShowResults(!showResults)
+		if (!showResults && hit.descripUrl) {
+			descriptionFetcher.load(
+				`/resources/job-description?descripUrl=${encodeURIComponent(hit.descripUrl)}`,
+			)
+		}
+		// Update URL without navigation
+		window.history.pushState(
+			{},
+			'',
+			`/jobs/${hit.objectID}-${formatJobSlug(hit.title)}`,
+		)
 	}
 
 	const formatJobSlug = (job: string) =>
@@ -63,19 +59,10 @@ export function Hit({ hit }: HitProps) {
 		finalTime = [yearDiff, TimeFormat.Year]
 	}
 
-	const baseURL =
+	const baseUrl =
 		process.env.NODE_ENV === 'development'
 			? 'http://localhost:3000/'
 			: 'https://goodunionjobs.com/'
-
-	const finalImage: string[] = hit.image.map(el =>
-		el
-			.replace(
-				'https://goodunionjobs.s3.amazonaws.com/',
-				'https://goodunionjobs.com/',
-			) // Always prod url because cached
-			.replace(/%20/g, '+'),
-	)
 
 	const theme = useTheme()
 	const lightColor = '#FFFFFF'
@@ -86,61 +73,48 @@ export function Hit({ hit }: HitProps) {
 			? lightColor
 			: '#0f172a'
 
-	console.log(hit.color, 'color here')
-
-	// For some reason until you fix colors function doesnt work :)
 	const textColor = FindTextColor(color, lightColor, darkColor)
 
 	return (
 		<div aria-label="Job post">
-			{/* <script
-				type="application/ld+json"
-				dangerouslySetInnerHTML={{
-					__html: JSON.stringify(JobPostingStructuredData),
-				}}
-			/> */}
-			<div
-				className="group pt-2"
-				//TODO: Make function
-				// onClick={() => onClick(hit.objectID, formatJobSlug(hit.job))}
-				onClick={() => console.log}
-			>
+			<div className="group pt-2" style={{ cursor: 'pointer' }}>
 				<div
 					className={divBlock}
 					style={{ background: color, color: textColor }}
 				>
-					<div className="flex h-24 flex-row items-stretch">
+					<div className="flex h-24 flex-row items-stretch" onClick={onClick}>
 						<LogoImage
-							finalImage={finalImage}
+							employerImage={hit.employerImage}
 							employer={hit.employer}
 							size={53}
 							layout="flex"
 						/>
 						<Attributes
 							hit={hit}
-							salary={hit.salary}
+							minSalary={hit.minSalary}
+							maxSalary={hit.maxSalary}
 							state={hit.state}
 							employmentType={hit.employmentType}
 							employer={hit.employer}
-							job={hit.job}
+							title={hit.title}
 						/>
 						<FinalTime finalTime={finalTime} />
 						<ApplyButton
 							url={hit.url}
-							handleButtonClick={handleButtonClick}
+							handleButtonClick={e => e.stopPropagation()} // Prevent job expansion when clicking on buttons
 							textColor={textColor}
 						/>
 					</div>
 				</div>
 				<BodyText
 					url={hit.url}
-					baseUrl={baseURL}
-					description={hit.description}
+					baseUrl={baseUrl} // Make sure this is defined or passed as a prop
+					description={descriptionFetcher.data?.description || ''}
 					objectID={hit.objectID}
-					handleButtonClick={handleButtonClick}
-					//TODO: Make work
-					// showResults={showResults}
-					job={formatJobSlug(hit.job)}
+					handleButtonClick={e => e.stopPropagation()} // Prevent the onClick from firing when clicking the apply button
+					showResults={showResults}
+					job={formatJobSlug(hit.title)}
+					isLoading={descriptionFetcher.state === 'loading'}
 				/>
 			</div>
 		</div>

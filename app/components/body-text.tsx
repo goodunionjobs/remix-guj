@@ -37,21 +37,22 @@ export function BodyText({
 						</div>
 					)}
 					<div className="flex justify-center">
-                    <Suspense
-                        fallback={
-                            <div
-                                className="prose prose-neutral prose-p:text-black mx-auto max-w-prose pl-2 pr-1 sm:mx-3"
-                                style={{ wordBreak: 'break-word' }}>
-                                Loading...
-                            </div>
-                        }
-                    >
-						<div
-							className="prose prose-neutral prose-p:text-black mx-auto max-w-prose pl-2 pr-1 sm:mx-3"
-							style={{ wordBreak: 'break-word' }}
-							dangerouslySetInnerHTML={{ __html: description }}
-						/>
-                    </Suspense>
+						<Suspense
+							fallback={
+								<div
+									className="prose prose-neutral prose-p:text-black mx-auto max-w-prose pl-2 pr-1 sm:mx-3"
+									style={{ wordBreak: 'break-word' }}
+								>
+									Loading...
+								</div>
+							}
+						>
+							<div
+								className="prose prose-neutral prose-p:text-black mx-auto max-w-prose pl-2 pr-1 sm:mx-3"
+								style={{ wordBreak: 'break-word' }}
+								dangerouslySetInnerHTML={{ __html: description }}
+							/>
+						</Suspense>
 					</div>
 					{objectID && (
 						<div className="mb-2 mt-1 flex flex-col">

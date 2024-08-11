@@ -1,101 +1,138 @@
-import { type MetaFunction } from '@remix-run/node'
+import { json, type LoaderFunction } from '@remix-run/node'
+import { useLoaderData, Link } from '@remix-run/react'
+import algoliasearch from 'algoliasearch/lite'
+import { history } from 'instantsearch.js/es/lib/routers/index.js'
+import { renderToString } from 'react-dom/server'
 import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '#app/components/ui/tooltip.tsx'
-import { cn } from '#app/utils/misc.tsx'
-import { logos } from './logos/logos.ts'
+	InstantSearch,
+	Configure,
+	Pagination,
+	SearchBox,
+	Hits,
+	InstantSearchSSRProvider,
+	getServerState,
+} from 'react-instantsearch'
+import { Hit } from '#app/components/algolia/hit'
+import { JobProvider } from '#app/utils/job-context.js'
 
-export const meta: MetaFunction = () => [{ title: 'Epic Notes' }]
+const searchClient = algoliasearch(
+	'WW2B8U6V57',
+	'7f9258c9815e66085c6072a642cfc11c',
+)
 
-// Tailwind Grid cell classes lookup
-const columnClasses: Record<(typeof logos)[number]['column'], string> = {
-	1: 'xl:col-start-1',
-	2: 'xl:col-start-2',
-	3: 'xl:col-start-3',
-	4: 'xl:col-start-4',
-	5: 'xl:col-start-5',
+export const loader: LoaderFunction = async ({ request }) => {
+	const serverUrl = request.url
+	const serverState = await getServerState(<Search serverUrl={serverUrl} />, {
+		renderToString,
+	})
+
+	return json({
+		serverState,
+		serverUrl,
+	})
 }
-const rowClasses: Record<(typeof logos)[number]['row'], string> = {
-	1: 'xl:row-start-1',
-	2: 'xl:row-start-2',
-	3: 'xl:row-start-3',
-	4: 'xl:row-start-4',
-	5: 'xl:row-start-5',
-	6: 'xl:row-start-6',
-}
 
-export default function Index() {
+type SearchProps = {
+	// TODO: Figure out where to find type
+	// @ts-ignore
+	serverState?: InstantSearchServerState
+	serverUrl?: string
+}
+let timerId: NodeJS.Timeout | string | number | undefined = undefined
+
+function Search({ serverState, serverUrl }: SearchProps) {
 	return (
-		<main className="font-poppins grid h-full place-items-center">
-			<div className="grid place-items-center px-4 py-16 xl:grid-cols-2 xl:gap-24">
-				<div className="flex max-w-md flex-col items-center text-center xl:order-2 xl:items-start xl:text-left">
-					<a
-						href="https://www.epicweb.dev/stack"
-						className="animate-slide-top [animation-fill-mode:backwards] xl:animate-slide-left xl:[animation-delay:0.5s] xl:[animation-fill-mode:backwards]"
-					>
-						<svg
-							className="size-20 text-foreground xl:-mt-4"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 65 65"
-						>
-							<path
-								fill="currentColor"
-								d="M39.445 25.555 37 17.163 65 0 47.821 28l-8.376-2.445Zm-13.89 0L28 17.163 0 0l17.179 28 8.376-2.445Zm13.89 13.89L37 47.837 65 65 47.821 37l-8.376 2.445Zm-13.89 0L28 47.837 0 65l17.179-28 8.376 2.445Z"
-							></path>
-						</svg>
-					</a>
-					<h1
-						data-heading
-						className="mt-8 animate-slide-top text-4xl font-medium text-foreground [animation-delay:0.3s] [animation-fill-mode:backwards] md:text-5xl xl:mt-4 xl:animate-slide-left xl:text-6xl xl:[animation-delay:0.8s] xl:[animation-fill-mode:backwards]"
-					>
-						<a href="https://www.epicweb.dev/stack">The Epic Stack</a>
-					</h1>
-					<p
-						data-paragraph
-						className="mt-6 animate-slide-top text-xl/7 text-muted-foreground [animation-delay:0.8s] [animation-fill-mode:backwards] xl:mt-8 xl:animate-slide-left xl:text-xl/6 xl:leading-10 xl:[animation-delay:1s] xl:[animation-fill-mode:backwards]"
-					>
-						Check the{' '}
-						<a
-							className="underline hover:no-underline"
-							href="https://github.com/epicweb-dev/epic-stack/blob/main/docs/getting-started.md"
-						>
-							Getting Started guide
-						</a>{' '}
-						file for how to get your project off the ground!
-					</p>
-				</div>
-				<ul className="mt-16 flex max-w-3xl flex-wrap justify-center gap-2 sm:gap-4 xl:mt-0 xl:grid xl:grid-flow-col xl:grid-cols-5 xl:grid-rows-6">
-					<TooltipProvider>
-						{logos.map((logo, i) => (
-							<li
-								key={logo.href}
-								className={cn(
-									columnClasses[logo.column],
-									rowClasses[logo.row],
-									'animate-roll-reveal [animation-fill-mode:backwards]',
-								)}
-								style={{ animationDelay: `${i * 0.07}s` }}
-							>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<a
-											href={logo.href}
-											className="grid size-20 place-items-center rounded-2xl bg-violet-600/10 p-4 transition hover:-rotate-6 hover:bg-violet-600/15 dark:bg-violet-200 dark:hover:bg-violet-100 sm:size-24"
-										>
-											<img src={logo.src} alt="" />
-										</a>
-									</TooltipTrigger>
-									<TooltipContent>{logo.alt}</TooltipContent>
-								</Tooltip>
-							</li>
-						))}
-					</TooltipProvider>
-				</ul>
+		<>
+			<div className="justify-center p-6">
+				<h1 className="flex flex-col text-2xl font-bold sm:text-4xl">
+					<span className="inline-flex justify-center">
+						<span className="rounded-sm bg-[#0730FD] px-1 text-white">
+							Make your job
+						</span>
+					</span>
+					<span className="inline-flex justify-center pt-1.5">
+						<span className="rounded-sm bg-amber-300 px-1 text-black">
+							work for{' '}
+							<span className="decoration-3 text-black underline">you</span>
+						</span>
+					</span>
+				</h1>
 			</div>
-		</main>
+
+			<InstantSearchSSRProvider {...serverState}>
+				<InstantSearch
+					searchClient={searchClient}
+					// indexName="test_guj"
+					indexName="staging_guj"
+					future={{
+						preserveSharedStateOnUnmount: true,
+					}}
+					routing={{
+						router: history({
+							getLocation() {
+								if (typeof window === 'undefined') {
+									return new URL(serverUrl!) as unknown as Location
+								}
+
+								return window.location
+							},
+							cleanUrlOnDispose: false,
+						}),
+					}}
+				>
+					<Configure hitsPerPage={40} />
+					<div className="grid justify-items-center ">
+						<div className=" justify-center">
+							<SearchBox
+								loadingIconComponent={() => 'loading...'}
+								placeholder="Search for Union Jobs"
+								classNames={{
+									root: `relative font-bold px-2 [width:315] sm:[width:386px]
+								bg-white rounded-lg border-black border border-2 text-black
+								dark:bg-black dark:border-white dark:text-white`,
+									input: `[width:250px] sm:[width:320px] [height:40px] sm:[height:53px]
+									bg-white dark:bg-black pl-2 focus:outline-none`,
+									reset: 'invisible',
+									submitIcon: 'text-xl sm:text-2xl',
+								}}
+								submitIconComponent={({ classNames }) => (
+									<div className={`${classNames.submitIcon}`}>🔍</div>
+								)}
+								queryHook={(query, search) => {
+									if (timerId) {
+										clearTimeout(timerId)
+									}
+									timerId = setTimeout(() => search(query), 500)
+								}}
+							/>
+						</div>
+						{/* Later when we have more filters get rid of the margins. They'll line up in the middle. Easier to handle */}
+						<div className="z-20 -mt-0.5 mb-3">
+							{/* <CustomMenuState attribute="state" /> */}
+							{/* <CustomMenuEmployment attribute="employmentType" /> */}
+						</div>
+					</div>
+					<div className="mt-1 flex justify-center dark:bg-slate-950">
+						<div className="[width:1115px]" aria-label="Job Listings">
+							<Hits hitComponent={Hit} />
+						</div>
+					</div>
+					<Pagination
+						padding={1}
+						classNames={{
+							root: `sm:text-4xl text-3xl sm:max-w-sm mx-auto`,
+							list: 'flex flex-row justify-center gap-4',
+							selectedItem: 'border-b-4 border-black ',
+						}}
+					/>
+				</InstantSearch>
+			</InstantSearchSSRProvider>
+		</>
 	)
+}
+
+export default function SearchRoute() {
+	const { serverState, serverUrl } = useLoaderData() as SearchProps
+
+	return <Search serverState={serverState} serverUrl={serverUrl} />
 }
