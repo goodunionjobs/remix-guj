@@ -13,7 +13,15 @@ import {
 	getServerState,
 } from 'react-instantsearch'
 import { Hit } from '#app/components/algolia/hit'
+import {
+	StateCombobox,
+	EmploymentTypeCombobox,
+} from '#app/components/algolia/combobox-menu.js'
 import { JobProvider } from '#app/utils/job-context.js'
+import {
+	SalaryRangeSlider,
+	SalaryRangeSliderPopover,
+} from '#app/components/algolia/salary-slider.js'
 
 const searchClient = algoliasearch(
 	'WW2B8U6V57',
@@ -107,9 +115,10 @@ function Search({ serverState, serverUrl }: SearchProps) {
 							/>
 						</div>
 						{/* Later when we have more filters get rid of the margins. They'll line up in the middle. Easier to handle */}
-						<div className="z-20 -mt-0.5 mb-3">
-							{/* <CustomMenuState attribute="state" /> */}
-							{/* <CustomMenuEmployment attribute="employmentType" /> */}
+						<div className="z-20 mb-3 mt-2">
+							<EmploymentTypeCombobox />
+							<StateCombobox />
+							<SalaryRangeSliderPopover />
 						</div>
 					</div>
 					<div className="mt-1 flex justify-center dark:bg-slate-950">
