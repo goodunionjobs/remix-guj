@@ -18,24 +18,30 @@ export function LogoImage({
 
 	const imageClassName = 'object-scale-down h-5/6 rounded-md shadow-xl text-xs'
 
-	const baseImageUrl = 'https://staging.goodunionjobs.com'
-	console.log()
-	employerImage = encodeURIComponent(employerImage)
+	// Extract the key part of the path (everything after 'company/assets/')
+	const imageKey = employerImage.split('company/assets/')[1]
+
+	if (!imageKey) {
+		console.error('Invalid employerImage format:', employerImage)
+		return null
+	}
+
+	// Encode the key for use in URL
+	const encodedKey = encodeURIComponent(imageKey)
 
 	return (
 		<div className={containerClassName}>
 			<picture>
 				<source
-					srcSet={`${baseImageUrl}/${employerImage}.avif`}
+					srcSet={`/images/${encodedKey.replace('.avif', '')}.avif`}
 					type="image/avif"
 				/>
 				<source
-					srcSet={`${baseImageUrl}/${employerImage}.webp`}
+					srcSet={`/images/${encodedKey.replace('.avif', '')}.webp`}
 					type="image/webp"
 				/>
 				<img
-					crossOrigin="anonymous"
-					src={`${baseImageUrl}/${employerImage}.jpeg`}
+					src={`/images/${encodedKey.replace('.avif', '')}.jpeg`}
 					alt={`${employer} Logo`}
 					className={imageClassName}
 					decoding="async"
