@@ -208,16 +208,28 @@ function App() {
 								<SearchBar status="idle" />
 							</div>
 						)} */}
-						<div className="flex flex-row gap-4">
-							<div className="flex items-center gap-2">
+						<div className="flex flex-col gap-4">
+							<div className="flex flex-col items-center gap-2">
 								{data.user ? (
 									<UserDropdown user={data.user} />
 								) : (
 									<>
-										<Button asChild variant="default" size="lg">
-											<Link to={'/kinde-auth/register'}>Register</Link>
+										<Button
+											asChild
+											variant="default"
+											size="lg"
+											className="w-3/4 sm:w-full "
+										>
+											<Link to={'/kinde-auth/register'}>
+												Sign Up - Job Notifications 💼
+											</Link>
 										</Button>
-										<Button asChild variant="outline" size="lg">
+										<Button
+											asChild
+											variant="outline"
+											size="lg"
+											className="w-3/4 sm:w-full"
+										>
 											<Link to={'/kinde-auth/login'}>Login</Link>
 										</Button>
 									</>
