@@ -18,6 +18,7 @@ export async function getJobDescription({
 		cache,
 		timings,
 		getFreshValue: async () => {
+			//TODO: Remove R2 Storage domain. Retrieve through S3 api like images!
 			const fullUrl = `${process.env.R2_STORAGE_DOMAIN}/${descripUrl}`
 			const response = await fetch(fullUrl)
 			if (!response.ok) {

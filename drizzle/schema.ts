@@ -48,6 +48,21 @@ export const addresses = pgTable(
 	}),
 )
 
+export const addressesRelations = relations(addresses, ({ one }) => ({
+	city: one(cities, {
+		fields: [addresses.cityId],
+		references: [cities.id],
+	}),
+	state: one(states, {
+		fields: [addresses.stateId],
+		references: [states.id],
+	}),
+	country: one(countries, {
+		fields: [addresses.countryId],
+		references: [countries.id],
+	}),
+}))
+
 export const guilds = pgTable('guilds', {
 	id: serial('id').primaryKey(),
 	name: varchar('name', { length: 100 }).notNull().unique(),
@@ -130,9 +145,17 @@ export const jobs = pgTable(
 	}),
 )
 
-export const jobsRelations = relations(jobs, ({ many }) => ({
+export const jobsRelations = relations(jobs, ({ one, many }) => ({
 	jobFunctions: many(jobsToJobFunctions),
 	industries: many(jobsToIndustries),
+	address: one(addresses, {
+		fields: [jobs.addressId],
+		references: [addresses.id],
+	}),
+	employer: one(employers, {
+		fields: [jobs.employerId],
+		references: [employers.id],
+	}),
 }))
 
 export const jobFunctions = pgTable('job_functions', {
@@ -328,4 +351,3 @@ export const jobsToIndustriesRelations = relations(
 //   }),
 // );
 //
-

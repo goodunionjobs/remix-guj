@@ -18,6 +18,8 @@
   to another in the same category. Once it's matched then remove it from
   selection.
 
+- Changing secret keys in Doopler staging and prod.
+- Use less powerful keys R2.
 - Staging access-control-allow-origin=\* is rule setup in cloudflare because of
   this issue:
   https://community.cloudflare.com/t/problem-with-settings-cors-policies-on-r2/432339/17

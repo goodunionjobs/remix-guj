@@ -248,10 +248,10 @@ function App() {
 									<UserDropdown />
 								) : (
 									<>
-										<Button asChild variant="outline" size="lg">
+										<Button asChild variant="default" size="lg">
 											<Link to={'/kinde-auth/register'}>Register</Link>
 										</Button>
-										<Button asChild variant="default" size="lg">
+										<Button asChild variant="outline" size="lg">
 											<Link to={'/kinde-auth/login'}>Login</Link>
 										</Button>
 									</>

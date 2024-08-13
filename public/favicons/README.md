@@ -8,4 +8,4 @@ referenced in the `site.webmanifest` file.
 Note, there's also a `favicon.ico` in the root of `/public` which some older
 browsers will request automatically. This is a fallback for those browsers.
 
-<!-- TODO:  Fix up so the small icon is not showing!-->
+<!-- TODO:  Fix up so the small icon is not showing! -->
