@@ -198,6 +198,8 @@ export const jobsToJobFunctionsRelations = relations(
 	}),
 )
 
+export const emailFrequencyEnum = pgEnum('email_frequency', ['daily', 'weekly'])
+
 export const users = pgTable('users', {
 	id: text('id')
 		.$defaultFn(() => createId())
@@ -207,6 +209,9 @@ export const users = pgTable('users', {
 	email: text('email').unique(),
 	firstName: text('first_name'),
 	lastName: text('last_name'),
+	emailFrequency: emailFrequencyEnum('email_frequency')
+		.notNull()
+		.default('daily'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at')
 		.notNull()
