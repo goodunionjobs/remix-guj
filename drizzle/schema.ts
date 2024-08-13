@@ -89,12 +89,14 @@ export const employers = pgTable(
 	}),
 )
 
-export const payTypeEnum = pgEnum('pay_type', ['hr', 'yr'])
+export const payTypeEnum = pgEnum('pay_type', ['hr', 'yr', 'mo'])
 // How linkedin Job posts can show up
 // $21.00/hr - $26.00/hr
 // $90,000.00/yr - $120,000.00/yr
 
 export const employmentTypeEnum = pgEnum('employment_type', [
+	// TODO: Add in below possibly... look if they are used
+	// internship, apprecenticheship, freelance
 	'Full-time',
 	'Part-time',
 	'Contract',
