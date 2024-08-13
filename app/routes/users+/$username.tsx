@@ -22,16 +22,15 @@ import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Spacer } from '#app/components/spacer.tsx'
 import { Button } from '#app/components/ui/button.tsx'
-import { Icon } from '#app/components/ui/icon.tsx'
-import { useOptionalUser } from '#app/utils/user.ts'
 import { Checkbox } from '#app/components/ui/checkbox'
 import { Label } from '#app/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '#app/components/ui/radio-group'
-import { db } from '#app/utils/db.server' // Assuming you have a db utility set up for Drizzle
+import { db } from '#app/utils/db.server'
+import { users, categories, usersToCategories } from '../../../drizzle/schema'
 
 const schema = z.object({
 	categories: z.array(z.string()).min(1, 'Select at least one category'),
-	frequency: z.enum(['daily', 'weekly'], {
+	emailFrequency: z.enum(['daily', 'weekly'], {
 		required_error: 'Please select a notification frequency',
 	}),
 })
@@ -44,13 +43,21 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		throw redirect('/kinde-auth/login')
 	}
 
-	return json({ user })
-	// // Fetch user preferences from the database
-	// const preferences = await db.query.userPreferences.findFirst({
-	// 	where: (preferences, { eq }) => eq(preferences.userId, user.id),
-	// })
-	//
-	// return json({ user, preferences })
+	const dbUser = await db.query.users.findFirst({
+		where: eq(users.kindeUserId, user.id),
+		with: {
+			usersCategories: {
+				columns: {},
+				with: {
+					category: true,
+				},
+			},
+		},
+	})
+
+	const allCategories = await db.query.categories.findMany()
+
+	return json({ user: dbUser, allCategories })
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -65,53 +72,55 @@ export async function action({ request }: ActionFunctionArgs) {
 	const submission = parseWithZod(formData, { schema })
 
 	if (submission.status !== 'success') {
-		return submission.reply()
+		return json(submission.reply())
 	}
 
-	// Save preferences to the database
-	// await db
-	// 	.insert(userPreferences)
-	// 	.values({
-	// 		userId: user.id,
-	// 		categories: submission.value.categories,
-	// 		frequency: submission.value.frequency,
-	// 	})
-	// 	.onConflictDoUpdate({
-	// 		target: userPreferences.userId,
-	// 		set: {
-	// 			categories: submission.value.categories,
-	// 			frequency: submission.value.frequency,
-	// 		},
-	// 	})
+	const dbUser = await db.query.users.findFirst({
+		where: eq(users.kindeUserId, user.id),
+	})
 
-	return redirect('/profile')
+	if (!dbUser) {
+		throw new Error('User not found')
+	}
+
+	// Update email frequency
+	await db
+		.update(users)
+		.set({ emailFrequency: submission.value.emailFrequency })
+		.where(eq(users.id, dbUser.id))
+
+	// Update category subscriptions
+	await db
+		.delete(usersToCategories)
+		.where(eq(usersToCategories.userId, dbUser.id))
+	await db.insert(usersToCategories).values(
+		submission.value.categories.map(categoryName => ({
+			userId: dbUser.id,
+			categoryName,
+		})),
+	)
+
+	return json(submission.reply())
 }
 
 export default function ProfileRoute() {
-	const { user } = useLoaderData<typeof loader>()
+	const { user, allCategories } = useLoaderData<typeof loader>()
 	const lastResult = useActionData<typeof action>()
-	const userDisplayName = user.given_name ?? user.email
-	const loggedInUser = useOptionalUser()
-	const isLoggedInUser = user.id === loggedInUser?.id
 
 	const [form, fields] = useForm({
-		id: 'job-preferences',
+		id: 'preferences',
 		lastResult,
 		constraint: getZodConstraint(schema),
-		// defaultValue: preferences,
+		defaultValue: {
+			categories: user.usersCategories.map(uc => uc.category.name),
+			emailFrequency: user.emailFrequency,
+		},
 		onValidate({ formData }) {
 			return parseWithZod(formData, { schema })
 		},
 		shouldValidate: 'onBlur',
 		shouldRevalidate: 'onInput',
 	})
-
-	const categories = [
-		'Construction',
-		'Education',
-		'Energy Infrastructure',
-		'General Misc. Services',
-	]
 
 	return (
 		<div className="container mb-48 mt-36 flex flex-col items-center justify-center">
@@ -135,114 +144,106 @@ export default function ProfileRoute() {
 					<h1 className="text-center text-h2">{userDisplayName}</h1>
 				</div>
 
-				{isLoggedInUser && (
-					<div className="mt-10 w-full max-w-md">
-						<h2 className="mb-4 text-xl font-semibold">
-							Job Posting Notifications
-						</h2>
-						<Form method="post" {...getFormProps(form)}>
-							<div className="space-y-4">
-								<Label className="text-base font-medium">Job Categories</Label>
-								{categories.map(category => {
-									const control = useInputControl(fields.categories)
-									return (
-										<div key={category} className="flex items-center space-x-2">
-											<Checkbox
-												id={category.toLowerCase().replace(' ', '-')}
-												checked={((control.value as string[]) || []).includes(
-													category,
-												)}
-												onCheckedChange={checked => {
-													const currentCategories =
-														(control.value as string[]) || []
-													const newCategories = checked
-														? [...currentCategories, category]
-														: currentCategories.filter(c => c !== category)
-													control.change(newCategories)
-												}}
-											/>
-											<input
-												{...getInputProps(fields.categories, {
-													type: 'checkbox',
-													value: category,
-												})}
-												className="sr-only"
-											/>
-											<Label
-												htmlFor={category.toLowerCase().replace(' ', '-')}
-												className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-											>
-												{category}
-											</Label>
-										</div>
-									)
-								})}
-								{fields.categories.errors && (
-									<div className="text-red-500">{fields.categories.errors}</div>
-								)}
-							</div>
-
-							<div className="mt-4 space-y-4">
-								<Label className="text-base font-medium">
-									Notification Frequency
-								</Label>
-								<RadioGroup
-									defaultValue={fields.frequency.value as string}
-									onValueChange={value => fields.frequency.onChange(value)}
+				<h2 className="mb-4 text-xl font-semibold">
+					Job Posting Notifications
+				</h2>
+				<Form method="post" {...getFormProps(form)}>
+					<div className="space-y-4">
+						<Label className="text-base font-medium">Job Categories</Label>
+						{allCategories.map(category => {
+							const control = useInputControl(fields.categories)
+							return (
+								<div
+									key={category.name}
+									className="flex items-center space-x-2"
 								>
-									<div className="flex items-center space-x-2">
-										<RadioGroupItem value="daily" id="daily" />
-										<Label htmlFor="daily">Daily</Label>
-									</div>
-									<div className="flex items-center space-x-2">
-										<RadioGroupItem value="weekly" id="weekly" disabled />
-										<Label htmlFor="weekly" className="opacity-50">
-											Weekly (Coming soon)
-										</Label>
-									</div>
-								</RadioGroup>
-								<input
-									{...getInputProps(fields.frequency, { type: 'hidden' })}
-								/>
-								{fields.frequency.errors && (
-									<div className="text-red-500">{fields.frequency.errors}</div>
-								)}
-							</div>
-
-							<p className="mt-2 text-sm text-muted-foreground">
-								While we are in beta, weekly postings are only available until
-								we get it going.
-							</p>
-
-							<Button type="submit" className="mt-4">
-								Save Preferences
-							</Button>
-						</Form>
+									<Checkbox
+										id={category.name.toLowerCase().replace(' ', '-')}
+										checked={((control.value as string[]) || []).includes(
+											category.name,
+										)}
+										onCheckedChange={checked => {
+											const currentCategories =
+												(control.value as string[]) || []
+											const newCategories = checked
+												? [...currentCategories, category.name]
+												: currentCategories.filter(c => c !== category.name)
+											control.change(newCategories)
+										}}
+									/>
+									<input
+										{...getInputProps(fields.categories, {
+											type: 'checkbox',
+											value: category.name,
+										})}
+										className="sr-only"
+									/>
+									<Label
+										htmlFor={category.name.toLowerCase().replace(' ', '-')}
+										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									>
+										{category.name}
+									</Label>
+								</div>
+							)
+						})}
+						{fields.categories.errors && (
+							<div className="text-red-500">{fields.categories.errors}</div>
+						)}
 					</div>
-				)}
 
-				<div className="mt-10 flex gap-4">
-					{/* {isLoggedInUser ? ( */}
-					{/* 	<> */}
-					{/* 		<Button asChild> */}
-					{/* 			<Link to="notes" prefetch="intent"> */}
-					{/* 				My notes */}
-					{/* 			</Link> */}
-					{/* 		</Button> */}
-					{/* 		<Button asChild> */}
-					{/* 			<Link to="/settings/profile" prefetch="intent"> */}
-					{/* 				Edit profile */}
-					{/* 			</Link> */}
-					{/* 		</Button> */}
-					{/* 	</> */}
-					{/* ) : ( */}
-					{/* 	<Button asChild> */}
-					{/* 		<Link to="notes" prefetch="intent"> */}
-					{/* 			{userDisplayName}'s notes */}
-					{/* 		</Link> */}
-					{/* 	</Button> */}
-					{/* )} */}
-				</div>
+					<div className="mt-4 space-y-4">
+						<Label className="text-base font-medium">
+							Notification Frequency
+						</Label>
+						<RadioGroup
+							defaultValue={fields.emailFrequency.value as string}
+							onValueChange={value => fields.emailFrequency.onChange(value)}
+						>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="daily" id="daily" />
+								<Label htmlFor="daily">Daily</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="weekly" id="weekly" />
+								<Label htmlFor="weekly">Weekly</Label>
+							</div>
+						</RadioGroup>
+						<input
+							{...getInputProps(fields.emailFrequency, { type: 'hidden' })}
+						/>
+						{fields.emailFrequency.errors && (
+							<div className="text-red-500">{fields.emailFrequency.errors}</div>
+						)}
+					</div>
+
+					<Button type="submit" className="mt-4">
+						Save Preferences
+					</Button>
+				</Form>
+			</div>
+
+			<div className="mt-10 flex gap-4">
+				{/* {isLoggedInUser ? ( */}
+				{/* 	<> */}
+				{/* 		<Button asChild> */}
+				{/* 			<Link to="notes" prefetch="intent"> */}
+				{/* 				My notes */}
+				{/* 			</Link> */}
+				{/* 		</Button> */}
+				{/* 		<Button asChild> */}
+				{/* 			<Link to="/settings/profile" prefetch="intent"> */}
+				{/* 				Edit profile */}
+				{/* 			</Link> */}
+				{/* 		</Button> */}
+				{/* 	</> */}
+				{/* ) : ( */}
+				{/* 	<Button asChild> */}
+				{/* 		<Link to="notes" prefetch="intent"> */}
+				{/* 			{userDisplayName}'s notes */}
+				{/* 		</Link> */}
+				{/* 	</Button> */}
+				{/* )} */}
 			</div>
 		</div>
 	)

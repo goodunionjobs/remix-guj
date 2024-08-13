@@ -163,6 +163,7 @@ function App() {
 	const data = useLoaderData<typeof loader>()
 	const nonce = useNonce()
 	// const user = useOptionalUser()
+	// TODO: When theme button is clicked job details loads again like its being fetched when job post is open
 	const theme = useTheme()
 	// TODO: DELETE
 	// const matches = useMatches()
