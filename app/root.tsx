@@ -1,3 +1,4 @@
+import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
 import {
 	json,
 	type LoaderFunctionArgs,
@@ -81,51 +82,15 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export async function loader({ request }: LoaderFunctionArgs) {
 	const timings = makeTimings('root loader')
 
-	//TODO: Check into user part here...not likely needed for us since Kinde is doing authentication on our end
-
-	// const userId = await time(() => getUserId(request), {
-	// 	timings,
-	// 	type: 'getUserId',
-	// 	desc: 'getUserId in root',
-	// })
-	//
-	// const user = userId
-	// 	? await time(
-	// 			() =>
-	// 				prisma.user.findUniqueOrThrow({
-	// 					select: {
-	// 						id: true,
-	// 						name: true,
-	// 						username: true,
-	// 						image: { select: { id: true } },
-	// 						roles: {
-	// 							select: {
-	// 								name: true,
-	// 								permissions: {
-	// 									select: { entity: true, action: true, access: true },
-	// 								},
-	// 							},
-	// 						},
-	// 					},
-	// 					where: { id: userId },
-	// 				}),
-	// 			{ timings, type: 'find user', desc: 'find user in root' },
-	// 		)
-	// 	: null
-	// if (userId && !user) {
-	// 	console.info('something weird happened')
-	// 	// something weird happened... The user is authenticated but we can't find
-	// 	// them in the database. Maybe they were deleted? Let's log them out.
-	// 	await logout({ request, redirectTo: '/' })
-	// }
+	const { getUser } = await getKindeSession(request)
+	const user = await getUser()
 
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const honeyProps = honeypot.getInputProps()
 
 	return json(
 		{
-			// TODO: look at above todo
-			// user,
+			user,
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),
@@ -197,7 +162,7 @@ function Document({
 function App() {
 	const data = useLoaderData<typeof loader>()
 	const nonce = useNonce()
-	const user = useOptionalUser()
+	// const user = useOptionalUser()
 	const theme = useTheme()
 	// TODO: DELETE
 	// const matches = useMatches()
@@ -244,8 +209,8 @@ function App() {
 						)} */}
 						<div className="flex flex-row gap-4">
 							<div className="flex items-center gap-2">
-								{user ? (
-									<UserDropdown />
+								{data.user ? (
+									<UserDropdown user={data.user} />
 								) : (
 									<>
 										<Button asChild variant="default" size="lg">
@@ -308,8 +273,11 @@ function AppWithProviders() {
 
 export default withSentry(AppWithProviders)
 
-function UserDropdown() {
-	const user = useUser()
+type KindeUser = NonNullable<
+	Awaited<ReturnType<Awaited<ReturnType<typeof getKindeSession>>['getUser']>>
+>
+
+function UserDropdown({ user }: { user: KindeUser }) {
 	const submit = useSubmit()
 	const formRef = useRef<HTMLFormElement>(null)
 	return (
@@ -317,35 +285,26 @@ function UserDropdown() {
 			<DropdownMenuTrigger asChild>
 				<Button asChild variant="secondary">
 					<Link
-						to={`/users/${user.username}`}
+						to={`/users/${user.id}`}
 						// this is for progressive enhancement
 						onClick={e => e.preventDefault()}
 						className="flex items-center gap-2"
 					>
 						<img
 							className="h-8 w-8 rounded-full object-cover"
-							alt={user.name ?? user.username}
-							src={getUserImgSrc(user.image?.id)}
+							alt={user.given_name ?? user.given_name}
+							src="/img/user.png"
 						/>
-						<span className="text-body-sm font-bold">
-							{user.name ?? user.username}
-						</span>
+						<span className="text-body-sm font-bold">{user.given_name}</span>
 					</Link>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuPortal>
 				<DropdownMenuContent sideOffset={8} align="start">
 					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}`}>
+						<Link prefetch="intent" to={`/users/${user.id}`}>
 							<Icon className="text-body-md" name="avatar">
 								Profile
-							</Icon>
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link prefetch="intent" to={`/users/${user.username}/notes`}>
-							<Icon className="text-body-md" name="pencil-2">
-								Notes
 							</Icon>
 						</Link>
 					</DropdownMenuItem>
@@ -361,7 +320,7 @@ function UserDropdown() {
 							<Icon className="text-body-md" name="exit">
 								<button type="submit">
 									{/* //TODO: Work on making this look like the format of login/register button */}
-									<Link to={'/kinde-auth/logout'}>Logout</Link>;
+									<Link to={'/kinde-auth/logout'}>Logout</Link>
 								</button>
 							</Icon>
 						</Form>
