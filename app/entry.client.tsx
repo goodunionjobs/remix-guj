@@ -1,7 +1,7 @@
 import { RemixBrowser } from '@remix-run/react'
+import posthog from 'posthog-js'
 import { startTransition, useEffect, StrictMode } from 'react'
 import { hydrateRoot } from 'react-dom/client'
-import posthog from 'posthog-js'
 
 if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
 	import('./utils/monitoring.client.tsx').then(({ init }) => init())
