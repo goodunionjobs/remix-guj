@@ -1,9 +1,14 @@
-import { json, type LoaderFunction } from '@remix-run/node'
-import { useLoaderData, Link } from '@remix-run/react'
+import {
+	json,
+	type LoaderFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
 import algoliasearch from 'algoliasearch/lite'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
 import { renderToString } from 'react-dom/server'
 import {
+	type InstantSearchServerState,
 	InstantSearch,
 	Configure,
 	Pagination,
@@ -12,26 +17,21 @@ import {
 	InstantSearchSSRProvider,
 	getServerState,
 } from 'react-instantsearch'
-import { Hit } from '#app/components/algolia/hit'
 import {
 	StateCombobox,
 	EmploymentTypeCombobox,
 } from '#app/components/algolia/combobox-menu.js'
-import { JobProvider } from '#app/utils/job-context.js'
-import {
-	SalaryRangeSlider,
-	SalaryRangeSliderPopover,
-} from '#app/components/algolia/salary-slider.js'
-import { env } from 'process'
-
-const ALGOLIA_INDEX = process.env.ALGOLIA_INDEX!
+import { Hit } from '#app/components/algolia/hit'
+import { SalaryRangeSliderPopover } from '#app/components/algolia/salary-slider.js'
 
 const searchClient = algoliasearch(
-	process.env.ALGOLIA_ID!,
-	process.env.ALGOLIA_API!,
+	//WARNING: THESE ARE PUBLIC
+	// MUST ONLY USE API KEY LIMITED TO HTTP REFERRER
+	ENV.ALGOLIA_ID!,
+	ENV.ALGOLIA_API!,
 )
 
-export const loader: LoaderFunction = async ({ request }) => {
+export async function loader({ request }: LoaderFunctionArgs) {
 	const serverUrl = request.url
 	const serverState = await getServerState(<Search serverUrl={serverUrl} />, {
 		renderToString,
@@ -52,6 +52,8 @@ type SearchProps = {
 let timerId: NodeJS.Timeout | string | number | undefined = undefined
 
 function Search({ serverState, serverUrl }: SearchProps) {
+	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX
+
 	return (
 		<>
 			<div className="justify-center p-6">
