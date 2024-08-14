@@ -18,8 +18,8 @@ export function LogoImage({
 
 	const imageClassName = 'object-scale-down h-5/6 rounded-md shadow-xl text-xs'
 
-	// Extract the key part of the path (everything after 'company/assets/')
-	const imageKey = employerImage.split('company/assets/')[1]
+	// Extract the key part of the path (everything after 'assets/company/image/')
+	const imageKey = employerImage.split('assets/company/image/')[1]
 
 	if (!imageKey) {
 		console.error('Invalid employerImage format:', employerImage)
@@ -29,19 +29,21 @@ export function LogoImage({
 	// Encode the key for use in URL
 	const encodedKey = encodeURIComponent(imageKey)
 
+	const basePath = 'assets/company/image/'
+
 	return (
 		<div className={containerClassName}>
 			<picture>
 				<source
-					srcSet={`/images/${encodedKey.replace('.avif', '')}.avif`}
+					srcSet={`${basePath}${encodedKey.replace('.avif', '')}.avif`}
 					type="image/avif"
 				/>
 				<source
-					srcSet={`/images/${encodedKey.replace('.avif', '')}.webp`}
+					srcSet={`${basePath}${encodedKey.replace('.avif', '')}.webp`}
 					type="image/webp"
 				/>
 				<img
-					src={`/images/${encodedKey.replace('.avif', '')}.jpeg`}
+					src={`${basePath}${encodedKey.replace('.avif', '')}.jpeg`}
 					alt={`${employer} Logo`}
 					className={imageClassName}
 					decoding="async"

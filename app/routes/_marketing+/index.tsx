@@ -22,10 +22,11 @@ import {
 	SalaryRangeSlider,
 	SalaryRangeSliderPopover,
 } from '#app/components/algolia/salary-slider.js'
+import { env } from 'process'
 
 const searchClient = algoliasearch(
-	'WW2B8U6V57',
-	'7f9258c9815e66085c6072a642cfc11c',
+	process.env.ALGOLIA_ID!,
+	process.env.ALGOLIA_API!,
 )
 
 export const loader: LoaderFunction = async ({ request }) => {
