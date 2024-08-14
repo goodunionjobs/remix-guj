@@ -1,39 +1,126 @@
-import { invariantResponse } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { Form, Link, useLoaderData, type MetaFunction } from '@remix-run/react'
+import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
+import {
+	redirect,
+	json,
+	type LoaderFunctionArgs,
+	type ActionFunctionArgs,
+} from '@remix-run/node'
+import {
+	Form,
+	useLoaderData,
+	useActionData,
+	type MetaFunction,
+} from '@remix-run/react'
+import {
+	useForm,
+	useInputControl,
+	getFormProps,
+	getInputProps,
+} from '@conform-to/react'
+import { parseWithZod, getZodConstraint } from '@conform-to/zod'
+import { z } from 'zod'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Spacer } from '#app/components/spacer.tsx'
 import { Button } from '#app/components/ui/button.tsx'
-import { Icon } from '#app/components/ui/icon.tsx'
-import { prisma } from '#app/utils/db.server.ts'
-import { getUserImgSrc } from '#app/utils/misc.tsx'
-import { useOptionalUser } from '#app/utils/user.ts'
+import { Checkbox } from '#app/components/ui/checkbox'
+import { Label } from '#app/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '#app/components/ui/radio-group'
+import { db } from '#app/utils/db.server'
+import { users, categories, usersToCategories } from '../../../drizzle/schema'
 
-export async function loader({ params }: LoaderFunctionArgs) {
-	const user = await prisma.user.findFirst({
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			createdAt: true,
-			image: { select: { id: true } },
-		},
-		where: {
-			username: params.username,
+const schema = z.object({
+	categories: z.array(z.string()).min(1, 'Select at least one category'),
+	emailFrequency: z.enum(['daily', 'weekly'], {
+		required_error: 'Please select a notification frequency',
+	}),
+})
+
+export async function loader({ params, request }: LoaderFunctionArgs) {
+	const { getUser } = await getKindeSession(request)
+	const user = await getUser()
+
+	if (user === null) {
+		throw redirect('/kinde-auth/login')
+	}
+
+	const dbUser = await db.query.users.findFirst({
+		where: eq(users.kindeUserId, user.id),
+		with: {
+			usersCategories: {
+				columns: {},
+				with: {
+					category: true,
+				},
+			},
 		},
 	})
 
-	invariantResponse(user, 'User not found', { status: 404 })
+	const allCategories = await db.query.categories.findMany()
 
-	return json({ user, userJoinedDisplay: user.createdAt.toLocaleDateString() })
+	return json({ user: dbUser, allCategories })
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+	const { getUser } = await getKindeSession(request)
+	const user = await getUser()
+
+	if (user === null) {
+		throw redirect('/kinde-auth/login')
+	}
+
+	const formData = await request.formData()
+	const submission = parseWithZod(formData, { schema })
+
+	if (submission.status !== 'success') {
+		return json(submission.reply())
+	}
+
+	const dbUser = await db.query.users.findFirst({
+		where: eq(users.kindeUserId, user.id),
+	})
+
+	if (!dbUser) {
+		throw new Error('User not found')
+	}
+
+	// Update email frequency
+	await db
+		.update(users)
+		.set({ emailFrequency: submission.value.emailFrequency })
+		.where(eq(users.id, dbUser.id))
+
+	// Update category subscriptions
+	await db
+		.delete(usersToCategories)
+		.where(eq(usersToCategories.userId, dbUser.id))
+	await db.insert(usersToCategories).values(
+		submission.value.categories.map(categoryName => ({
+			userId: dbUser.id,
+			categoryName,
+		})),
+	)
+
+	return json(submission.reply())
 }
 
 export default function ProfileRoute() {
-	const data = useLoaderData<typeof loader>()
-	const user = data.user
-	const userDisplayName = user.name ?? user.username
-	const loggedInUser = useOptionalUser()
-	const isLoggedInUser = data.user.id === loggedInUser?.id
+	const { user, allCategories } = useLoaderData<typeof loader>()
+	const lastResult = useActionData<typeof action>()
+
+	const [form, fields] = useForm({
+		id: 'preferences',
+		lastResult,
+		constraint: getZodConstraint(schema),
+		defaultValue: {
+			categories: user.usersCategories.map(uc => uc.category.name),
+			emailFrequency: user.emailFrequency,
+		},
+		onValidate({ formData }) {
+			return parseWithZod(formData, { schema })
+		},
+		shouldValidate: 'onBlur',
+		shouldRevalidate: 'onInput',
+	})
 
 	return (
 		<div className="container mb-48 mt-36 flex flex-col items-center justify-center">
@@ -44,7 +131,7 @@ export default function ProfileRoute() {
 					<div className="absolute -top-40">
 						<div className="relative">
 							<img
-								src={getUserImgSrc(data.user.image?.id)}
+								src="/img/user.png"
 								alt={userDisplayName}
 								className="h-52 w-52 rounded-full object-cover"
 							/>
@@ -53,61 +140,126 @@ export default function ProfileRoute() {
 				</div>
 
 				<Spacer size="sm" />
+				<div className="flex flex-wrap items-center justify-center gap-4">
+					<h1 className="text-center text-h2">{userDisplayName}</h1>
+				</div>
 
-				<div className="flex flex-col items-center">
-					<div className="flex flex-wrap items-center justify-center gap-4">
-						<h1 className="text-center text-h2">{userDisplayName}</h1>
-					</div>
-					<p className="mt-2 text-center text-muted-foreground">
-						Joined {data.userJoinedDisplay}
-					</p>
-					{isLoggedInUser ? (
-						<Form action="/logout" method="POST" className="mt-3">
-							<Button type="submit" variant="link" size="pill">
-								<Icon name="exit" className="scale-125 max-md:scale-150">
-									Logout
-								</Icon>
-							</Button>
-						</Form>
-					) : null}
-					<div className="mt-10 flex gap-4">
-						{isLoggedInUser ? (
-							<>
-								<Button asChild>
-									<Link to="notes" prefetch="intent">
-										My notes
-									</Link>
-								</Button>
-								<Button asChild>
-									<Link to="/settings/profile" prefetch="intent">
-										Edit profile
-									</Link>
-								</Button>
-							</>
-						) : (
-							<Button asChild>
-								<Link to="notes" prefetch="intent">
-									{userDisplayName}'s notes
-								</Link>
-							</Button>
+				<h2 className="mb-4 text-xl font-semibold">
+					Job Posting Notifications
+				</h2>
+				<Form method="post" {...getFormProps(form)}>
+					<div className="space-y-4">
+						<Label className="text-base font-medium">Job Categories</Label>
+						{allCategories.map(category => {
+							const control = useInputControl(fields.categories)
+							return (
+								<div
+									key={category.name}
+									className="flex items-center space-x-2"
+								>
+									<Checkbox
+										id={category.name.toLowerCase().replace(' ', '-')}
+										checked={((control.value as string[]) || []).includes(
+											category.name,
+										)}
+										onCheckedChange={checked => {
+											const currentCategories =
+												(control.value as string[]) || []
+											const newCategories = checked
+												? [...currentCategories, category.name]
+												: currentCategories.filter(c => c !== category.name)
+											control.change(newCategories)
+										}}
+									/>
+									<input
+										{...getInputProps(fields.categories, {
+											type: 'checkbox',
+											value: category.name,
+										})}
+										className="sr-only"
+									/>
+									<Label
+										htmlFor={category.name.toLowerCase().replace(' ', '-')}
+										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									>
+										{category.name}
+									</Label>
+								</div>
+							)
+						})}
+						{fields.categories.errors && (
+							<div className="text-red-500">{fields.categories.errors}</div>
 						)}
 					</div>
-				</div>
+
+					<div className="mt-4 space-y-4">
+						<Label className="text-base font-medium">
+							Notification Frequency
+						</Label>
+						<RadioGroup
+							defaultValue={fields.emailFrequency.value as string}
+							onValueChange={value => fields.emailFrequency.onChange(value)}
+						>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="daily" id="daily" />
+								<Label htmlFor="daily">Daily</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="weekly" id="weekly" />
+								<Label htmlFor="weekly">Weekly</Label>
+							</div>
+						</RadioGroup>
+						<input
+							{...getInputProps(fields.emailFrequency, { type: 'hidden' })}
+						/>
+						{fields.emailFrequency.errors && (
+							<div className="text-red-500">{fields.emailFrequency.errors}</div>
+						)}
+					</div>
+
+					<Button type="submit" className="mt-4">
+						Save Preferences
+					</Button>
+				</Form>
+			</div>
+
+			<div className="mt-10 flex gap-4">
+				{/* {isLoggedInUser ? ( */}
+				{/* 	<> */}
+				{/* 		<Button asChild> */}
+				{/* 			<Link to="notes" prefetch="intent"> */}
+				{/* 				My notes */}
+				{/* 			</Link> */}
+				{/* 		</Button> */}
+				{/* 		<Button asChild> */}
+				{/* 			<Link to="/settings/profile" prefetch="intent"> */}
+				{/* 				Edit profile */}
+				{/* 			</Link> */}
+				{/* 		</Button> */}
+				{/* 	</> */}
+				{/* ) : ( */}
+				{/* 	<Button asChild> */}
+				{/* 		<Link to="notes" prefetch="intent"> */}
+				{/* 			{userDisplayName}'s notes */}
+				{/* 		</Link> */}
+				{/* 	</Button> */}
+				{/* )} */}
 			</div>
 		</div>
 	)
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data, params }) => {
-	const displayName = data?.user.name ?? params.username
-	return [
-		{ title: `${displayName} | Epic Notes` },
-		{
-			name: 'description',
-			content: `Profile of ${displayName} on Epic Notes`,
-		},
-	]
-}
+//TODO: ADD LATER?
+// export const meta: MetaFunction<typeof loader> = ({ data, params }) => {
+// 	const displayName = data?.user.name ?? params.username
+// 	return [
+// 		{ title: `${displayName} | Epic Notes` },
+// 		{
+// 			name: 'description',
+// 			content: `Profile of ${displayName} on Epic Notes`,
+// 		},
+// 	]
+// }
 
 export function ErrorBoundary() {
 	return (

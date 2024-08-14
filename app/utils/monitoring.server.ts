@@ -1,6 +1,6 @@
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import * as Sentry from '@sentry/remix'
-import { prisma } from './db.server.ts'
+// import { prisma } from './db.server.ts'
 
 export function init() {
 	Sentry.init({
@@ -19,7 +19,9 @@ export function init() {
 		],
 		integrations: [
 			new Sentry.Integrations.Http({ tracing: true }),
-			new Sentry.Integrations.Prisma({ client: prisma }),
+			//TODO: Work on integrating drizzle
+			//https://github.com/getsentry/sentry-javascript/discussions/8117#discussioncomment-9260637
+			// new Sentry.Integrations.Prisma({ client: prisma }),
 			new ProfilingIntegration(),
 		],
 		tracesSampler(samplingContext) {

@@ -1,4 +1,5 @@
 import { invariantResponse } from '@epic-web/invariant'
+import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import {
 	json,
@@ -30,14 +31,30 @@ import {
 	getInstanceInfo,
 } from '#app/utils/litefs.server.ts'
 import { useDebounce, useDoubleCheck } from '#app/utils/misc.tsx'
-import { requireUserWithRole } from '#app/utils/permissions.server.ts'
+// import { requireUserWithRole } from '#app/utils/permissions.server.ts'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	await requireUserWithRole(request, 'admin')
+	// await requireUserWithRole(request, 'admin')
+	// TODO: Copy above encapsulate below code to function
+	// Also, this permission. Change requiredRole to requiredPermission
+	const { getPermission } = await getKindeSession(request)
+	const user = await getPermission('administrator')
+	const roleName = 'admin'
+	if (!user) {
+		throw json(
+			{
+				error: 'Unauthorized',
+				requiredRole: roleName,
+				message: `Unauthorized: required role: ${roleName}`,
+			},
+			{ status: 403 },
+		)
+	}
+
 	const searchParams = new URL(request.url).searchParams
 	const query = searchParams.get('query')
 	if (query === '') {

@@ -11,3 +11,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 		},
 	})
 }
+
+// TODO: Need to add dynamic sitemap for each job page itself. 
+// Also, need for algolia seo pages
+
+
+// To generate sitemap for dynamic routes
+// routes/blog/$blogslug.tsx
+
+// export const handle: SEOHandle = {
+//   getSitemapEntries: async (request) => {
+//     const blogs = await db.blog.findMany();
+//     return blogs.map((blog) => {
+//       return { route: `/blog/${blog.slug}`, priority: 0.7 };
+//     });
+//   },
+// };
