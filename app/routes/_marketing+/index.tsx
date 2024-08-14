@@ -24,6 +24,8 @@ import {
 } from '#app/components/algolia/salary-slider.js'
 import { env } from 'process'
 
+const ALGOLIA_INDEX = process.env.ALGOLIA_INDEX!
+
 const searchClient = algoliasearch(
 	process.env.ALGOLIA_ID!,
 	process.env.ALGOLIA_API!,
@@ -71,8 +73,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 			<InstantSearchSSRProvider {...serverState}>
 				<InstantSearch
 					searchClient={searchClient}
-					// indexName="test_guj"
-					indexName="staging_guj"
+					indexName={ALGOLIA_INDEX}
 					future={{
 						preserveSharedStateOnUnmount: true,
 					}}
