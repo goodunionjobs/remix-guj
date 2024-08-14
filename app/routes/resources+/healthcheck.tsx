@@ -2,7 +2,7 @@
 import { type LoaderFunctionArgs } from '@remix-run/node'
 import { count } from 'drizzle-orm'
 import { db } from '#app/utils/db.server.ts'
-import { users } from '../../../drizzle/schema'
+import { guilds } from '../../../drizzle/schema'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const host =
@@ -12,7 +12,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		// if we can connect to the database and make a simple query
 		// and make a HEAD request to ourselves, then we're good.
 		await Promise.all([
-			db.select({ count: count() }).from(users),
+			db.select({ count: count() }).from(guilds),
 			fetch(`${new URL(request.url).protocol}${host}`, {
 				method: 'HEAD',
 				headers: { 'X-Healthcheck': 'true' },
