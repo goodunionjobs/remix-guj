@@ -31,7 +31,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	// Remove the file extension from the key if it exists
 	const keyWithoutExtension = key.replace(/\.(avif|webp|jpeg)$/, '')
 
-	const imagePath = `company/assets/${keyWithoutExtension}.${format}`
+	const imagePath = `assets/company/image/${keyWithoutExtension}.${format}`
 
 	try {
 		const { Body } = await s3.getObject({
