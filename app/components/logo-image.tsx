@@ -21,7 +21,6 @@ export function LogoImage({
 	// Extract the key part of the path (everything after 'assets/company/image/')
 	// TODO: I HAVE TO UPDATE THIS WITH THE STAGING AND UPDATE WITH FILES SO THAT WE CAN GET SOME STUFF TO TEST!!!
 	const imageKey = employerImage.split('assets/company/image/')[1]
-	console.log('imagekey', imageKey)
 
 	if (!imageKey) {
 		console.error('Invalid employerImage format:', employerImage)
@@ -31,30 +30,45 @@ export function LogoImage({
 	// Encode the key for use in URL
 	const encodedKey = encodeURIComponent(imageKey)
 
-	const basePath = 'assets/company/image/'
-	console.log('HERE')
-
 	return (
 		<div className={containerClassName}>
-			<picture>
-				<source
-					srcSet={`${basePath}${encodedKey.replace('.avif', '')}.avif`}
-					type="image/avif"
-				/>
-				<source
-					srcSet={`${basePath}${encodedKey.replace('.avif', '')}.webp`}
-					type="image/webp"
-				/>
-				<img
-					src={`${basePath}${encodedKey.replace('.avif', '')}.jpeg`}
-					alt={`${employer} Logo`}
-					className={imageClassName}
-					decoding="async"
-					loading="lazy"
-					width={size}
-					height={size}
-				/>
-			</picture>
+			<img
+				src={`/resources/company-image?imageKey=${encodedKey}`}
+				alt={`${employer} Logo`}
+				className={imageClassName}
+				decoding="async"
+				loading="lazy"
+				width={size}
+				height={size}
+			/>
 		</div>
 	)
 }
+
+// 	const basePath = 'assets/company/image/'
+// 	console.log('HERE')
+//
+// 	return (
+// 		<div className={containerClassName}>
+// 			<picture>
+// 				<source
+// 					srcSet={`${basePath}${encodedKey.replace('.avif', '')}.avif`}
+// 					type="image/avif"
+// 				/>
+// 				<source
+// 					srcSet={`${basePath}${encodedKey.replace('.avif', '')}.webp`}
+// 					type="image/webp"
+// 				/>
+// 				<img
+// 					src={`${basePath}${encodedKey.replace('.avif', '')}.jpeg`}
+// 					alt={`${employer} Logo`}
+// 					className={imageClassName}
+// 					decoding="async"
+// 					loading="lazy"
+// 					width={size}
+// 					height={size}
+// 				/>
+// 			</picture>
+// 		</div>
+// 	)
+// }
