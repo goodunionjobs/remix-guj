@@ -9,6 +9,7 @@ import {
 import { useTheme } from '#app/routes/resources+/theme-switch'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { type HitProps } from '#app/utils/types'
+import { LogoImage } from '../logo-image'
 
 export function Hit({ hit }: HitProps) {
 	const [showResults, setShowResults] = useState(false)

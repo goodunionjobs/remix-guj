@@ -19,7 +19,9 @@ export function LogoImage({
 	const imageClassName = 'object-scale-down h-5/6 rounded-md shadow-xl text-xs'
 
 	// Extract the key part of the path (everything after 'assets/company/image/')
+	// TODO: I HAVE TO UPDATE THIS WITH THE STAGING AND UPDATE WITH FILES SO THAT WE CAN GET SOME STUFF TO TEST!!!
 	const imageKey = employerImage.split('assets/company/image/')[1]
+	console.log('imagekey', imageKey)
 
 	if (!imageKey) {
 		console.error('Invalid employerImage format:', employerImage)
@@ -30,6 +32,7 @@ export function LogoImage({
 	const encodedKey = encodeURIComponent(imageKey)
 
 	const basePath = 'assets/company/image/'
+	console.log('HERE')
 
 	return (
 		<div className={containerClassName}>
