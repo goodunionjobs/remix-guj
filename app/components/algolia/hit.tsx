@@ -8,7 +8,8 @@ import {
 } from '#app/components/algolia/jobpost-parts'
 import { useTheme } from '#app/routes/resources+/theme-switch'
 import { FindTextColor } from '#app/utils/find-text-color'
-import type { HitProps } from '#app/utils/types'
+import { type HitProps } from '#app/utils/types'
+import { LogoImage } from '../logo-image'
 
 export function Hit({ hit }: HitProps) {
 	const [showResults, setShowResults] = useState(false)
@@ -58,6 +59,7 @@ export function Hit({ hit }: HitProps) {
 					url={hit.url}
 					onClick={onClick}
 				/>
+
 				{showResults && (
 					<JobDescription
 						url={hit.url}

@@ -53,6 +53,9 @@ export function getEnv() {
 		MODE: process.env.NODE_ENV,
 		SENTRY_DSN: process.env.SENTRY_DSN,
 		ALLOW_INDEXING: process.env.ALLOW_INDEXING,
+		ALGOLIA_INDEX: process.env.ALGOLIA_INDEX,
+		ALGOLIA_API: process.env.ALGOLIA_API,
+		ALGOLIA_ID: process.env.ALGOLIA_ID,
 	}
 }
 
