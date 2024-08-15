@@ -37,12 +37,12 @@ export function JobHeader({
 	return (
 		<div className={divBlock} style={{ background: color, color: textColor }}>
 			<div className="flex h-24 flex-row items-stretch" onClick={onClick}>
-				{/* <LogoImage */}
-				{/* 	employerImage={employerImage} */}
-				{/* 	employer={employer} */}
-				{/* 	size={53} */}
-				{/* 	layout="flex" */}
-				{/* /> */}
+				<LogoImage
+					employerImage={employerImage}
+					employer={employer}
+					size={53}
+					layout="flex"
+				/>
 				<Attributes
 					hit={hit}
 					minSalary={hit.minSalary}
