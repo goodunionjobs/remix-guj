@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 const schema = z.object({
 	NODE_ENV: z.enum(['production', 'development', 'test'] as const),
-	// TODO: Figure out why adding R2_STORAGE_DOMAIN causes issues
 	DATABASE_PATH: z.string(),
 	DATABASE_URL: z.string(),
 	SESSION_SECRET: z.string(),
