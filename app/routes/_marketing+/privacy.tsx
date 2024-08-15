@@ -1,27 +1,30 @@
-import { json } from '@remix-run/node'
-import type { LoaderFunction } from '@remix-run/node'
+import { json, type LoaderFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { marked } from 'marked'
 
-interface LoaderData {
+type LoaderData = {
 	html: string
 }
 
 let cachedHtml: string | null = null
 let cacheTime: number | null = null
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
 	const currentTime = Date.now()
 	const cacheDuration = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
+	// Get the base URL from the request
+	const url = new URL(request.url)
+	const baseUrl = `${url.protocol}//${url.host}`
+
 	// If cache is valid, return cached content
 	if (cachedHtml && cacheTime && currentTime - cacheTime < cacheDuration) {
-		return json<LoaderData>({ html: cachedHtml })
+		return json({ html: cachedHtml })
 	}
 
 	// If cache is invalid or doesn't exist, fetch and parse the content
 	try {
-		const response = await fetch('http://localhost:3000/markdown/privacy.md')
+		const response = await fetch(`${baseUrl}/markdown/privacy.md`)
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`)
 		}
@@ -32,7 +35,7 @@ export const loader: LoaderFunction = async () => {
 		cachedHtml = html
 		cacheTime = currentTime
 
-		return json<LoaderData>(
+		return json(
 			{ html },
 			{
 				headers: {
@@ -42,16 +45,16 @@ export const loader: LoaderFunction = async () => {
 		)
 	} catch (error) {
 		console.error('Error fetching or parsing Markdown:', error)
-		return json<LoaderData>(
+		return json(
 			{
-				html: '<p>Terms of Service content is currently unavailable. Please try again later.</p>',
+				html: '<p>Privacy content is currently unavailable. Please try again later.</p>',
 			},
 			{ status: 500 },
 		)
 	}
 }
 
-export default function PrivacyRoute() {
+export default function TermsOfServiceRoute() {
 	const { html } = useLoaderData<LoaderData>()
 
 	return (

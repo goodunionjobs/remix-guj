@@ -1,6 +1,6 @@
 ---
 title: Copy that?
-description: How Basecamp handles copyright infringement claims.
+description: How Good Union Jobs handles copyright infringement claims.
 ---
 
 # Copyright Infringement Claims

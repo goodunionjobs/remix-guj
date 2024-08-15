@@ -1,8 +1,8 @@
 // app/routes/assets.company.image.$imagekey.tsx
-import { LoaderFunction } from '@remix-run/node'
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import path from 'path'
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { invariant, invariantResponse } from '@epic-web/invariant'
+import { type LoaderFunction } from '@remix-run/node'
 
 // Allowed image extensions
 const allowedExtensions = ['.avif', '.webp', '.jpeg']
