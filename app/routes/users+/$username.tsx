@@ -56,6 +56,23 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 		},
 	})
 
+    
+ //    let newUser
+	//  if (dbUser === undefined) {
+	//    newUser = await db.insert(users).values({
+	//    kindeUserId: user.id,
+	//    email: user.email,
+ //     firstName: user.given_name,
+ //     lastName: user.family_name,
+	//    })
+	//
+	// await db.insert(usersToCategories).values(
+	// 	submission.value.categories.map(categoryName => ({
+	// 		userId: dbUser.id,
+	// 		categoryName,
+	// 	})),
+	//  }
+
 	const allCategories = await db.query.categories.findMany()
 
 	return json({ user: dbUser, allCategories })
