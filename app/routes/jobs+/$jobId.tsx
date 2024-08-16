@@ -4,6 +4,7 @@ import { json } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
 import { eq } from 'drizzle-orm'
 import sanitizeHtml from 'sanitize-html'
+import { SEOHandle } from '@nasa-gcn/remix-seo'
 import type { JobPosting, WithContext } from 'schema-dts'
 import {
 	JobHeader,
@@ -61,6 +62,46 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	}
 
 	return json({ ...job, fullDescription: descriptionData.description })
+}
+
+function escapeXml(unsafe: string): string {
+	return unsafe.replace(/[&<>'"]/g, char => {
+		switch (char) {
+			case '&':
+				return '&amp;'
+			case '<':
+				return '&lt;'
+			case '>':
+				return '&gt;'
+			case "'":
+				return '&apos;'
+			case '"':
+				return '&quot;'
+			default:
+				return char
+		}
+	})
+}
+
+export const handle: SEOHandle = {
+	getSitemapEntries: async request => {
+		const jobs = await db.query.jobs.findMany({
+			with: {
+				address: {
+					with: {
+						city: true,
+						state: true,
+						country: true,
+					},
+				},
+				employer: true,
+			},
+		})
+		return jobs.map(job => ({
+			route: `/jobs/${job.id}-${escapeXml(job.title)}`,
+			lastmod: job.timeStamp.toISOString(),
+		}))
+	},
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
