@@ -1,10 +1,10 @@
 import { invariant } from '@epic-web/invariant'
+import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
 import { eq } from 'drizzle-orm'
 import sanitizeHtml from 'sanitize-html'
-import { SEOHandle } from '@nasa-gcn/remix-seo'
 import type { JobPosting, WithContext } from 'schema-dts'
 import {
 	JobHeader,
