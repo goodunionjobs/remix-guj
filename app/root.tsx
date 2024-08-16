@@ -308,7 +308,10 @@ function UserDropdown({ user }: { user: KindeUser }) {
 							alt={user.given_name ?? user.given_name}
 							src="/img/user.png"
 						/>
-						<span className="text-body-sm font-bold">{user.given_name}</span>
+						<span className="text-body-sm font-bold">
+							{user.given_name}
+							{user.family_name}
+						</span>
 					</Link>
 				</Button>
 			</DropdownMenuTrigger>

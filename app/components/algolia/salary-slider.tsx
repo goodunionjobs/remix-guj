@@ -8,46 +8,34 @@ export function SalaryRangeSliderPopover() {
 	const { range, start, canRefine, refine } = useRange({
 		attribute: 'minSalary',
 	})
+	const { min, max } = range
+	const [value, setValue] = useState([Math.max(min, 1000), max])
 
-	const [value, setValue] = useState([0, 300])
+	const from = Math.max(1000, Number.isFinite(start[0]) ? start[0] : 1000)
+	const to = Math.min(max, Number.isFinite(start[1]) ? start[1] : max)
 
 	useEffect(() => {
-		if (canRefine) {
-			const min = 0
-			const max = Math.max(300, range.max)
-			const from = Math.max(min, Number.isFinite(start[0]) ? start[0] : min)
-			const to = Math.min(max, Number.isFinite(start[1]) ? start[1] : max)
-			setValue([from, to])
-		}
-	}, [canRefine, range.max, start])
-
-	const handleValueChange = (newValue: number[]) => {
-		setValue(newValue)
-	}
-
-	const handleValueCommit = (newValue: number[]) => {
-		refine(newValue)
-	}
+		setValue([from, to])
+	}, [from, to])
 
 	const formatSalary = (value: number) => {
-		return `$${value}K`
+		if (value >= 1000) {
+			return `${Math.floor(value / 1000)}K`
+		}
+		return `${value}`
 	}
 
-	const getButtonText = () => {
-		if (value[0] === 0 && value[1] >= 300) {
-			return 'Salary: Any'
-		} else if (value[0] > 0) {
-			return `Salary: >${formatSalary(value[0])}`
-		} else {
-			return `Salary: <${formatSalary(value[1])}`
-		}
-	}
+	const formatter = new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD',
+		maximumFractionDigits: 0,
+	})
 
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" className="dark:border-white dark:bg-black">
-					{getButtonText()}
+					Salary: {'>'}${formatSalary(from)}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-80">
@@ -60,17 +48,18 @@ export function SalaryRangeSliderPopover() {
 					</div>
 					<div className="grid gap-2">
 						<Slider
-							min={0}
-							max={300}
-							step={1}
+							min={min}
+							max={max}
+							step={1000}
 							value={value}
-							onValueChange={handleValueChange}
-							onValueCommit={handleValueCommit}
+							onValueChange={setValue}
+							onValueCommit={refine}
+							disabled={!canRefine}
 							className="mb-2"
 						/>
 						<div className="flex justify-between text-sm">
-							<span>{formatSalary(value[0])}</span>
-							<span>{formatSalary(value[1])}</span>
+							<span>{formatter.format(from)}</span>
+							<span>{formatter.format(to)}</span>
 						</div>
 					</div>
 				</div>
