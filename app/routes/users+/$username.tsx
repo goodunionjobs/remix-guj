@@ -27,6 +27,7 @@ import { Label } from '#app/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '#app/components/ui/radio-group'
 import { db } from '#app/utils/db.server'
 import { users, categories, usersToCategories } from '../../../drizzle/schema'
+import { eq } from 'drizzle-orm'
 
 const schema = z.object({
 	categories: z.array(z.string()).min(1, 'Select at least one category'),
