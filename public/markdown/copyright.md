@@ -1,8 +1,3 @@
----
-title: Copy that?
-description: How Good Union Jobs handles copyright infringement claims.
----
-
 # Copyright Infringement Claims
 
 ## Notification of Copyright Infringement Claims
@@ -63,7 +58,7 @@ information:
 You can notify us of either copyright infringement claims or DCMA
 counter-notifications through either of the following channels:
 
-**By email**: [report@basecamp.com](mailto:report@goodunionjobs.com)
+**By email**: report@goodunionjobs.com
 
 <!-- TODO: Put email -->
 <!-- **By mail**: Basecamp, LLC 2045 W Grand Ave Ste B, PMB 53289 ATTN: David H. -->

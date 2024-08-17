@@ -243,12 +243,18 @@ function App() {
 					<Outlet />
 				</div>
 
-				<div className="container flex justify-between pb-5">
-					<div className="flex justify-between gap-1">
+				<div className="container flex justify-between justify-items-center pb-5">
+					<div className="flex items-center justify-items-center  gap-4">
 						<Logo />
 						<Link to="/" className="hidden self-center md:block">
 							<div className="font-light">Good</div>
 							<div className="font-bold">Union Jobs</div>
+						</Link>
+						<Link to="/tos" className="">
+							Terms {'&'} Conditions
+						</Link>
+						<Link to="/privacy" className="">
+							Privacy Policy
 						</Link>
 					</div>
 				</div>
