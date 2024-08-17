@@ -1,5 +1,4 @@
 import { invariant } from '@epic-web/invariant'
-import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
@@ -15,6 +14,7 @@ import {
 import { db } from '#app/utils/db.server'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { jobs } from '../../../drizzle/schema'
+export { handle } from './$jobId.server'
 
 type JobDescriptionResponse = {
 	description: string
@@ -81,27 +81,6 @@ function escapeXml(unsafe: string): string {
 				return char
 		}
 	})
-}
-
-export const handle: SEOHandle = {
-	getSitemapEntries: async request => {
-		const jobs = await db.query.jobs.findMany({
-			with: {
-				address: {
-					with: {
-						city: true,
-						state: true,
-						country: true,
-					},
-				},
-				employer: true,
-			},
-		})
-		return jobs.map(job => ({
-			route: `/jobs/${job.id}-${escapeXml(job.title)}`,
-			lastmod: job.timeStamp.toISOString(),
-		}))
-	},
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
