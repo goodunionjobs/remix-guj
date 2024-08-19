@@ -213,30 +213,30 @@ function App() {
 						)} */}
 						<div className="flex flex-col gap-4">
 							<div className="flex flex-col items-center gap-2">
-								{/* {data.user ? ( */}
-								{/* 	<UserDropdown user={data.user} /> */}
-								{/* ) : ( */}
-								{/* 	<> */}
-								{/* 		<Button */}
-								{/* 			asChild */}
-								{/* 			variant="default" */}
-								{/* 			size="lg" */}
-								{/* 			className="w-3/4 sm:w-full " */}
-								{/* 		> */}
-								{/* 			<Link to={'/kinde-auth/register'}> */}
-								{/* 				Sign Up - Job Notifications 💼 */}
-								{/* 			</Link> */}
-								{/* 		</Button> */}
-								{/* 		<Button */}
-								{/* 			asChild */}
-								{/* 			variant="outline" */}
-								{/* 			size="lg" */}
-								{/* 			className="w-3/4 sm:w-full" */}
-								{/* 		> */}
-								{/* 			<Link to={'/kinde-auth/login'}>Login</Link> */}
-								{/* 		</Button> */}
-								{/* 	</> */}
-								{/* )} */}
+								{data.user ? (
+									<UserDropdown user={data.user} />
+								) : (
+									<>
+										<Button
+											asChild
+											variant="default"
+											size="lg"
+											className="w-3/4 sm:w-full "
+										>
+											<Link to={'/kinde-auth/register'}>
+												Sign Up - Job Notifications 💼
+											</Link>
+										</Button>
+										<Button
+											asChild
+											variant="outline"
+											size="lg"
+											className="w-3/4 sm:w-full"
+										>
+											<Link to={'/kinde-auth/login'}>Login</Link>
+										</Button>
+									</>
+								)}
 							</div>
 						</div>
 					</nav>
