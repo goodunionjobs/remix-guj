@@ -1,5 +1,6 @@
 import { Highlight } from 'react-instantsearch'
 import type { HitProps } from '#app/utils/types.tsx'
+import { jobs } from '../../drizzle/schema'
 
 function formatSalaryInThousands(salary: number): string {
 	// Round to the nearest thousand
@@ -22,6 +23,84 @@ function formatSalaryRange(
 
 	// Return null if either salary is missing or null
 	return null
+}
+
+// First, infer the base type from your schema
+type BaseSelectJob = typeof jobs.$inferSelect
+
+// Create a type that represents the JSON version of our job object
+type JsonJob = {
+	[K in keyof BaseSelectJob]: BaseSelectJob[K] extends Date
+		? string
+		: BaseSelectJob[K]
+}
+
+// Create a union type that can be either the base type or the JSON type
+export type SelectJob = BaseSelectJob | JsonJob
+
+export function DrizzleAttributes({
+	hit,
+	minSalary,
+	maxSalary,
+	state,
+	employmentType,
+	employer,
+	title,
+}: {
+	hit?: SelectJob
+	minSalary?: number | null
+	maxSalary?: number | null
+	state: string
+	employmentType: string
+	employer: string
+	title: string
+}) {
+	const salaryRangeStr = formatSalaryRange(minSalary, maxSalary)
+
+	return (
+		<>
+			<div className="flex-auto self-center">
+				<p className="font-Atkinson line-clamp-2 text-sm leading-none sm:leading-tight">
+					{employer}
+				</p>
+				<p className="font-Atkinson line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight">
+					{title}
+				</p>
+				{minSalary === null ||
+				(minSalary === undefined && maxSalary === null) ||
+				maxSalary === undefined ? (
+					<span className="hidden"></span>
+				) : (
+					<span
+						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
+                  pt-0.5 text-xs font-bold text-black sm:text-sm"
+					>
+						💰{salaryRangeStr}
+					</span>
+				)}
+				{state === '' || state === null ? (
+					<span className="hidden"></span>
+				) : (
+					<span
+						className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200
+                  px-1 pt-0.5 text-xs font-bold text-black sm:text-sm"
+					>
+						📌{state}
+					</span>
+				)}
+				{employmentType === '' || employmentType === null ? (
+					<span className="hidden"></span>
+				) : (
+					<span
+						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
+                  pt-0.5 text-xs font-bold text-black sm:text-sm"
+					>
+						🕑{employmentType}
+					</span>
+				)}
+			</div>
+		</>
+	)
 }
 
 export function Attributes({

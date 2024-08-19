@@ -7,18 +7,18 @@ if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
 	import('./utils/monitoring.client.tsx').then(({ init }) => init())
 }
 
-// function PosthogInit() {
-// 	useEffect(() => {
-// 		if (ENV.MODE === 'production') {
-// 			posthog.init('phc_JlLZHgPkAs5IFqAguiVTI09r3aThYEYsuJ0mKy9kzAi', {
-// 				api_host: 'https://us.i.posthog.com',
-// 				person_profiles: 'identified_only',
-// 			})
-// 		}
-// 	}, [])
-//
-// 	return null
-// }
+function PosthogInit() {
+	useEffect(() => {
+		if (ENV.MODE === 'production') {
+			posthog.init('phc_JlLZHgPkAs5IFqAguiVTI09r3aThYEYsuJ0mKy9kzAi', {
+				api_host: 'https://us.i.posthog.com',
+				person_profiles: 'identified_only',
+			})
+		}
+	}, [])
+
+	return null
+}
 
 startTransition(() => {
 	hydrateRoot(
@@ -26,7 +26,7 @@ startTransition(() => {
 		// TODO: Strictmode disable?
 		<StrictMode>
 			<RemixBrowser />
-			{/* <PosthogInit /> */}
+			<PosthogInit />
 		</StrictMode>,
 	)
 })

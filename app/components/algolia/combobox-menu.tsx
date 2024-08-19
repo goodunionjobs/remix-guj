@@ -57,8 +57,7 @@ export function AlgoliaFlexibleCombobox({
 	const [selectedValue, setSelectedValue] = useState('')
 
 	// TODO: Fixup with types and make it switch case
-	const allOptionLabel =
-		attribute === 'state' ? 'All States' : 'All Employment Types'
+	const allOptionLabel = attribute === 'state' ? 'All States' : 'All Job Types'
 
 	// Add specific "All" option to the beginning of the options array
 	const allOptions = useMemo(
@@ -171,7 +170,7 @@ export function EmploymentTypeCombobox() {
 	return (
 		<AlgoliaFlexibleCombobox
 			attribute="employmentType"
-			placeholder="Select employment type"
+			placeholder="Select job type"
 			width="300px"
 			options={employmentTypes}
 		/>

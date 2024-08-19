@@ -7,14 +7,14 @@ export const loader: LoaderFunction = async ({ request }) => {
 	const baseUrl = getDomainUrl(request)
 
 	const staticRoutes = [
-		{ loc: `${baseUrl}/*`, priority: 0.7 },
-		{ loc: `${baseUrl}/abuse`, priority: 0.7 },
-		{ loc: `${baseUrl}/ccpa`, priority: 0.7 },
-		{ loc: `${baseUrl}/copyright`, priority: 0.7 },
-		{ loc: `${baseUrl}`, priority: 0.7 },
-		{ loc: `${baseUrl}/privacy`, priority: 0.7 },
-		{ loc: `${baseUrl}/support`, priority: 0.7 },
-		{ loc: `${baseUrl}/tos`, priority: 0.7 },
+		{ loc: `${baseUrl}/*`, priority: 0.8 },
+		{ loc: `${baseUrl}/abuse`, priority: 0.6 },
+		{ loc: `${baseUrl}/ccpa`, priority: 0.6 },
+		{ loc: `${baseUrl}/copyright`, priority: 0.6 },
+		{ loc: `${baseUrl}`, priority: 0.8 },
+		{ loc: `${baseUrl}/privacy`, priority: 0.6 },
+		{ loc: `${baseUrl}/support`, priority: 0.6 },
+		{ loc: `${baseUrl}/tos`, priority: 0.6 },
 	]
 
 	const jobsquery = await db.select().from(jobs)

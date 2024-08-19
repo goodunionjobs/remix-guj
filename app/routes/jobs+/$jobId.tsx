@@ -1,6 +1,4 @@
 import { invariant } from '@epic-web/invariant'
-import { type SEOHandle } from '@nasa-gcn/remix-seo'
-import { type SitemapEntry } from '@nasa-gcn/remix-seo/build/types'
 import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -10,16 +8,17 @@ import { useLoaderData, Link } from '@remix-run/react'
 import { eq } from 'drizzle-orm'
 import sanitizeHtml from 'sanitize-html'
 import { type JobPosting, type WithContext } from 'schema-dts'
-import { serverOnly$ } from 'vite-env-only/macros'
 import {
 	JobHeader,
 	JobDescription,
 	formatJobSlug,
 	calculateFinalTime,
+	JobHeaderDrizzle,
 } from '#app/components/algolia/jobpost-parts'
 import { db } from '#app/utils/db.server'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { jobs } from '../../../drizzle/schema'
+import { useTheme } from '../resources+/theme-switch'
 
 type JobDescriptionResponse = {
 	description: string
@@ -67,25 +66,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	}
 
 	return json({ ...job, fullDescription: descriptionData.description })
-}
-
-function escapeXml(unsafe: string): string {
-	return unsafe.replace(/[&<>'"]/g, char => {
-		switch (char) {
-			case '&':
-				return '&amp;'
-			case '<':
-				return '&lt;'
-			case '>':
-				return '&gt;'
-			case "'":
-				return '&apos;'
-			case '"':
-				return '&quot;'
-			default:
-				return char
-		}
-	})
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -173,16 +153,21 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export default function JobRoute() {
 	const job = useLoaderData<typeof loader>()
 
+	const theme = useTheme()
 	const lightColor = '#FFFFFF'
 	const darkColor = '#000000'
 	const color = job.color
 		? '#' + ('000000' + job.color.toString(16)).slice(-6)
-		: lightColor
+		: theme === 'light'
+			? lightColor
+			: '#0f172a'
 
 	const textColor = FindTextColor(color, lightColor, darkColor)
 	const finalTime = calculateFinalTime(job.dateStamp)
 
 	const baseUrl = 'https://goodunionjobs.com/'
+
+	console.log('title dirzzle: ', job.title)
 
 	return (
 		<div className="md:px-42 lg:px- mt-4 flex justify-center bg-white px-4 py-4 dark:bg-slate-950 sm:px-8">
@@ -195,7 +180,7 @@ export default function JobRoute() {
 					← Back to Search
 				</Link>
 				<div className="group pt-2">
-					<JobHeader
+					<JobHeaderDrizzle
 						color={color}
 						textColor={textColor}
 						employerImage={job.employer.s3Link}

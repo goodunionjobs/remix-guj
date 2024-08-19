@@ -35,15 +35,15 @@ export function SalaryRangeSliderPopover() {
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button variant="outline" className="dark:border-white dark:bg-black">
-					Salary: {'>'}${formatSalary(from)}
+					Yearly Pay: {'>'}${formatSalary(from)}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-80">
 				<div className="grid gap-4">
 					<div className="space-y-2">
-						<h4 className="font-medium leading-none">Salary Range</h4>
+						<h4 className="font-medium leading-none">Yearly Pay Range</h4>
 						<p className="text-sm text-muted-foreground">
-							Set the minimum and maximum salary range.
+							Set the minimum and maximum (*estimated) yearly pay range.
 						</p>
 					</div>
 					<div className="grid gap-2">
