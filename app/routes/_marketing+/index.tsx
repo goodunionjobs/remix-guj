@@ -56,7 +56,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 
 	return (
 		<>
-			<div className="justify-center p-6">
+			<div className="mt-10 justify-center p-6">
 				<h1 className="flex flex-col text-2xl font-bold sm:text-4xl">
 					<span className="inline-flex justify-center">
 						<span className="rounded-sm bg-[#0730FD] px-1 text-white">
@@ -93,7 +93,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 					}}
 				>
 					<Configure hitsPerPage={40} />
-					<div className="grid justify-items-center ">
+					<div className="mt-10 grid justify-items-center">
 						<div className=" justify-center">
 							<SearchBox
 								loadingIconComponent={() => 'loading...'}

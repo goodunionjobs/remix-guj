@@ -1,3 +1,4 @@
+// TODO: Doesn't work exporting handle from here
 import type { SEOHandle } from '@nasa-gcn/remix-seo'
 import { type SitemapEntry } from '@nasa-gcn/remix-seo/build/types'
 import { db } from '#app/utils/db.server'
