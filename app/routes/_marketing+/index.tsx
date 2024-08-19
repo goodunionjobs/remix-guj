@@ -52,7 +52,7 @@ type SearchProps = {
 let timerId: NodeJS.Timeout | string | number | undefined = undefined
 
 function Search({ serverState, serverUrl }: SearchProps) {
-	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX
+	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
 
 	return (
 		<>
@@ -81,15 +81,42 @@ function Search({ serverState, serverUrl }: SearchProps) {
 					}}
 					routing={{
 						router: history({
+							cleanUrlOnDispose: false,
 							getLocation() {
 								if (typeof window === 'undefined') {
 									return new URL(serverUrl!) as unknown as Location
 								}
-
 								return window.location
 							},
-							cleanUrlOnDispose: false,
 						}),
+						stateMapping: {
+							stateToRoute(uiState) {
+								const indexUiState = uiState[ALGOLIA_INDEX]
+								return {
+									q: indexUiState.query,
+									state: indexUiState.menu?.state,
+									jobtype: indexUiState.menu?.employmentType,
+									page: indexUiState.page,
+								}
+							},
+							routeToState(routeState) {
+								return {
+									[ALGOLIA_INDEX]: {
+										query: routeState.q,
+										menu: {
+											categories: routeState.state,
+											// Set other menu properties if needed
+										},
+										page: routeState.page,
+									},
+								}
+							},
+						},
+						onRouteChange() {
+							// This callback is called when the route changes
+							// You can implement any additional logic here if needed
+						},
+						// initialRouteState, // Uncomment and set initial route state if needed
 					}}
 				>
 					<Configure hitsPerPage={40} />

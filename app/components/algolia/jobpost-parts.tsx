@@ -3,9 +3,10 @@
 import { Link } from '@remix-run/react'
 import dayjs from 'dayjs'
 import { ApplyButton } from '#app/components/apply-button'
-import { Attributes } from '#app/components/attributes'
+import { Attributes, DrizzleAttributes } from '#app/components/attributes'
 import { FinalTime } from '#app/components/final-time'
 import { LogoImage } from '#app/components/logo-image'
+import { jobs } from '../../../drizzle/schema'
 import { divBlock } from '../job-posts/jobblockcss'
 
 enum TimeFormat {
@@ -13,6 +14,68 @@ enum TimeFormat {
 	Day = 'd',
 	Month = 'mo',
 	Year = 'yr',
+}
+
+// First, infer the base type from your schema
+type BaseSelectJob = typeof jobs.$inferSelect
+
+// Create a type that represents the JSON version of our job object
+type JsonJob = {
+	[K in keyof BaseSelectJob]: BaseSelectJob[K] extends Date
+		? string
+		: BaseSelectJob[K]
+}
+
+// Create a union type that can be either the base type or the JSON type
+export type SelectJob = BaseSelectJob | JsonJob
+
+//TODO: Combine with otherJobHeader
+export function JobHeaderDrizzle({
+	color,
+	textColor,
+	employerImage,
+	employer,
+	hit,
+	finalTime,
+	url,
+	onClick,
+}: {
+	color: string
+	textColor: string
+	employerImage: string
+	employer: string
+	hit: SelectJob
+	finalTime: [number, TimeFormat]
+	url: string
+	onClick?: () => void
+}) {
+	return (
+		<div className={divBlock} style={{ background: color, color: textColor }}>
+			<div className="flex h-24 flex-row items-stretch" onClick={onClick}>
+				<LogoImage
+					employerImage={employerImage}
+					employer={employer}
+					size={53}
+					layout="flex"
+				/>
+				<DrizzleAttributes
+					hit={hit}
+					minSalary={hit.minSalary}
+					maxSalary={hit.maxSalary}
+					state={'FAKE'}
+					employmentType={hit.employmentType}
+					employer={employer}
+					title={hit.title}
+				/>
+				<FinalTime finalTime={finalTime} />
+				<ApplyButton
+					url={url}
+					handleButtonClick={e => e.stopPropagation()}
+					textColor={textColor}
+				/>
+			</div>
+		</div>
+	)
 }
 
 export function JobHeader({
