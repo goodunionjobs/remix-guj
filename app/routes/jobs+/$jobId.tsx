@@ -10,6 +10,7 @@ import { useLoaderData, Link } from '@remix-run/react'
 import { eq } from 'drizzle-orm'
 import sanitizeHtml from 'sanitize-html'
 import { type JobPosting, type WithContext } from 'schema-dts'
+import { serverOnly$ } from 'vite-env-only/macros'
 import {
 	JobHeader,
 	JobDescription,
@@ -19,23 +20,11 @@ import {
 import { db } from '#app/utils/db.server'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { jobs } from '../../../drizzle/schema'
+export { handle } from './$jobId.server'
 
 type JobDescriptionResponse = {
 	description: string
 	error?: string
-}
-
-export const handle: SEOHandle = {
-	getSitemapEntries: async (
-		_request: Request,
-	): Promise<Array<SitemapEntry | null>> => {
-		const jobsquery = await db.select().from(jobs)
-		return jobsquery.map(job => ({
-			route: `/jobs/${job.id}-${job.title}`,
-			priority: 0.7,
-			lastmod: job.timeStamp.toISOString(),
-		}))
-	},
 }
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {

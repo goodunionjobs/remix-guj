@@ -3,6 +3,7 @@ import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { glob } from 'glob'
 import { flatRoutes } from 'remix-flat-routes'
 import { defineConfig } from 'vite'
+import { denyImports, envOnlyMacros } from 'vite-env-only'
 
 const MODE = process.env.NODE_ENV
 
@@ -23,6 +24,13 @@ export default defineConfig({
 		sourcemap: true,
 	},
 	plugins: [
+		envOnlyMacros(), // This enables the macros like serverOnly$
+		denyImports({
+			client: {
+				// This prevents any files in the `.server` directory or with `.server.` in the filename from being imported in the client bundle
+				files: ['**/.server/*', '**/*.server.*'],
+			},
+		}),
 		remix({
 			ignoredRouteFiles: ['**/*'],
 			serverModuleFormat: 'esm',

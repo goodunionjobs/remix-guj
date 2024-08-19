@@ -173,6 +173,7 @@
     "tsx": "^4.8.2",
     "typescript": "^5.4.5",
     "vite": "^5.2.10",
+    "vite-env-only": "^3.0.3",
     "vitest": "^1.5.3"
   },
   "engines": {
