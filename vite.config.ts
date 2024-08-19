@@ -22,9 +22,6 @@ export default defineConfig({
 
 		sourcemap: true,
 	},
-	ssr: {
-		noExternal: ['posthog-js', 'posthog-js/react'],
-	},
 	plugins: [
 		remix({
 			ignoredRouteFiles: ['**/*'],
