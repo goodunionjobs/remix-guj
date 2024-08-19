@@ -114,11 +114,12 @@ app.use(
 		crossOriginEmbedderPolicy: false,
 		contentSecurityPolicy: {
 			// NOTE: Remove reportOnly when you're ready to enforce this CSP
-			reportOnly: true,
+			reportOnly: false,
 			directives: {
 				'connect-src': [
 					MODE === 'development' ? 'ws:' : null,
 					process.env.SENTRY_DSN ? '*.sentry.io' : null,
+					'https://hog.goodunionjobs.com',
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
