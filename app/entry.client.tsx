@@ -13,6 +13,7 @@ function PosthogInit() {
 			posthog.init('phc_JlLZHgPkAs5IFqAguiVTI09r3aThYEYsuJ0mKy9kzAi', {
 				api_host: 'https://us.i.posthog.com',
 				person_profiles: 'identified_only',
+				capture_pageview: false,
 			})
 		}
 	}, [])
