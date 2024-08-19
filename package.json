@@ -170,6 +170,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-sql": "^0.18.0",
     "prettier-plugin-tailwindcss": "^0.5.14",
+    "remix-development-tools": "^4.2.2",
     "remix-flat-routes": "^0.6.4",
     "tsx": "^4.8.2",
     "typescript": "^5.4.5",
