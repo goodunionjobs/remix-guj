@@ -1,13 +1,4 @@
----
-title: Terms of Service
-description:
-  All the terms that you agree to when you sign up for a Good Union Jobs
-  product.
----
-
-# Terms of Service
-
-\_Last updated: August 15, 2024
+Last updated: August 15, 2024
 
 From everyone at Good Union Jobs, thank you for using our products! We build
 them to help you do your best work. There are millions of people using Good
@@ -64,7 +55,7 @@ deserve that trust by being open
 <!-- [who we are](https://basecamp.com/about/team), -->
 <!-- [how we work](https://basecamp.com/handbook),  -->
 
-and keeping an open door to [your feedback]({{ support@goodunionjobs.com }}).
+and keeping an open door to [your feedback](support@goodunionjobs.com).
 
 ## Account Terms
 
@@ -131,17 +122,16 @@ and keeping an open door to [your feedback]({{ support@goodunionjobs.com }}).
     permanently deleted from our backups. We cannot recover this information
     once it has been permanently deleted.
        <!-- TODO: Work on it -->
-          <!-- If you want to export any data before your account is -->
-          <!--    canceled, we‘ve provided instructions for -->
-          <!--    [HEY](https://hey.com/faqs/#if-i-don-t-like-hey-can-i-export-my-email-and-contacts), -->
-          <!--    [Basecamp 4](https://3.basecamp-help.com/article/150-export-your-basecamp-data), -->
-          <!--    [Basecamp 2](https://2.basecamp-help.com/article/247-exporting-account-data), -->
-          <!--    [Basecamp Classic](https://classic.basecamp-help.com/article/524-exports), -->
-          <!--    [Highrise](https://support.highrise-help.com/category/314-imports-exports), -->
-          <!--    [Campfire](https://support.campfire-help.com/article/146-how-do-i-export-cancel-my-account), -->
-          <!--    and -->
-          <!--    [Backpack](https://support.backpack-help.com/article/289-can-i-export-my-data-out-of-backpack). -->
-    <!-- TODO: As well -->
+    <!-- If you want to export any data before your account is -->
+    <!--          canceled, we‘ve provided instructions for -->
+    <!--          [HEY](https://hey.com/faqs/#if-i-don-t-like-hey-can-i-export-my-email-and-contacts), -->
+    <!--          [Basecamp 4](https://3.basecamp-help.com/article/150-export-your-basecamp-data), -->
+    <!--          [Basecamp 2](https://2.basecamp-help.com/article/247-exporting-account-data), -->
+    <!--          [Basecamp Classic](https://classic.basecamp-help.com/article/524-exports), -->
+    <!--          [Highrise](https://support.highrise-help.com/category/314-imports-exports), -->
+    <!--          [Campfire](https://support.campfire-help.com/article/146-how-do-i-export-cancel-my-account), -->
+    <!--          and -->
+    <!--          [Backpack](https://support.backpack-help.com/article/289-can-i-export-my-data-out-of-backpack). -->
     <!-- 3. If you cancel the Service before the end of your current paid up month, your -->
     <!--    cancellation will take effect immediately, and you will not be charged again. -->
     <!--    We do not automatically prorate unused time in the last billing cycle. See -->

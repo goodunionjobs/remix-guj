@@ -1,13 +1,3 @@
----
-title: Privacy policy
-description:
-  The privacy of your data — and it is your data, not ours! — is a big deal to
-  us. Here’s the rundown of what we collect and why, when we access your
-  information, and your rights.
----
-
-# Privacy policy
-
 _Last updated: August 15, 2024_
 
 The privacy of your data—and it is your data, not ours!—is a big deal to us. In
@@ -290,7 +280,7 @@ regardless of their location. Some of these rights include:
 - **Right to Portability.** You have the right to receive the personal
   information we have about you and the right to transmit it to another party.
   If you want to export data from your accounts you may do so by contacting us
-  at [reports@goodunionjobs.com](mailto:reports@goodunionjobs.com]
+  at reports@goodunionjobs.com
 
 <!-- , you can do so directly by -->
 <!--   following these instructions for -->
@@ -326,7 +316,7 @@ the sensitivity of the information you are requesting and the type of request
 you are making, verifying your name and email address. If we are unable to
 verify you, we may be unable to respond to your requests. If you have questions
 about exercising these rights or need assistance, please contact us at
-[privacy@goodunionjobs.com](mailto:privacy@goodunionjobs.com]
+privacy@goodunionjobs.com
 
 <!-- TODO: Add address -->
 <!--  or at 37signals LLC, 2045 -->
@@ -426,7 +416,7 @@ transfer.
 
 We may update this policy as needed to comply with relevant regulations and
 reflect any new practices. You can request to see changes to our policies by
-emailing [support@goodunionjobs.com](mailto:support@goodunionjobs.com).
+emailing support@goodunionjobs.com.
 
 <!-- You can view a history of the changes to our policies -->
 <!-- since mid-2018 [on GitHub](https://github.com/basecamp/policies/commits/master). -->
@@ -436,5 +426,4 @@ at the top of this page and take any other appropriate steps to notify users.
 
 Have any questions, comments, or concerns about this privacy policy, your data,
 or your rights with respect to your information? Please get in touch by emailing
-us at [privacy@goodunionjobs.com](mailto:support@goodunionjobs.com) and we’ll be
-happy to try to answer them!
+us at privacy@goodunionjobs.com and we’ll be happy to try to answer them!

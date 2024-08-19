@@ -1,10 +1,16 @@
 import { invariant } from '@epic-web/invariant'
-import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node'
-import { json } from '@remix-run/node'
+import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { type SitemapEntry } from '@nasa-gcn/remix-seo/build/types'
+import {
+	type LoaderFunctionArgs,
+	type MetaFunction,
+	json,
+} from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
 import { eq } from 'drizzle-orm'
 import sanitizeHtml from 'sanitize-html'
-import type { JobPosting, WithContext } from 'schema-dts'
+import { type JobPosting, type WithContext } from 'schema-dts'
+import { serverOnly$ } from 'vite-env-only/macros'
 import {
 	JobHeader,
 	JobDescription,
@@ -61,6 +67,25 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	}
 
 	return json({ ...job, fullDescription: descriptionData.description })
+}
+
+function escapeXml(unsafe: string): string {
+	return unsafe.replace(/[&<>'"]/g, char => {
+		switch (char) {
+			case '&':
+				return '&amp;'
+			case '<':
+				return '&lt;'
+			case '>':
+				return '&gt;'
+			case "'":
+				return '&apos;'
+			case '"':
+				return '&quot;'
+			default:
+				return char
+		}
+	})
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
