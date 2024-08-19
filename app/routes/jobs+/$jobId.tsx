@@ -20,7 +20,6 @@ import {
 import { db } from '#app/utils/db.server'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { jobs } from '../../../drizzle/schema'
-export { handle } from './$jobId.server'
 
 type JobDescriptionResponse = {
 	description: string
