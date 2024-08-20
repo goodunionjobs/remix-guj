@@ -110,7 +110,7 @@ app.use((_, res, next) => {
 app.use(
 	helmet({
 		xPoweredBy: false,
-		referrerPolicy: { policy: 'same-origin' },
+		referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 		crossOriginEmbedderPolicy: false,
 		crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 		contentSecurityPolicy: {
