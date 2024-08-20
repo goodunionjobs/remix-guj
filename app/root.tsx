@@ -46,7 +46,6 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
-import { ClientOnly } from 'remix-utils/client-only'
 
 export const links: LinksFunction = () => {
 	return [
@@ -143,17 +142,6 @@ function Document({
 					<meta name="robots" content="noindex, nofollow" />
 				)}
 				<Links />
-				<ClientOnly>
-					{() => (
-						<script
-							dangerouslySetInnerHTML={{
-								__html: `
-!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');
-              `,
-							}}
-						/>
-					)}
-				</ClientOnly>
 			</head>
 			<body className="bg-background text-foreground">
 				{children}
@@ -185,6 +173,17 @@ function App() {
 	const location = useLocation()
 	useEffect(() => {
 		posthog.capture('$pageview')
+		const script = document.createElement('script')
+		script.id = 'reddit-pixel'
+		script.async = true
+		script.innerText = `<!-- Reddit Pixel -->
+<script>
+!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');
+</script>
+<!-- DO NOT MODIFY UNLESS TO REPLACE A USER IDENTIFIER -->
+<!-- End Reddit Pixel -->
+`
+		document.head.appendChild(script)
 	}, [location])
 
 	return (
