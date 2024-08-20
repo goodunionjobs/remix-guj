@@ -25,6 +25,9 @@
   https://community.cloudflare.com/t/problem-with-settings-cors-policies-on-r2/432339/17
   I think I need to terraform my cloudflare so these rules stay in place for
   future. Look at doing this when I talked with AI:
+- Look through and try to remove any unused Icons in other folder. Look for
+  stuff like this below and see which ones aren't used
+  <Icon name="arrow-left">Back to home</Icon>
 
 ```
   // app/routes/api/image-proxy.ts

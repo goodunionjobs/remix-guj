@@ -254,7 +254,7 @@ function App() {
 							<div className="font-bold">Union Jobs</div>
 						</Link>
 						<Link to="/tos" className="">
-							Terms {'&'} Conditions
+							Terms & Conditions
 						</Link>
 						<Link to="/privacy" className="">
 							Privacy Policy
