@@ -120,6 +120,7 @@ app.use(
 					MODE === 'development' ? 'ws:' : null,
 					process.env.SENTRY_DSN ? '*.sentry.io' : null,
 					'https://hog.goodunionjobs.com',
+					'*.algolia.net',
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
