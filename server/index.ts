@@ -110,42 +110,51 @@ app.use((_, res, next) => {
 app.use(
 	helmet({
 		xPoweredBy: false,
-		referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+		referrerPolicy: { policy: 'no-referrer-when-downgrade' },
 		crossOriginEmbedderPolicy: false,
-		crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
-		contentSecurityPolicy: {
-			// NOTE: Remove reportOnly when you're ready to enforce this CSP
-			reportOnly: false,
-			directives: {
-				'connect-src': [
-					MODE === 'development' ? 'ws:' : null,
-					process.env.SENTRY_DSN ? '*.sentry.io' : null,
-					'https://hog.goodunionjobs.com',
-					'*.reddit.com',
-					'*.redditstatic.com',
-					'*.algolia.net',
-					"'self'",
-				].filter(Boolean),
-				'font-src': ["'self'"],
-				'frame-src': ["'self'", '*.reddit.com', '*.redditstatic.com'],
-				'img-src': ["'self'", 'data:', '*.reddit.com'],
-				'script-src': [
-					'*.reddit.com',
-					'*.redditstatic.com',
-					"'strict-dynamic'",
-					"'self'",
-					// @ts-expect-error
-					(_, res) => `'nonce-${res.locals.cspNonce}'`,
-				],
-				'script-src-attr': [
-					// @ts-expect-error
-					(_, res) => `'nonce-${res.locals.cspNonce}'`,
-				],
-				'upgrade-insecure-requests': null,
-			},
-		},
+		contentSecurityPolicy: false, // Temporarily disable CSP
 	}),
 )
+
+// app.use(
+// 	helmet({
+// 		xPoweredBy: false,
+//     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+// 		crossOriginEmbedderPolicy: false,
+// 		crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+// 		contentSecurityPolicy: {
+// 			// NOTE: Remove reportOnly when you're ready to enforce this CSP
+// 			reportOnly: false,
+// 			directives: {
+// 				'connect-src': [
+// 					MODE === 'development' ? 'ws:' : null,
+// 					process.env.SENTRY_DSN ? '*.sentry.io' : null,
+// 					'https://hog.goodunionjobs.com',
+// 					'*.reddit.com',
+// 					'*.redditstatic.com',
+// 					'*.algolia.net',
+// 					"'self'",
+// 				].filter(Boolean),
+// 				'font-src': ["'self'"],
+// 				'frame-src': ["'self'", '*.reddit.com', '*.redditstatic.com'],
+// 				'img-src': ["'self'", 'data:', '*.reddit.com'],
+// 				'script-src': [
+// 					'*.reddit.com',
+// 					'*.redditstatic.com',
+// 					"'strict-dynamic'",
+// 					"'self'",
+// 					// @ts-expect-error
+// 					(_, res) => `'nonce-${res.locals.cspNonce}'`,
+// 				],
+// 				'script-src-attr': [
+// 					// @ts-expect-error
+// 					(_, res) => `'nonce-${res.locals.cspNonce}'`,
+// 				],
+// 				'upgrade-insecure-requests': null,
+// 			},
+// 		},
+// 	}),
+// )
 
 // When running tests or running in development, we want to effectively disable
 // rate limiting because playwright tests are very fast and we don't want to
