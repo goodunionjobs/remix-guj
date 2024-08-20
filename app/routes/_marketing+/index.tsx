@@ -49,7 +49,17 @@ type SearchProps = {
 	serverState?: InstantSearchServerState
 	serverUrl?: string
 }
-let timerId: NodeJS.Timeout | string | number | undefined = undefined
+
+let timerId = undefined
+let timeout = 200
+
+function queryHook(query, search) {
+	if (timerId) {
+		clearTimeout(timerId)
+	}
+
+	timerId = setTimeout(() => search(query), timeout)
+}
 
 function Search({ serverState, serverUrl }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
@@ -137,12 +147,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 								submitIconComponent={({ classNames }) => (
 									<div className={`${classNames.submitIcon}`}>🔍</div>
 								)}
-								queryHook={(query, search) => {
-									if (timerId) {
-										clearTimeout(timerId)
-									}
-									timerId = setTimeout(() => search(query), 500)
-								}}
+								queryHook={queryHook}
 							/>
 						</div>
 						{/* Later when we have more filters get rid of the margins. They'll line up in the middle. Easier to handle */}

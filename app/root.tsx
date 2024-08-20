@@ -172,12 +172,37 @@ function App() {
 	useToast(data.toast)
 	const location = useLocation()
 	useEffect(() => {
+		// Posthog capture pageview
 		posthog.capture('$pageview')
+		// Add reddit pixel
 		const script = document.createElement('script')
 		script.id = 'reddit-pixel'
 		script.async = true
 		script.innerText = `!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');`
 		document.head.appendChild(script)
+
+		const signUpButton = document.getElementById('signUpButton')
+		if (signUpButton) {
+			signUpButton.addEventListener('click', () => {
+				if (window.rdt) {
+					window.rdt('track', 'SignUpClick', {
+						customEventName: 'SignUpClick',
+						value: 'Job Notifications',
+					})
+				}
+			})
+		}
+
+		// Clean up the event listener on component unmount
+		return () => {
+			if (signUpButton) {
+				signUpButton.removeEventListener('click', () => {
+					if (window.rdt) {
+						window.rdt('track', 'SignUpClick')
+					}
+				})
+			}
+		}
 	}, [location])
 
 	return (
@@ -227,6 +252,7 @@ function App() {
 											variant="default"
 											size="lg"
 											className="w-3/4 sm:w-full "
+											id="signUpButton" // reddit pixel
 										>
 											<Link to={'/kinde-auth/register'}>
 												Sign Up - Job Notifications 💼
