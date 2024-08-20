@@ -112,6 +112,7 @@ app.use(
 		xPoweredBy: false,
 		referrerPolicy: { policy: 'same-origin' },
 		crossOriginEmbedderPolicy: false,
+		crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 		contentSecurityPolicy: {
 			// NOTE: Remove reportOnly when you're ready to enforce this CSP
 			reportOnly: false,
@@ -126,7 +127,7 @@ app.use(
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
-				'frame-src': ["'self'"],
+				'frame-src': ["'self'", '*.reddit.com', '*.redditstatic.com'],
 				'img-src': ["'self'", 'data:', '*.reddit.com'],
 				'script-src': [
 					'*.reddit.com',
