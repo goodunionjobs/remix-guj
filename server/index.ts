@@ -129,6 +129,8 @@ app.use(
 				'frame-src': ["'self'"],
 				'img-src': ["'self'", 'data:', '*.reddit.com'],
 				'script-src': [
+					'*.reddit.com',
+					'*.redditstatic.com',
 					"'strict-dynamic'",
 					"'self'",
 					// @ts-expect-error
