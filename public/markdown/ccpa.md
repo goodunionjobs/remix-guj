@@ -1,8 +1,3 @@
----
-title: California Resident Notice at Collection
-description: This document includes provisions for California residents.
----
-
 # California Resident Notice at Collection
 
 If you are a California resident, the California Consumer Privacy Act, as

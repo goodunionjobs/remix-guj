@@ -1,4 +1,4 @@
-Last updated: August 15, 2024
+Last updated: August 20, 2024
 
 From everyone at Good Union Jobs, thank you for using our products! We build
 them to help you do your best work. There are millions of people using Good
@@ -236,17 +236,22 @@ and keeping an open door to [your feedback](support@goodunionjobs.com).
 [Algolia](https://gdpr.algolia.com/gdpr-article-1)
 [Resend](https://resend.com/security)
 
-6. Under the California Consumer Privacy Act (“CCPA”), Good Union Jobs is a
-   “service provider”, not a “business” or “third party”, with respect to your
-   use of the Services. That means we process any data you share with us only
-   for the purpose you signed up for and as described in these Terms, the
-   [Privacy Policy](https://goodunionjobs.com/privacy).
+<!-- Removed August 20th -->
+<!-- 6. Under the California Consumer Privacy Act (“CCPA”), Good Union Jobs is a -->
+<!--    “service provider”, not a “business” or “third party”, with respect to your -->
+<!--    use of the Services. That means we process any data you share with us only -->
+<!--    for the purpose you signed up for and as described in these Terms, the -->
+<!--    [Privacy Policy](https://goodunionjobs.com/privacy). -->
+
       <!-- TODO: Check later -->
       <!-- , and [other policies](../index.md).  -->
-   We do not retain, use, disclose, or sell any of that information for any
-   other commercial purposes unless we have your explicit permission. And on the
-   flip-side, you agree to comply with your requirements under the CCPA and not
-   use Good Union Jobs’ Services in a way that violates the regulations.
+
+    <!-- Removed August 20th -->
+
+   <!-- We do not retain, use, disclose, or sell any of that information for any -->
+   <!-- other commercial purposes unless we have your explicit permission. And on the -->
+   <!-- flip-side, you agree to comply with your requirements under the CCPA and not -->
+   <!-- use Good Union Jobs’ Services in a way that violates the regulations. -->
    <!-- TODO: Later -->
    <!-- 7. These Terms incorporate the -->
    <!--    [37signals Data Processing Addendum (“DPA”)](https://basecamp.com/about/policies/privacy/regulations/basecamp-gdpr-dpa.pdf) -->
