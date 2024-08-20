@@ -1,4 +1,4 @@
-_Last updated: August 15, 2024_
+_Last updated: August 20, 2024_
 
 The privacy of your data—and it is your data, not ours!—is a big deal to us. In
 this policy, we lay out: what data we collect and why; how your data is handled;
@@ -44,9 +44,10 @@ If you are a customer’s end user and you have questions about how your
 information is collected and processed through the services, please contact the
 organization who has provided your information to us for more information.
 
-If you are a California resident, please
-[click here to see our California Notice at Collection](https://goodunionjobs.com/ccpa),
-which includes additional disclosures as required by California law.
+<!-- Removed August 20th -->
+<!-- If you are a California resident, please -->
+<!-- [click here to see our California Notice at Collection](https://goodunionjobs.com/ccpa), -->
+<!-- which includes additional disclosures as required by California law. -->
 
 ## What we collect and why
 
