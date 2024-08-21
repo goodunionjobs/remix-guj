@@ -101,6 +101,7 @@
     "marked": "^14.0.0",
     "morgan": "^1.10.0",
     "pg": "^8.12.0",
+    "postgres": "^3.4.4",
     "posthog-js": "^1.157.0",
     "prisma": "^5.13.0",
     "qrcode": "^1.5.3",
@@ -122,6 +123,7 @@
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "tailwindcss-radix": "^3.0.3",
+    "ws": "^8.18.0",
     "zod": "^3.23.5"
   },
   "devDependencies": {
@@ -154,6 +156,7 @@
     "@types/sanitize-html": "^2.11.0",
     "@types/set-cookie-parser": "^2.4.7",
     "@types/source-map-support": "^0.5.10",
+    "@types/ws": "^8.5.12",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-v8": "^1.5.3",
     "autoprefixer": "^10.4.19",
