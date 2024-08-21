@@ -1,6 +1,11 @@
 import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
 import { type KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import {
+	json,
+	type LoaderFunctionArgs,
+	type LinksFunction,
+	type MetaFunction,
+} from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import algoliasearch from 'algoliasearch/lite'
 import { eq } from 'drizzle-orm'
@@ -25,6 +30,7 @@ import { Hit } from '#app/components/algolia/hit'
 import { SalaryRangeSliderPopover } from '#app/components/algolia/salary-slider.js'
 import { db } from '#app/utils/db.server'
 import { users } from '../../../drizzle/schema'
+import { organizationSchema, description } from '#app/utils/constants.js'
 
 const searchClient = algoliasearch(
 	//WARNING: THESE ARE PUBLIC
@@ -32,6 +38,14 @@ const searchClient = algoliasearch(
 	ENV.ALGOLIA_ID!,
 	ENV.ALGOLIA_API!,
 )
+
+export const links: LinksFunction = () => [
+	{
+		rel: 'preconnect',
+		href: `https://${ENV.ALGOLIA_ID!}-dsn.algolia.net`,
+		crossOrigin: 'anonymous',
+	},
+]
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const { getUser } = await getKindeSession(request)
@@ -90,6 +104,17 @@ type SearchProps = {
 	serverUrl?: string
 	user?: KindeUser | null
 	isNewSignUp?: boolean
+}
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return [
+		{ title: data ? 'Good Union Jobs' : 'Error | Good Union Jobs' },
+		{
+			name: 'description',
+			content: description,
+		},
+		{ 'script:ld+json': organizationSchema },
+	]
 }
 
 //@ts-ignore
