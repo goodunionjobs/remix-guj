@@ -9,12 +9,14 @@ if (ENV.MODE === 'production' && ENV.SENTRY_DSN) {
 
 function PosthogInit() {
 	useEffect(() => {
-		posthog.init('phc_JlLZHgPkAs5IFqAguiVTI09r3aThYEYsuJ0mKy9kzAi', {
-			api_host: 'https://hog.goodunionjobs.com',
-			ui_host: 'https://us.i.posthog.com',
-			person_profiles: 'identified_only',
-			capture_pageview: false,
-		})
+		if (ENV.MODE === 'production') {
+			posthog.init('phc_JlLZHgPkAs5IFqAguiVTI09r3aThYEYsuJ0mKy9kzAi', {
+				api_host: 'https://hog.goodunionjobs.com',
+				ui_host: 'https://us.i.posthog.com',
+				person_profiles: 'identified_only',
+				capture_pageview: false,
+			})
+		}
 	}, [])
 
 	return null
