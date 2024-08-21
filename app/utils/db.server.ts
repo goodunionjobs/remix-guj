@@ -70,8 +70,6 @@ class MyLogWriter implements LogWriter {
 }
 
 const createDbClient = () => {
-	neonConfig.webSocketConstructor = WebSocket
-
 	const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 	const logger = new DefaultLogger({ writer: new MyLogWriter() })
