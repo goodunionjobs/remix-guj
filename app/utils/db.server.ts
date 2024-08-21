@@ -3,9 +3,8 @@ import { Pool, neonConfig } from '@neondatabase/serverless'
 import chalk from 'chalk'
 import { DefaultLogger, type LogWriter } from 'drizzle-orm/logger'
 import { drizzle } from 'drizzle-orm/neon-serverless'
+import ws from 'ws'
 import * as schema from '../../drizzle/schema'
-import ws from 'ws';
-
 
 const logThreshold = 20
 
@@ -34,7 +33,7 @@ class MyLogWriter implements LogWriter {
 }
 
 const createDbClient = () => {
-  neonConfig.webSocketConstructor = ws;
+	neonConfig.webSocketConstructor = ws
 	const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 	//HERE

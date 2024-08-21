@@ -155,6 +155,7 @@
     "@types/sanitize-html": "^2.11.0",
     "@types/set-cookie-parser": "^2.4.7",
     "@types/source-map-support": "^0.5.10",
+    "@types/ws": "^8.5.12",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-v8": "^1.5.3",
     "autoprefixer": "^10.4.19",
