@@ -9,7 +9,6 @@ import { eq } from 'drizzle-orm'
 import sanitizeHtml from 'sanitize-html'
 import { type JobPosting, type WithContext } from 'schema-dts'
 import {
-	JobHeader,
 	JobDescription,
 	formatJobSlug,
 	calculateFinalTime,
@@ -27,6 +26,11 @@ type JobDescriptionResponse = {
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	invariant(params.jobId, 'params.jobId is not defined')
+
+	// Get the base URL from the request
+	const url = new URL(request.url)
+	const baseUrl = `${url.protocol}//${url.host}`
+	console.log('baseurl: ', baseUrl)
 
 	const jobIdString = params.jobId.split('-')[0]
 	const jobId = parseInt(jobIdString, 10)
@@ -65,7 +69,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 		throw json({ error: 'Failed to fetch job description' }, { status: 500 })
 	}
 
-	return json({ ...job, fullDescription: descriptionData.description })
+	return json({ ...job, fullDescription: descriptionData.description, baseUrl })
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -85,8 +89,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		fullDescription,
 	} = data
 
-	const baseUrl = 'https://goodunionjobs.com'
-	const imageBaseUrl = `${baseUrl}/${employer.s3Link}`
+	const imageBaseUrl = `${data.baseUrl}/${employer.s3Link}`
 	const imageUrls = {
 		jpeg: `${imageBaseUrl}.jpeg`,
 		avif: `${imageBaseUrl}.avif`,
@@ -141,7 +144,10 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ title: `${title} | ${employer.name}` },
 		{ name: 'description', content: cleanDescription },
 		{ property: 'og:title', content: `${title} at ${employer.name}` },
-		{ property: 'og:url', content: `${baseUrl}/jobs/${data.id}-${jobSlug}` },
+		{
+			property: 'og:url',
+			content: `${data.baseUrl}/jobs/${data.id}-${jobSlug}`,
+		},
 		{ property: 'og:description', content: cleanDescription },
 		{ property: 'og:image', content: imageUrls.jpeg },
 		{ property: 'og:image:alt', content: `${employer.name} Logo` },
@@ -151,19 +157,20 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 }
 
 export default function JobRoute() {
-	const job = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader>()
 
 	const theme = useTheme()
 	const lightColor = '#FFFFFF'
 	const darkColor = '#000000'
-	const color = job.color
-		? '#' + ('000000' + job.color.toString(16)).slice(-6)
+	const color = data.color
+		? '#' + ('000000' + data.color.toString(16)).slice(-6)
 		: theme === 'light'
 			? lightColor
 			: '#0f172a'
 
 	const textColor = FindTextColor(color, lightColor, darkColor)
-	const finalTime = calculateFinalTime(job.dateStamp)
+	const unixTimestamp = Math.floor(new Date(data.dateStamp).getTime() / 1000)
+	const finalTime = calculateFinalTime(unixTimestamp)
 
 	return (
 		<div className="md:px-42 lg:px- mt-4 flex justify-center bg-white px-4 py-4 dark:bg-slate-950 sm:px-8">
@@ -179,18 +186,18 @@ export default function JobRoute() {
 					<JobHeaderDrizzle
 						color={color}
 						textColor={textColor}
-						employerImage={job.employer.s3Link}
-						employer={job.employer.name}
-						hit={job}
+						employerImage={data.employer.s3Link}
+						employer={data.employer.name}
+						hit={data}
 						finalTime={finalTime}
-						url={job.url}
+						url={data.url}
 					/>
 					<JobDescription
-						url={job.url}
-						baseUrl={baseUrl}
-						description={job.fullDescription}
-						objectID={job.id.toString()}
-						job={formatJobSlug(job.title)}
+						url={data.url}
+						baseUrl={data.baseUrl}
+						description={data.fullDescription}
+						objectID={data.id.toString()}
+						job={formatJobSlug(data.title)}
 					/>
 				</div>
 			</div>

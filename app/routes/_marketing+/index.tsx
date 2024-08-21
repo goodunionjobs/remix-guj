@@ -54,7 +54,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	let isNewSignUp = false
 
 	if (user) {
-		console.log(user)
 		// Check if the user exists in our database
 		const existingUser = await db.query.users.findFirst({
 			where: eq(users.email, user.email),
@@ -71,7 +70,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		}
 		//TODO: Need to make sure kindeUserId and our DB.UserId match
 		// If not query updates
-		console.log('existing user: ', existingUser)
 
 		if (!existingUser) {
 			// New sign up - create user in our database
@@ -133,8 +131,6 @@ function queryHook(query, search) {
 
 function Search({ serverState, serverUrl, user, isNewSignUp }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
-	console.log('newSignup: ', isNewSignUp)
-	console.log('user: ', user)
 	useEffect(() => {
 		const script = document.createElement('script')
 		script.id = 'reddit-pixel'
@@ -144,9 +140,7 @@ function Search({ serverState, serverUrl, user, isNewSignUp }: SearchProps) {
 		if (isNewSignUp && user) {
 			// Function to attempt tracking
 			const attemptTracking = () => {
-				console.log('signed up!')
 				if (typeof window.rdt === 'function') {
-					console.log('signed up 2!')
 					const normalizedEmail =
 						window.redditNormalizeEmail?.(user.email) ?? user.email
 					window.rdt('track', 'SignUp', {
