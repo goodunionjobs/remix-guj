@@ -37,10 +37,10 @@
 //
 
 import { remember } from '@epic-web/remember'
-import { neon } from '@neondatabase/serverless'
+import { Pool, neonConfig } from '@neondatabase/serverless'
 import chalk from 'chalk'
-import { DefaultLogger, LogWriter } from 'drizzle-orm/logger'
-import { drizzle } from 'drizzle-orm/neon-http'
+import { DefaultLogger, type LogWriter } from 'drizzle-orm/logger'
+import { drizzle } from 'drizzle-orm/neon-serverless'
 import * as schema from '../../drizzle/schema'
 
 const logThreshold = 20
@@ -70,12 +70,14 @@ class MyLogWriter implements LogWriter {
 }
 
 const createDbClient = () => {
-	const client = neon(process.env.DATABASE_URL!)
+	neonConfig.webSocketConstructor = WebSocket
+
+	const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 	const logger = new DefaultLogger({ writer: new MyLogWriter() })
 
 	// Create a Drizzle client with custom logger
-	const db = drizzle(client, { schema, logger })
+	const db = drizzle(pool, { schema, logger })
 
 	return db
 }
