@@ -126,8 +126,8 @@ app.use(
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
-				'frame-src': ["'self'"],
-				'img-src': ["'self'", 'data:', '*.reddit.com'],
+				'frame-src': ["'self'", 'https://tenor.com'],
+				'img-src': ["'self'", 'data:', '*.reddit.com', 'https://*.tenor.com'],
 				'script-src': [
 					'*.reddit.com',
 					'*.redditstatic.com',
