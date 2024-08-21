@@ -44,7 +44,8 @@ export function JobHeaderDrizzle({
 	textColor: string
 	employerImage: string
 	employer: string
-	hit: SelectJob
+	//TODO: Make this hit better than above selection for types
+	hit: any
 	finalTime: [number, TimeFormat]
 	url: string
 	onClick?: () => void
@@ -62,7 +63,7 @@ export function JobHeaderDrizzle({
 					hit={hit}
 					minSalary={hit.minSalary}
 					maxSalary={hit.maxSalary}
-					state={''}
+					state={hit.address.state.name}
 					employmentType={hit.employmentType}
 					employer={employer}
 					title={hit.title}

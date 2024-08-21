@@ -73,7 +73,7 @@ export function DrizzleAttributes({
 				) : (
 					<span
 						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
-                  pt-0.5 text-xs font-bold text-black sm:text-sm"
+				              pt-0.5 text-xs font-bold text-black sm:text-sm"
 					>
 						💰{salaryRangeStr}
 					</span>
@@ -83,7 +83,7 @@ export function DrizzleAttributes({
 				) : (
 					<span
 						className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200
-                  px-1 pt-0.5 text-xs font-bold text-black sm:text-sm"
+				              px-1 pt-0.5 text-xs font-bold text-black sm:text-sm"
 					>
 						📌{state}
 					</span>
@@ -93,7 +93,7 @@ export function DrizzleAttributes({
 				) : (
 					<span
 						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
-                  pt-0.5 text-xs font-bold text-black sm:text-sm"
+				              pt-0.5 text-xs font-bold text-black sm:text-sm"
 					>
 						🕑{employmentType}
 					</span>
