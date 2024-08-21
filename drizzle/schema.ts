@@ -213,6 +213,7 @@ export const users = pgTable('users', {
 		.notNull()
 		.default('daily'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
+	//TODO: Fix, causes errors
 	updatedAt: timestamp('updated_at')
 		.notNull()
 		.default(sql`(CURRENT_TIMESTAMP)`)

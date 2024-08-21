@@ -1,14 +1,11 @@
 import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
-import type { KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
-import { db } from '#app/utils/db.server'
-import { users } from '../../../drizzle/schema'
-import { eq } from 'drizzle-orm'
-import { useEffect } from 'react'
-import type { KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
+import { type KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import algoliasearch from 'algoliasearch/lite'
+import { eq } from 'drizzle-orm'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
+import { useEffect } from 'react'
 import { renderToString } from 'react-dom/server'
 import {
 	type InstantSearchServerState,
@@ -26,6 +23,8 @@ import {
 } from '#app/components/algolia/combobox-menu.js'
 import { Hit } from '#app/components/algolia/hit'
 import { SalaryRangeSliderPopover } from '#app/components/algolia/salary-slider.js'
+import { db } from '#app/utils/db.server'
+import { users } from '../../../drizzle/schema'
 
 const searchClient = algoliasearch(
 	//WARNING: THESE ARE PUBLIC
@@ -41,13 +40,28 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	let isNewSignUp = false
 
 	if (user) {
+		console.log(user)
 		// Check if the user exists in our database
 		const existingUser = await db.query.users.findFirst({
-			where: eq(users.kindeUserId, user.id),
+			where: eq(users.email, user.email),
 		})
+
+		if (existingUser?.kindeUserId !== user.id) {
+			await db
+				.update(users)
+				.set({
+					kindeUserId: user.id,
+					updatedAt: new Date(),
+				})
+				.where(eq(users.kindeUserId, user.id))
+		}
+		//TODO: Need to make sure kindeUserId and our DB.UserId match
+		// If not query updates
+		console.log('existing user: ', existingUser)
 
 		if (!existingUser) {
 			// New sign up - create user in our database
+			// TODO: Create upsert just in case!
 			await db.insert(users).values({
 				kindeUserId: user.id,
 				email: user.email,
