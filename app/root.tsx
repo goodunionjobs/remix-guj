@@ -7,7 +7,6 @@ import {
 	type MetaFunction,
 } from '@remix-run/node'
 import {
-	Form,
 	Link,
 	Links,
 	Meta,
@@ -24,7 +23,6 @@ import { useRef, useEffect } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
-import { SearchBar } from './components/search-bar.tsx'
 import { useToast } from './components/toaster.tsx'
 import { Button } from './components/ui/button.tsx'
 import {
@@ -39,12 +37,13 @@ import { EpicToaster } from './components/ui/sonner.tsx'
 import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
 import tailwindStyleSheetUrl from './styles/tailwind.css?url'
 import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
+import { organizationSchema, description } from './utils/constants.tsx'
 import { getEnv } from './utils/env.server.ts'
 import { honeypot } from './utils/honeypot.server.ts'
-import { combineHeaders, getDomainUrl, getUserImgSrc } from './utils/misc.tsx'
+import { combineHeaders, getDomainUrl } from './utils/misc.tsx'
 import { useNonce } from './utils/nonce-provider.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
-import { makeTimings, time } from './utils/timing.server.ts'
+import { makeTimings } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
 
 export const links: LinksFunction = () => {
@@ -71,10 +70,13 @@ export const links: LinksFunction = () => {
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-	// TODO: Fix up
 	return [
 		{ title: data ? 'Good Union Jobs' : 'Error | Good Union Jobs' },
-		{ name: 'description', content: `Your own captain's log` },
+		{
+			name: 'description',
+			content: description,
+		},
+		{ 'script:ld+json': organizationSchema },
 	]
 }
 
@@ -135,12 +137,12 @@ function Document({
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
 			<head>
 				<ClientHintCheck nonce={nonce} />
-				<Meta />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				{allowIndexing ? null : (
 					<meta name="robots" content="noindex, nofollow" />
 				)}
+				<Meta />
 				<Links />
 			</head>
 			<body className="bg-background text-foreground">
