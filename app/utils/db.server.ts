@@ -72,6 +72,7 @@ class MyLogWriter implements LogWriter {
 const createDbClient = () => {
 	const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
+	//HERE
 	const logger = new DefaultLogger({ writer: new MyLogWriter() })
 
 	// Create a Drizzle client with custom logger
