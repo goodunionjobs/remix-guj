@@ -366,14 +366,12 @@ function UserDropdown({ user }: { user: KindeUser }) {
 							submit(formRef.current)
 						}}
 					>
-						<Form action="/logout" method="POST" ref={formRef}>
-							<Icon className="text-body-md" name="exit">
-								<button type="submit">
-									{/* //TODO: Work on making this look like the format of login/register button */}
-									<Link to={'/kinde-auth/logout'}>Logout</Link>
-								</button>
-							</Icon>
-						</Form>
+						<Icon className="text-body-md" name="exit">
+							<button type="submit">
+								{/* //TODO: Work on making this look like the format of login/register button */}
+								<Link to={'/kinde-auth/logout'}>Logout</Link>
+							</button>
+						</Icon>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenuPortal>
