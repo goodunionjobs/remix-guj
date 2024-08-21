@@ -31,6 +31,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	// Get the base URL from the request
 	const url = new URL(request.url)
 	const baseUrl = `${url.protocol}//${url.host}`
+	console.log('baseurl: ', baseUrl)
 
 	const jobIdString = params.jobId.split('-')[0]
 	const jobId = parseInt(jobIdString, 10)
@@ -157,19 +158,19 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 }
 
 export default function JobRoute() {
-	const job = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader>()
 
 	const theme = useTheme()
 	const lightColor = '#FFFFFF'
 	const darkColor = '#000000'
-	const color = job.color
-		? '#' + ('000000' + job.color.toString(16)).slice(-6)
+	const color = data.color
+		? '#' + ('000000' + data.color.toString(16)).slice(-6)
 		: theme === 'light'
 			? lightColor
 			: '#0f172a'
 
 	const textColor = FindTextColor(color, lightColor, darkColor)
-	const unixTimestamp = Math.floor(new Date(job.dateStamp).getTime() / 1000)
+	const unixTimestamp = Math.floor(new Date(data.dateStamp).getTime() / 1000)
 	const finalTime = calculateFinalTime(unixTimestamp)
 
 	return (
@@ -186,18 +187,18 @@ export default function JobRoute() {
 					<JobHeaderDrizzle
 						color={color}
 						textColor={textColor}
-						employerImage={job.employer.s3Link}
-						employer={job.employer.name}
-						hit={job}
+						employerImage={data.employer.s3Link}
+						employer={data.employer.name}
+						hit={data}
 						finalTime={finalTime}
-						url={job.url}
+						url={data.url}
 					/>
 					<JobDescription
-						url={job.url}
-						baseUrl={job.baseUrl}
-						description={job.fullDescription}
-						objectID={job.id.toString()}
-						job={formatJobSlug(job.title)}
+						url={data.url}
+						baseUrl={data.baseUrl}
+						description={data.fullDescription}
+						objectID={data.id.toString()}
+						job={formatJobSlug(data.title)}
 					/>
 				</div>
 			</div>
