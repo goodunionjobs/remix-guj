@@ -165,10 +165,6 @@ export default function JobRoute() {
 	const textColor = FindTextColor(color, lightColor, darkColor)
 	const finalTime = calculateFinalTime(job.dateStamp)
 
-	const baseUrl = 'https://goodunionjobs.com/'
-
-	console.log('title dirzzle: ', job.title)
-
 	return (
 		<div className="md:px-42 lg:px- mt-4 flex justify-center bg-white px-4 py-4 dark:bg-slate-950 sm:px-8">
 			<div className="min-h-screen [width:1115px]">

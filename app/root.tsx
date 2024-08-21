@@ -174,36 +174,33 @@ function App() {
 	useEffect(() => {
 		// Posthog capture pageview
 		posthog.capture('$pageview')
-		// Add reddit pixel
-		const script = document.createElement('script')
-		script.id = 'reddit-pixel'
-		script.async = true
-		script.innerText = `!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');`
-		document.head.appendChild(script)
+		// Add reddit pixel, but only if not index
+		const isNotIndexPage = location.pathname !== '/' && location.pathname !== ''
 
-		const signUpButton = document.getElementById('signUpButton')
-		if (signUpButton) {
-			signUpButton.addEventListener('click', () => {
-				if (window.rdt) {
-					window.rdt('track', 'SignUpClick', {
-						customEventName: 'SignUpClick',
-						value: 'Job Notifications',
-					})
-				}
-			})
-		}
-
-		// Clean up the event listener on component unmount
-		return () => {
-			if (signUpButton) {
-				signUpButton.removeEventListener('click', () => {
-					if (window.rdt) {
-						window.rdt('track', 'SignUpClick')
-					}
-				})
+		// Add reddit pixel, but only if not index
+		if (isNotIndexPage) {
+			const existingScript = document.getElementById('reddit-pixel')
+			if (!existingScript) {
+				const script = document.createElement('script')
+				script.id = 'reddit-pixel'
+				script.async = true
+				script.innerText = `!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');`
+				document.head.appendChild(script)
 			}
 		}
 	}, [location])
+
+	// const handleSignUpClick = () => {
+	// 	if (typeof window !== 'undefined' && window.rdt) {
+	// 		window.rdt('track', 'SignUp', {
+	// 			customEventName: 'Sign Up Click',
+	// 			// You can add more metadata here if needed
+	// 			// value: 0,
+	// 			// currency: 'USD',
+	// 			// conversionId: 'uniqueID',
+	// 		})
+	// 	}
+	// }
 
 	return (
 		<Document
@@ -252,7 +249,7 @@ function App() {
 											variant="default"
 											size="lg"
 											className="w-3/4 sm:w-full "
-											id="signUpButton" // reddit pixel
+											// onClick={handleSignUpClick}
 										>
 											<Link to={'/kinde-auth/register'}>
 												Sign Up - Job Notifications 💼

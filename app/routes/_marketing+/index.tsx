@@ -1,8 +1,11 @@
-import {
-	json,
-	type LoaderFunction,
-	type LoaderFunctionArgs,
-} from '@remix-run/node'
+import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
+import type { KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
+import { db } from '#app/utils/db.server'
+import { users } from '../../../drizzle/schema'
+import { eq } from 'drizzle-orm'
+import { useEffect } from 'react'
+import type { KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import algoliasearch from 'algoliasearch/lite'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
@@ -32,28 +35,56 @@ const searchClient = algoliasearch(
 )
 
 export async function loader({ request }: LoaderFunctionArgs) {
+	const { getUser } = await getKindeSession(request)
+	const user: KindeUser | null = await getUser()
+
+	let isNewSignUp = false
+
+	if (user) {
+		// Check if the user exists in our database
+		const existingUser = await db.query.users.findFirst({
+			where: eq(users.kindeUserId, user.id),
+		})
+
+		if (!existingUser) {
+			// New sign up - create user in our database
+			await db.insert(users).values({
+				kindeUserId: user.id,
+				email: user.email,
+				firstName: user.given_name,
+				lastName: user.family_name,
+			})
+			isNewSignUp = true
+		}
+	}
+
 	const serverUrl = request.url
 	const serverState = await getServerState(<Search serverUrl={serverUrl} />, {
 		renderToString,
 	})
 
 	return json({
+		user,
+		isNewSignUp,
 		serverState,
 		serverUrl,
 	})
 }
 
 type SearchProps = {
-	// TODO: Figure out where to find type
-	// @ts-ignore
 	serverState?: InstantSearchServerState
 	serverUrl?: string
+	user?: KindeUser | null
+	isNewSignUp?: boolean
 }
 
+//@ts-ignore
 let timerId = undefined
 let timeout = 200
 
+//@ts-ignore
 function queryHook(query, search) {
+	//@ts-ignore
 	if (timerId) {
 		clearTimeout(timerId)
 	}
@@ -61,8 +92,38 @@ function queryHook(query, search) {
 	timerId = setTimeout(() => search(query), timeout)
 }
 
-function Search({ serverState, serverUrl }: SearchProps) {
+function Search({ serverState, serverUrl, user, isNewSignUp }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
+	console.log('newSignup: ', isNewSignUp)
+	console.log('user: ', user)
+	useEffect(() => {
+		const script = document.createElement('script')
+		script.id = 'reddit-pixel'
+		script.async = true
+		script.innerText = `!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');`
+		document.head.appendChild(script)
+		if (isNewSignUp && user) {
+			// Function to attempt tracking
+			const attemptTracking = () => {
+				console.log('signed up!')
+				if (typeof window.rdt === 'function') {
+					console.log('signed up 2!')
+					const normalizedEmail =
+						window.redditNormalizeEmail?.(user.email) ?? user.email
+					window.rdt('track', 'SignUp', {
+						email: normalizedEmail,
+						external_id: user.id,
+					})
+				} else {
+					// If rdt is not available, try again after a short delay
+					setTimeout(attemptTracking, 500)
+				}
+			}
+
+			// Start attempting to track
+			attemptTracking()
+		}
+	}, [isNewSignUp, user])
 
 	return (
 		<>
@@ -177,7 +238,15 @@ function Search({ serverState, serverUrl }: SearchProps) {
 }
 
 export default function SearchRoute() {
-	const { serverState, serverUrl } = useLoaderData() as SearchProps
+	const { serverState, serverUrl, user, isNewSignUp } =
+		useLoaderData() as SearchProps
 
-	return <Search serverState={serverState} serverUrl={serverUrl} />
+	return (
+		<Search
+			serverState={serverState}
+			serverUrl={serverUrl}
+			user={user}
+			isNewSignUp={isNewSignUp}
+		/>
+	)
 }

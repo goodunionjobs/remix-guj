@@ -2,7 +2,6 @@ import { json, type LoaderFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { marked } from 'marked'
 
-// Define the LoaderData type
 type LoaderData = {
 	html: string
 }

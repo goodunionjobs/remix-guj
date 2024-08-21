@@ -62,7 +62,7 @@ export function JobHeaderDrizzle({
 					hit={hit}
 					minSalary={hit.minSalary}
 					maxSalary={hit.maxSalary}
-					state={'FAKE'}
+					state={''}
 					employmentType={hit.employmentType}
 					employer={employer}
 					title={hit.title}
