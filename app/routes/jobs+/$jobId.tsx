@@ -183,15 +183,15 @@ export default function JobRoute() {
 					← Back to Search
 				</Link>
 				<div className="group pt-2">
-					{/* <JobHeaderDrizzle */}
-					{/* 	color={color} */}
-					{/* 	textColor={textColor} */}
-					{/* 	employerImage={data.employer.s3Link} */}
-					{/* 	employer={data.employer.name} */}
-					{/* 	hit={data} */}
-					{/* 	finalTime={finalTime} */}
-					{/* 	url={data.url} */}
-					{/* /> */}
+					<JobHeaderDrizzle
+						color={color}
+						textColor={textColor}
+						employerImage={data.employer.s3Link}
+						employer={data.employer.name}
+						hit={data}
+						finalTime={finalTime}
+						url={data.url}
+					/>
 					<JobDescription
 						url={data.url}
 						baseUrl={data.baseUrl}
