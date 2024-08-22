@@ -48,50 +48,12 @@ export const links: LinksFunction = () => [
 ]
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	const { getUser } = await getKindeSession(request)
-	const user: KindeUser | null = await getUser()
-
-	let isNewSignUp = false
-
-	if (user) {
-		// Check if the user exists in our database
-		const existingUser = await db.query.users.findFirst({
-			where: eq(users.email, user.email),
-		})
-
-		if (existingUser?.kindeUserId !== user.id) {
-			await db
-				.update(users)
-				.set({
-					kindeUserId: user.id,
-					updatedAt: new Date(),
-				})
-				.where(eq(users.kindeUserId, user.id))
-		}
-		//TODO: Need to make sure kindeUserId and our DB.UserId match
-		// If not query updates
-
-		if (!existingUser) {
-			// New sign up - create user in our database
-			// TODO: Create upsert just in case!
-			await db.insert(users).values({
-				kindeUserId: user.id,
-				email: user.email,
-				firstName: user.given_name,
-				lastName: user.family_name,
-			})
-			isNewSignUp = true
-		}
-	}
-
 	const serverUrl = request.url
 	const serverState = await getServerState(<Search serverUrl={serverUrl} />, {
 		renderToString,
 	})
 
 	return json({
-		user,
-		isNewSignUp,
 		serverState,
 		serverUrl,
 	})
@@ -100,17 +62,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
 type SearchProps = {
 	serverState?: InstantSearchServerState
 	serverUrl?: string
-	user?: KindeUser | null
-	isNewSignUp?: boolean
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return [
-		{ title: data ? 'Good Union Jobs' : 'Error | Good Union Jobs' },
+		{
+			title: data
+				? 'Browse nationwide union jobs, get daily alerts - Good Union Jobs'
+				: 'Error | Good Union Jobs',
+		},
 		{
 			name: 'description',
 			content: description,
 		},
+
 		{ 'script:ld+json': organizationSchema },
 	]
 }
@@ -129,35 +94,8 @@ function queryHook(query, search) {
 	timerId = setTimeout(() => search(query), timeout)
 }
 
-function Search({ serverState, serverUrl, user, isNewSignUp }: SearchProps) {
+function Search({ serverState, serverUrl }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
-	useEffect(() => {
-		const script = document.createElement('script')
-		script.id = 'reddit-pixel'
-		script.async = true
-		script.innerText = `!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');`
-		document.head.appendChild(script)
-		if (isNewSignUp && user) {
-			// Function to attempt tracking
-			const attemptTracking = () => {
-				if (typeof window.rdt === 'function') {
-					const normalizedEmail =
-						window.redditNormalizeEmail?.(user.email) ?? user.email
-					window.rdt('track', 'SignUp', {
-						email: normalizedEmail,
-						external_id: user.id,
-					})
-				} else {
-					// If rdt is not available, try again after a short delay
-					setTimeout(attemptTracking, 500)
-				}
-			}
-
-			// Start attempting to track
-			attemptTracking()
-		}
-	}, [isNewSignUp, user])
-
 	return (
 		<>
 			<div className="mt-10 justify-center p-6">
@@ -271,15 +209,7 @@ function Search({ serverState, serverUrl, user, isNewSignUp }: SearchProps) {
 }
 
 export default function SearchRoute() {
-	const { serverState, serverUrl, user, isNewSignUp } =
-		useLoaderData() as SearchProps
+	const { serverState, serverUrl } = useLoaderData() as SearchProps
 
-	return (
-		<Search
-			serverState={serverState}
-			serverUrl={serverUrl}
-			user={user}
-			isNewSignUp={isNewSignUp}
-		/>
-	)
+	return <Search serverState={serverState} serverUrl={serverUrl} />
 }

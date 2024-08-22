@@ -13,13 +13,11 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
-	useLocation,
 	useLoaderData,
 	useSubmit,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
-import posthog from 'posthog-js'
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
@@ -71,10 +69,15 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return [
-		{ title: data ? 'Good Union Jobs' : 'Error | Good Union Jobs' },
+		{
+			title: data
+				? 'Browse nationwide union jobs, get daily alerts - Good Union Jobs'
+				: 'Error | Good Union Jobs',
+		},
 		{
 			name: 'description',
-			content: description,
+			content:
+				'GoodUnionJobs.com is your go-to platform for browsing union job postings across all industries nationwide. Stay updated with daily email alerts on the latest opportunities, ensuring you never miss a chance to find your next union job.',
 		},
 		{ 'script:ld+json': organizationSchema },
 	]
@@ -153,6 +156,19 @@ function Document({
 						__html: `window.ENV = ${JSON.stringify(env)}`,
 					}}
 				/>
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `
+            (function() {
+              var script = document.createElement('script');
+              script.defer = true;
+              script.src = "https://cloud.umami.is/script.js";
+              script.setAttribute('data-website-id', 'b84e466c-cbe0-43fc-b6fc-00691c847f0d');
+              document.body.appendChild(script);
+            })();
+          `,
+					}}
+				/>
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>
@@ -172,37 +188,6 @@ function App() {
 	// const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
 	const allowIndexing = data.ENV.ALLOW_INDEXING !== 'false'
 	useToast(data.toast)
-	const location = useLocation()
-	useEffect(() => {
-		// Posthog capture pageview
-		posthog.capture('$pageview')
-		// Add reddit pixel, but only if not index
-		const isNotIndexPage = location.pathname !== '/' && location.pathname !== ''
-
-		// Add reddit pixel, but only if not index
-		if (isNotIndexPage) {
-			const existingScript = document.getElementById('reddit-pixel')
-			if (!existingScript) {
-				const script = document.createElement('script')
-				script.id = 'reddit-pixel'
-				script.async = true
-				script.innerText = `!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);rdt('init','a2_fdiyqmhdozo7');rdt('track', 'PageVisit');`
-				document.head.appendChild(script)
-			}
-		}
-	}, [location])
-
-	// const handleSignUpClick = () => {
-	// 	if (typeof window !== 'undefined' && window.rdt) {
-	// 		window.rdt('track', 'SignUp', {
-	// 			customEventName: 'Sign Up Click',
-	// 			// You can add more metadata here if needed
-	// 			// value: 0,
-	// 			// currency: 'USD',
-	// 			// conversionId: 'uniqueID',
-	// 		})
-	// 	}
-	// }
 
 	return (
 		<Document
@@ -251,7 +236,6 @@ function App() {
 											variant="default"
 											size="lg"
 											className="w-3/4 sm:w-full "
-											// onClick={handleSignUpClick}
 										>
 											<Link to={'/kinde-auth/register'}>
 												Sign Up - Job Notifications 💼
