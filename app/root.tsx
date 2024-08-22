@@ -156,20 +156,20 @@ function Document({
 						__html: `window.ENV = ${JSON.stringify(env)}`,
 					}}
 				/>
-				<script
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `
-            (function() {
-              var script = document.createElement('script');
-              script.defer = true;
-              script.src = "https://cloud.umami.is/script.js";
-              script.setAttribute('data-website-id', 'b84e466c-cbe0-43fc-b6fc-00691c847f0d');
-              document.body.appendChild(script);
-            })();
-          `,
-					}}
-				/>
+				{/* <script */}
+				{/* 	nonce={nonce} */}
+				{/* 	dangerouslySetInnerHTML={{ */}
+				{/* 		__html: ` */}
+				{/*         (function() { */}
+				{/*           var script = document.createElement('script'); */}
+				{/*           script.defer = true; */}
+				{/*           script.src = "https://cloud.umami.is/script.js"; */}
+				{/*           script.setAttribute('data-website-id', 'b84e466c-cbe0-43fc-b6fc-00691c847f0d'); */}
+				{/*           document.body.appendChild(script); */}
+				{/*         })(); */}
+				{/*       `, */}
+				{/* 	}} */}
+				{/* /> */}
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
 			</body>
