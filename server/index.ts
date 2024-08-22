@@ -119,20 +119,16 @@ app.use(
 				'connect-src': [
 					MODE === 'development' ? 'ws:' : null,
 					process.env.SENTRY_DSN ? '*.sentry.io' : null,
-					'https://hog.goodunionjobs.com',
-					'*.reddit.com',
-					'*.redditstatic.com',
 					'*.algolia.net',
 					'*.umami.is',
+					'*.umami.dev',
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
 				'frame-src': ["'self'", 'https://tenor.com'],
-				'img-src': ["'self'", 'data:', '*.reddit.com', 'https://*.tenor.com'],
+				'img-src': ["'self'", 'data:', 'https://*.tenor.com'],
 				'script-src': [
-					'*.reddit.com',
 					'*.umami.is',
-					'*.redditstatic.com',
 					"'strict-dynamic'",
 					"'self'",
 					// @ts-expect-error
