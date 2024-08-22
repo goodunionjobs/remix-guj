@@ -151,26 +151,7 @@ export default function ProfileRoute() {
 
 	return (
 		<div className="container mb-48 mt-36 flex flex-col items-center justify-center">
-			<Spacer size="4xs" />
-
 			<div className="container flex flex-col items-center rounded-3xl bg-muted p-12">
-				<div className="relative w-52">
-					<div className="absolute -top-40">
-						<div className="relative">
-							<img
-								src="/img/user.png"
-								alt={user.email === null ? 'profile' : user.email}
-								className="h-52 w-52 rounded-full object-cover"
-							/>
-						</div>
-					</div>
-				</div>
-
-				<Spacer size="sm" />
-				<div className="flex flex-wrap items-center justify-center gap-4">
-					<h1 className="text-center text-h2">{user.firstName}</h1>
-				</div>
-
 				<div className="mb-8 mt-6 flex flex-col items-center justify-center rounded-lg bg-blue-100 p-4 text-blue-700 sm:flex-row">
 					<InfoIcon className="mb-2 h-8 w-8 sm:mb-0 sm:mr-3" />
 					<p className="text-center text-lg font-medium">

@@ -123,6 +123,7 @@ app.use(
 					'*.reddit.com',
 					'*.redditstatic.com',
 					'*.algolia.net',
+					'*.umami.is',
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
@@ -130,6 +131,7 @@ app.use(
 				'img-src': ["'self'", 'data:', '*.reddit.com', 'https://*.tenor.com'],
 				'script-src': [
 					'*.reddit.com',
+					'*.umami.is',
 					'*.redditstatic.com',
 					"'strict-dynamic'",
 					"'self'",
