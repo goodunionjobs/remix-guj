@@ -157,6 +157,7 @@ function Document({
 					}}
 				/>
 				<script
+					nonce={nonce}
 					dangerouslySetInnerHTML={{
 						__html: `
             (function() {
