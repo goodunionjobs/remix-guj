@@ -68,7 +68,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	return [
 		{
 			title: data
-				? 'Browse nationwide union jobs, get daily alerts - Good Union Jobs'
+				? 'Good Union Jobs - Browse nationwide union jobs, get daily alerts'
 				: 'Error | Good Union Jobs',
 		},
 		{
