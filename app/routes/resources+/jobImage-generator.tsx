@@ -27,6 +27,14 @@ async function getFont(
 	)
 }
 
+async function loadImage(src: string): Promise<string> {
+	const res = await fetch(src)
+	const arrayBuffer = await res.arrayBuffer()
+	const base64 = Buffer.from(arrayBuffer).toString('base64')
+	const mimeType = res.headers.get('content-type') || 'image/png'
+	return `data:${mimeType};base64,${base64}`
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
 	const url = new URL(request.url)
 	const title = url.searchParams.get('title') || ''
@@ -37,6 +45,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const employmentType = url.searchParams.get('employmentType') || ''
 
 	const fonts = await getFont('Atkinson Hyperlegible', [400, 700])
+
+	let logoData = ''
+	try {
+		if (logo) {
+			logoData = await loadImage(logo)
+		}
+	} catch (error) {
+		console.error('Failed to load logo:', error)
+		// Proceed without the logo if it fails to load
+	}
 
 	const jsx = (
 		<div
@@ -109,7 +127,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 					)}
 				</div>
 			</div>
-			{logo && (
+			{logoData && (
 				<div
 					style={{
 						width: '200px',
@@ -120,13 +138,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 					}}
 				>
 					<img
-						src={logo}
+						src={logoData}
 						alt="Company Logo"
 						style={{
 							maxWidth: '100%',
 							maxHeight: '100%',
 							objectFit: 'contain',
 						}}
+						width="200"
+						height="200"
 					/>
 				</div>
 			)}
