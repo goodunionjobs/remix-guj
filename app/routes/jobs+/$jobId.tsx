@@ -106,7 +106,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	const imageUrl = new URL(`${data.baseUrl}/resources/jobImage-generator`)
 	imageUrl.searchParams.set('title', title)
 	imageUrl.searchParams.set('employer', employer.name)
-	imageUrl.searchParams.set('logo', `${data.baseUrl}/${employer.s3Link}`)
+	imageUrl.searchParams.set('logo', `${data.baseUrl}/${employer.s3Link}{.png}`)
 	if (state) imageUrl.searchParams.set('state', state)
 	if (salaryRangeStr) imageUrl.searchParams.set('salaryRange', salaryRangeStr)
 	if (employmentType)
@@ -158,7 +158,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 			content: `${data.baseUrl}/jobs/${data.id}-${jobSlug}`,
 		},
 		{ property: 'og:description', content: cleanDescription },
-		{ property: 'og:image', content: imageUrl.toString() },
+		{ property: 'og:image', content: imageUrl },
 		{
 			property: 'og:image:alt',
 			content: `Job posting for ${title} at ${employer.name}`,
