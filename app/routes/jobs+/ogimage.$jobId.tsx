@@ -57,6 +57,31 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
 	}
 }
 
+//TODO: Put this with other same one in utils later and export
+function formatSalaryInThousands(salary: number): string {
+	// Round to the nearest thousand
+	const roundedSalary = Math.round(salary / 1000)
+
+	// Format with dollar sign and add 'K' suffix
+	return `$${roundedSalary}K`
+}
+
+//TODO: Put this with other same one in utils later and export
+function formatSalaryRange(
+	minSalary?: number | null,
+	maxSalary?: number | null,
+): string | null {
+	// Only format if both minSalary and maxSalary are present and not null
+	if (minSalary != null && maxSalary != null) {
+		const formattedMin = formatSalaryInThousands(minSalary)
+		const formattedMax = formatSalaryInThousands(maxSalary)
+		return `${formattedMin}-${formattedMax}`
+	}
+
+	// Return null if either salary is missing or null
+	return null
+}
+
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	const { jobId } = params
 
@@ -89,10 +114,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	const minSalary = job.minSalary
 	const maxSalary = job.maxSalary
 
-	const salaryRangeStr =
-		minSalary !== null && maxSalary !== null
-			? `$${minSalary.toLocaleString()}-${maxSalary.toLocaleString()}/yr`
-			: ''
+	const salaryRangeStr = formatSalaryRange(minSalary, maxSalary)
 
 	// Generate the image as before
 	const [fonts, logoDataUri, moneyBagEmoji, pushPinEmoji, clockEmoji] =
