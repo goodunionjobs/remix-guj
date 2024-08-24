@@ -186,6 +186,7 @@ export function JobDescription({
 				)}
 			</div>
 			{objectID && (
+				//TODO: Work on just making a button that says, maybe, "Click to Copy and share?"
 				<div className="mb-2 mt-1 flex flex-col">
 					<div className="text-center text-xl font-bold underline">
 						Share this job:

@@ -1,6 +1,7 @@
 import { Link } from '@remix-run/react'
 import { Suspense } from 'react'
 
+//TODO: Not used? Remove after looking into it more
 export function BodyText({
 	handleButtonClick,
 	url,
