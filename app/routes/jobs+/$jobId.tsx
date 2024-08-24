@@ -90,7 +90,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	} = data
 
 	const jobSlug = formatJobSlug(title)
-	const state = address.state.name
 
 	const cleanDescription =
 		sanitizeHtml(fullDescription, {
@@ -98,22 +97,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 			allowedAttributes: {},
 		}).substring(0, 300) + '...'
 
-	const salaryRangeStr =
-		minSalary !== null && maxSalary !== null
-			? `$${minSalary.toLocaleString()}-${maxSalary.toLocaleString()}${payType === 'hr' ? '/hr' : '/yr'}`
-			: ''
+	const ogImageUrl = new URL(
+		`${data.baseUrl}/jobs/ogimage/${data.id}-${jobSlug}`,
+	)
 
-	const imageUrl = new URL(`${data.baseUrl}/resources/jobImage-generator`)
-	imageUrl.searchParams.set('title', title)
-	imageUrl.searchParams.set('employer', employer.name)
-	imageUrl.searchParams.set('logo', encodeURIComponent(employer.s3Link))
-	if (state) imageUrl.searchParams.set('state', state)
-	if (salaryRangeStr) imageUrl.searchParams.set('salaryRange', salaryRangeStr)
-	if (employmentType)
-		imageUrl.searchParams.set('employmentType', employmentType)
-
-	console.log('THIS IS THE S#link: ', employer.s3Link)
-	console.log('this is whole link: ', imageUrl)
+	console.log('THIS IS THE OG IMAGE LINK: ', ogImageUrl)
 
 	const jobPostingSchema: WithContext<JobPosting> = {
 		'@context': 'https://schema.org',
@@ -128,8 +116,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		hiringOrganization: {
 			'@type': 'Organization',
 			name: employer.name,
-			//TODO: Fix this below to use company logo
-			logo: imageUrl.toString(),
+			logo: ogImageUrl.toString(), // Use the new OG image URL
 		},
 		jobLocation: {
 			'@type': 'Place',
@@ -161,7 +148,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 			content: `${data.baseUrl}/jobs/${data.id}-${jobSlug}`,
 		},
 		{ property: 'og:description', content: cleanDescription },
-		{ property: 'og:image', content: imageUrl.toString() },
+		{ property: 'og:image', content: ogImageUrl.toString() },
 		{
 			property: 'og:image:alt',
 			content: `Job posting for ${title} at ${employer.name}`,
