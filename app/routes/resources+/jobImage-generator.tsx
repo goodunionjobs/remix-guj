@@ -1,13 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import { type LoaderFunctionArgs } from '@remix-run/node'
 import { Resvg } from '@resvg/resvg-js'
 import satori, { type SatoriOptions } from 'satori'
-
-// Helper to resolve the current directory in ES modules
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 type Weight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
 
