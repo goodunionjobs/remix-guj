@@ -89,13 +89,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		fullDescription,
 	} = data
 
-	const imageBaseUrl = `${data.baseUrl}/${employer.s3Link}`
-	const imageUrls = {
-		jpeg: `${imageBaseUrl}.jpeg`,
-		avif: `${imageBaseUrl}.avif`,
-		webp: `${imageBaseUrl}.webp`,
-	}
-
 	const jobSlug = formatJobSlug(title)
 
 	const cleanDescription =
@@ -103,6 +96,12 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 			allowedTags: [],
 			allowedAttributes: {},
 		}).substring(0, 300) + '...'
+
+	const ogImageUrl = new URL(
+		`${data.baseUrl}/jobs/ogimage/${data.id}-${jobSlug}`,
+	)
+
+	console.log('THIS IS THE OG IMAGE LINK: ', ogImageUrl)
 
 	const jobPostingSchema: WithContext<JobPosting> = {
 		'@context': 'https://schema.org',
@@ -117,7 +116,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		hiringOrganization: {
 			'@type': 'Organization',
 			name: employer.name,
-			logo: imageUrls.jpeg,
+			logo: ogImageUrl.toString(), // Use the new OG image URL
 		},
 		jobLocation: {
 			'@type': 'Place',
@@ -149,9 +148,14 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 			content: `${data.baseUrl}/jobs/${data.id}-${jobSlug}`,
 		},
 		{ property: 'og:description', content: cleanDescription },
-		{ property: 'og:image', content: imageUrls.jpeg },
-		{ property: 'og:image:alt', content: `${employer.name} Logo` },
-		{ property: 'og:image:type', content: 'image/jpeg' },
+		{ property: 'og:image', content: ogImageUrl.toString() },
+		{
+			property: 'og:image:alt',
+			content: `Job posting for ${title} at ${employer.name}`,
+		},
+		{ property: 'og:image:type', content: 'image/png' },
+		{ property: 'og:image:width', content: '1200' },
+		{ property: 'og:image:height', content: '630' },
 		{ 'script:ld+json': jobPostingSchema },
 	]
 }
