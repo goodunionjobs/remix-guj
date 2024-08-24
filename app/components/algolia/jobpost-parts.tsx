@@ -7,7 +7,6 @@ import { Attributes, DrizzleAttributes } from '#app/components/attributes'
 import { FinalTime } from '#app/components/final-time'
 import { LogoImage } from '#app/components/logo-image'
 import { jobs } from '../../../drizzle/schema'
-import { divBlock } from '../job-posts/jobblockcss'
 
 enum TimeFormat {
 	Hour = 'hr',
@@ -51,8 +50,16 @@ export function JobHeaderDrizzle({
 	onClick?: () => void
 }) {
 	return (
-		<div className={divBlock} style={{ background: color, color: textColor }}>
-			<div className="flex h-24 flex-row items-stretch" onClick={onClick}>
+		<div
+			className="border-grey-200 border-1 relative z-10
+h-max overflow-hidden rounded-md  border
+text-black shadow-xl transition duration-300  ease-out dark:shadow-slate-800/60 
+lg:hover:transform-none lg:active:translate-x-0.5
+lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5
+2xl:active:translate-x-1 2xl:active:translate-y-1"
+			style={{ background: color, color: textColor }}
+		>
+			<div className="flex h-24 flex-row items-center" onClick={onClick}>
 				<LogoImage
 					employerImage={employerImage}
 					employer={employer}
@@ -99,8 +106,16 @@ export function JobHeader({
 	onClick?: () => void
 }) {
 	return (
-		<div className={divBlock} style={{ background: color, color: textColor }}>
-			<div className="flex h-24 flex-row items-stretch" onClick={onClick}>
+		<div
+			className="border-grey-200 border-1 relative z-10
+h-max overflow-hidden rounded-md  border
+text-black shadow-xl transition duration-300  ease-out dark:shadow-slate-800/60 
+lg:hover:transform-none lg:active:translate-x-0.5
+lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5
+2xl:active:translate-x-1 2xl:active:translate-y-1"
+			style={{ background: color, color: textColor }}
+		>
+			<div className="flex h-24 flex-row items-center" onClick={onClick}>
 				<LogoImage
 					employerImage={employerImage}
 					employer={employer}
@@ -185,7 +200,7 @@ export function JobDescription({
 						<Link
 							to={`/jobs/${objectID}-${job}`}
 							target="_blank"
-							className="block max-w-sm select-all overflow-hidden whitespace-nowrap sm:max-w-xl"
+							className="block max-w-sm select-all overflow-hidden  sm:max-w-xl"
 						>
 							{`${baseUrl}jobs/${objectID}-${job}`}
 						</Link>
