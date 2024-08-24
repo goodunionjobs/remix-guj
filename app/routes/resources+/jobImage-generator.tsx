@@ -1,7 +1,13 @@
-// app/routes/resources+/jobImage-generator.tsx
+import fs from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { type LoaderFunctionArgs } from '@remix-run/node'
 import { Resvg } from '@resvg/resvg-js'
 import satori, { type SatoriOptions } from 'satori'
+
+// Helper to resolve the current directory in ES modules
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 type Weight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
 
@@ -27,146 +33,220 @@ async function getFont(
 	)
 }
 
-async function loadImage(src: string): Promise<string> {
-	const res = await fetch(src)
-	const arrayBuffer = await res.arrayBuffer()
-	const base64 = Buffer.from(arrayBuffer).toString('base64')
-	const mimeType = res.headers.get('content-type') || 'image/png'
-	return `data:${mimeType};base64,${base64}`
+function getBaseUrl(request: Request): string {
+	const url = new URL(request.url)
+	if (url.hostname === 'localhost') {
+		return 'http://localhost:3000'
+	} else if (url.hostname === 'remix-guj-staging.fly.dev') {
+		return 'https://remix-guj-staging.fly.dev'
+	} else {
+		return 'https://goodunionjobs.com'
+	}
+}
+
+async function fetchImageAsDataUri(url: string): Promise<string | null> {
+	try {
+		const response = await fetch(url)
+		console.log('HERE IS THE URL: ', url)
+		if (!response.ok) {
+			console.error(
+				`Failed to fetch image: ${response.status} ${response.statusText}`,
+			)
+			return null
+		}
+		const arrayBuffer = await response.arrayBuffer()
+		const base64 = Buffer.from(arrayBuffer).toString('base64')
+		const mimeType = response.headers.get('content-type') || 'image/jpeg'
+		return `data:${mimeType};base64,${base64}`
+	} catch (error) {
+		console.error('Error fetching image:', error)
+		return null
+	}
+}
+
+async function loadLocalEmoji(filename: string): Promise<string> {
+	const filePath = path.resolve('public', 'img', 'emojis', filename)
+	const fileData = await fs.readFile(filePath)
+	const base64 = fileData.toString('base64')
+	return `data:image/png;base64,${base64}`
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	const url = new URL(request.url)
-	const title = url.searchParams.get('title') || ''
-	const employer = url.searchParams.get('employer') || ''
-	const logo = url.searchParams.get('logo') || ''
-	const state = url.searchParams.get('state') || ''
-	const salaryRange = url.searchParams.get('salaryRange') || ''
-	const employmentType = url.searchParams.get('employmentType') || ''
-
-	const fonts = await getFont('Atkinson Hyperlegible', [400, 700])
-
-	let logoData = ''
 	try {
-		if (logo) {
-			logoData = await loadImage(logo)
-		}
-	} catch (error) {
-		console.error('Failed to load logo:', error)
-		// Proceed without the logo if it fails to load
-	}
+		const url = new URL(request.url)
+		const title = url.searchParams.get('title') || ''
+		const employer = url.searchParams.get('employer') || ''
+		const logoPath = url.searchParams.get('logo') || ''
+		const state = url.searchParams.get('state') || ''
+		const salaryRange = url.searchParams.get('salaryRange') || ''
+		const employmentType = url.searchParams.get('employmentType') || ''
 
-	const jsx = (
-		<div
-			style={{
-				height: '100%',
-				width: '100%',
-				display: 'flex',
-				backgroundColor: '#ffffff',
-				color: '#000000',
-				fontFamily: 'Atkinson Hyperlegible',
-				padding: '40px',
-			}}
-		>
+		const baseUrl = getBaseUrl(request)
+
+		// Decode the logo URL and construct it correctly
+		const decodedLogoPath = decodeURIComponent(logoPath)
+		const logoUrl = decodedLogoPath.startsWith('http')
+			? decodedLogoPath
+			: `${baseUrl}/${decodedLogoPath}.jpeg`
+
+		console.log('Fetching logo from:', logoUrl)
+
+		const [fonts, logoDataUri, moneyBagEmoji, pushPinEmoji, clockEmoji] =
+			await Promise.all([
+				getFont('Atkinson Hyperlegible', [400, 700]),
+				fetchImageAsDataUri(logoUrl),
+				loadLocalEmoji('moneybag.png'),
+				loadLocalEmoji('pushpin.png'),
+				loadLocalEmoji('clock.png'),
+			])
+
+		const jsx = (
 			<div
 				style={{
-					flex: 1,
+					height: '100%',
+					width: '100%',
 					display: 'flex',
-					flexDirection: 'column',
-					justifyContent: 'center',
+					backgroundColor: '#ffffff',
+					color: '#000000',
+					fontFamily: '"Atkinson Hyperlegible"',
+					padding: '40px',
 				}}
 			>
-				<p style={{ fontSize: '24px', marginBottom: '10px' }}>{employer}</p>
-				<p
-					style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '20px' }}
-				>
-					{title}
-				</p>
-				<div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-					{salaryRange && (
-						<span
-							style={{
-								backgroundColor: '#e2e8f0',
-								border: '2px solid #000000',
-								borderRadius: '4px',
-								padding: '4px 8px',
-								fontSize: '18px',
-								fontWeight: 'bold',
-							}}
-						>
-							💰 {salaryRange}
-						</span>
-					)}
-					{state && (
-						<span
-							style={{
-								backgroundColor: '#e2e8f0',
-								border: '2px solid #000000',
-								borderRadius: '4px',
-								padding: '4px 8px',
-								fontSize: '18px',
-								fontWeight: 'bold',
-							}}
-						>
-							📌 {state}
-						</span>
-					)}
-					{employmentType && (
-						<span
-							style={{
-								backgroundColor: '#e2e8f0',
-								border: '2px solid #000000',
-								borderRadius: '4px',
-								padding: '4px 8px',
-								fontSize: '18px',
-								fontWeight: 'bold',
-							}}
-						>
-							🕑 {employmentType}
-						</span>
-					)}
-				</div>
-			</div>
-			{logoData && (
 				<div
 					style={{
-						width: '200px',
-						height: '200px',
+						flex: 2,
+						display: 'flex',
+						flexDirection: 'column',
+						justifyContent: 'center',
+					}}
+				>
+					<p style={{ fontSize: '24px', marginBottom: '10px' }}>{employer}</p>
+					<p
+						style={{
+							fontSize: '36px',
+							fontWeight: 'bold',
+							marginBottom: '20px',
+						}}
+					>
+						{title}
+					</p>
+					<div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+						{salaryRange && (
+							<span
+								style={{
+									backgroundColor: '#e2e8f0',
+									border: '2px solid #000000',
+									borderRadius: '4px',
+									padding: '4px 8px',
+									fontSize: '18px',
+									fontWeight: 'bold',
+									display: 'flex',
+									alignItems: 'center',
+									gap: '8px',
+								}}
+							>
+								<img
+									src={moneyBagEmoji}
+									alt="Moneybag"
+									style={{ width: '24px', height: '24px' }}
+								/>
+								{salaryRange}
+							</span>
+						)}
+						{state && (
+							<span
+								style={{
+									backgroundColor: '#e2e8f0',
+									border: '2px solid #000000',
+									borderRadius: '4px',
+									padding: '4px 8px',
+									fontSize: '18px',
+									fontWeight: 'bold',
+									display: 'flex',
+									alignItems: 'center',
+									gap: '8px',
+								}}
+							>
+								<img
+									src={pushPinEmoji}
+									alt="Pushpin"
+									style={{ width: '24px', height: '24px' }}
+								/>
+								{state}
+							</span>
+						)}
+						{employmentType && (
+							<span
+								style={{
+									backgroundColor: '#e2e8f0',
+									border: '2px solid #000000',
+									borderRadius: '4px',
+									padding: '4px 8px',
+									fontSize: '18px',
+									fontWeight: 'bold',
+									display: 'flex',
+									alignItems: 'center',
+									gap: '8px',
+								}}
+							>
+								<img
+									src={clockEmoji}
+									alt="Clock"
+									style={{ width: '24px', height: '24px' }}
+								/>
+								{employmentType}
+							</span>
+						)}
+					</div>
+				</div>
+				<div
+					style={{
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
 					}}
 				>
-					<img
-						src={logoData}
-						alt="Company Logo"
-						style={{
-							maxWidth: '100%',
-							maxHeight: '100%',
-							objectFit: 'contain',
-						}}
-						width="200"
-						height="200"
-					/>
+					{logoDataUri ? (
+						<img
+							src={logoDataUri}
+							alt="Company Logo"
+							style={{
+								maxWidth: '100%',
+								maxHeight: '100%',
+								objectFit: 'contain',
+							}}
+							width="400"
+							height="400"
+						/>
+					) : (
+						<div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+							{employer.slice(0, 2).toUpperCase()}
+						</div>
+					)}
 				</div>
-			)}
-		</div>
-	)
+			</div>
+		)
 
-	const svg = await satori(jsx, {
-		width: 1200,
-		height: 630,
-		fonts,
-	})
+		const svg = await satori(jsx, {
+			width: 1200,
+			height: 630,
+			fonts,
+		})
 
-	const resvg = new Resvg(svg)
-	const pngData = resvg.render()
-	const pngBuffer = pngData.asPng()
+		const resvg = new Resvg(svg)
+		const pngData = resvg.render()
+		const pngBuffer = pngData.asPng()
 
-	return new Response(pngBuffer, {
-		headers: {
-			'Content-Type': 'image/png',
-			'Cache-Control': 'public, max-age=31536000, immutable',
-		},
-	})
+		return new Response(pngBuffer, {
+			headers: {
+				'Content-Type': 'image/png',
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+		})
+	} catch (error) {
+		console.error('Error generating image:', error)
+		return new Response(`Error generating image: ${error.message}`, {
+			status: 500,
+		})
+	}
 }
