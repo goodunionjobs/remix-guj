@@ -62,7 +62,9 @@ export const links: LinksFunction = () => {
 			crossOrigin: 'use-credentials',
 		} as const, // necessary to make typescript happy
 		//These should match the css preloads above to avoid css as render blocking resource
-		{ rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' },
+		//TODO: Fix svg icon. Shows in chrome and other browsers small!
+		// { rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' },
+		{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.ico' },
 		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }

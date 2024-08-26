@@ -156,6 +156,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ property: 'og:image:type', content: 'image/png' },
 		{ property: 'og:image:width', content: '1200' },
 		{ property: 'og:image:height', content: '630' },
+		{ property: 'twitter:card', content: 'summary_large_image' },
+		{ property: 'twitter:site', content: '@goodunionjobs' },
+		{ property: 'twitter:title', content: `${title} at ${employer.name}` },
+		{ property: 'twitter:description', content: cleanDescription },
+		{ property: 'twitter:image', content: ogImageUrl.toString() },
 		{ 'script:ld+json': jobPostingSchema },
 	]
 }
