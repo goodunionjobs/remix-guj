@@ -126,13 +126,13 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	}
 
 	// Adds company and salary to beginning for description
-	let finalDescrip = `${employer.name} is hiring in ${address.state.name}, ${address.city.name}`
+	let finalDescrip = `${employer.name} is hiring in ${address.state.name}, ${address.city.name}.`
 
 	let twitterSalary: undefined | string
 	if (minSalary !== null) {
 		const salaryDescrip = formatSalaryInThousands(minSalary)
 		twitterSalary = formatSalaryInThousands(minSalary, true) // Remove 'K' and add '/y'
-		finalDescrip = `${finalDescrip} (💰~${salaryDescrip}).`
+		finalDescrip = `${finalDescrip}(💰~${salaryDescrip}).`
 	}
 
 	finalDescrip = `${finalDescrip}${fullDescription.trimStart()}`
