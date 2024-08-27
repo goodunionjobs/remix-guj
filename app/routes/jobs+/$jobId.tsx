@@ -189,6 +189,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	}
 
 	return [
+		{
+			tagName: 'link',
+			rel: 'canonical',
+			href: `${data.baseUrl}/jobs/${data.id}-${jobSlug}`,
+		},
 		{ title: `${title} | ${employer.name}` },
 		{ name: 'description', content: cleanDescription },
 		{ property: 'og:title', content: `${title} at ${employer.name}` },
