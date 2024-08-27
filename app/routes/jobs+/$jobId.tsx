@@ -132,6 +132,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	if (minSalary !== null) {
 		const salaryDescrip = formatSalaryInThousands(minSalary)
 		twitterSalary = formatSalaryInThousands(minSalary, true) // Remove 'K' and add '/y'
+		//TODO: Fix that we add dot for both finaldscript and salary
 		finalDescrip = `${finalDescrip}(💰~${salaryDescrip}).`
 	}
 
