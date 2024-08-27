@@ -2,6 +2,7 @@ import { type LoaderFunction } from '@remix-run/node'
 import { db } from '#app/utils/db.server'
 import { getDomainUrl } from '#app/utils/misc.tsx'
 import { jobs } from '../../../drizzle/schema'
+import slugify from '@sindresorhus/slugify'
 
 export const loader: LoaderFunction = async ({ request }) => {
 	const baseUrl = getDomainUrl(request)
@@ -20,7 +21,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 	const jobsquery = await db.select().from(jobs)
 
 	const dynamicRoutes = jobsquery.map(job => ({
-		loc: `${baseUrl}/jobs/${job.id}-${encodeURIComponent(job.title)}`,
+		loc: `${baseUrl}/jobs/${job.id}-${slugify(job.title)}`,
 		priority: 0.7,
 		lastmod: job.timeStamp.toISOString(),
 	}))

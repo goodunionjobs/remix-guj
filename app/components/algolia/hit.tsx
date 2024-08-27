@@ -3,12 +3,12 @@ import { useState } from 'react'
 import {
 	JobHeader,
 	JobDescription,
-	formatJobSlug,
 	calculateFinalTime,
 } from '#app/components/algolia/jobpost-parts'
 import { useTheme } from '#app/routes/resources+/theme-switch'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { type HitProps } from '#app/utils/types'
+import slugify from '@sindresorhus/slugify'
 
 export function Hit({ hit }: HitProps) {
 	const [showResults, setShowResults] = useState(false)
@@ -24,7 +24,7 @@ export function Hit({ hit }: HitProps) {
 		window.history.pushState(
 			{},
 			'',
-			`/jobs/${hit.objectID}-${formatJobSlug(hit.title)}`,
+			`/jobs/${hit.objectID}-${slugify(hit.title)}`,
 		)
 	}
 
@@ -65,7 +65,7 @@ export function Hit({ hit }: HitProps) {
 						baseUrl={baseUrl}
 						description={descriptionFetcher.data?.description || ''}
 						objectID={hit.objectID}
-						job={formatJobSlug(hit.title)}
+						job={slugify(hit.title)}
 						isLoading={descriptionFetcher.state === 'loading'}
 					/>
 				)}

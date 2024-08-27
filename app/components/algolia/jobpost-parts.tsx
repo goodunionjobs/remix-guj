@@ -212,10 +212,6 @@ export function JobDescription({
 	)
 }
 
-export function formatJobSlug(job: string) {
-	return job.replace(/\s/g, '-').replace(/\//g, '_')
-}
-
 export function calculateFinalTime(timestamp: number): [number, TimeFormat] {
 	const now = dayjs()
 	const datestamp = dayjs.unix(timestamp)

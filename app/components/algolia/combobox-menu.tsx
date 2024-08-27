@@ -138,7 +138,9 @@ export function AlgoliaFlexibleCombobox({
 									/>
 									<div>
 										<div>
-											{item.label} {item.value !== '' && `(${item.count})`}
+											{/* //TODO: Check over count...not working? */}
+											{/* {item.label} {item.value !== '' && `(${item.count})`} */}
+											{item.label} {item.value !== ''}
 										</div>
 										{item.description && (
 											<div className="text-sm text-gray-500">

@@ -5,12 +5,12 @@ import {
 	json,
 } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
+import slugify from '@sindresorhus/slugify'
+import DOMPurify from 'isomorphic-dompurify'
 import { eq } from 'drizzle-orm'
-import sanitizeHtml from 'sanitize-html'
 import { type JobPosting, type WithContext } from 'schema-dts'
 import {
 	JobDescription,
-	formatJobSlug,
 	calculateFinalTime,
 	JobHeaderDrizzle,
 } from '#app/components/algolia/jobpost-parts'
@@ -89,19 +89,60 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		fullDescription,
 	} = data
 
-	const jobSlug = formatJobSlug(title)
+	const jobSlug = slugify(title)
 
-	const cleanDescription =
-		sanitizeHtml(fullDescription, {
-			allowedTags: [],
-			allowedAttributes: {},
-		}).substring(0, 300) + '...'
+	function cleanAndTruncateDescription(
+		fullDescription: string,
+		maxLength: number = 250,
+	): string {
+		// Sanitize the HTML
+		const sanitizedHtml = DOMPurify.sanitize(fullDescription, {
+			ALLOWED_TAGS: [], // Remove all HTML tags
+			ALLOWED_ATTR: [], // Remove all attributes
+		})
+
+		// Truncate the text and add ellipsis if necessary
+		if (sanitizedHtml.length <= maxLength) {
+			return sanitizedHtml
+		} else {
+			return sanitizedHtml.substring(0, maxLength).trim() + '...'
+		}
+	}
+
+	//TODO: Put this with other same one in utils later and export
+	function formatSalaryInThousands(
+		salary: number,
+		withYearSuffix: boolean = false,
+	): string {
+		// Round to the nearest thousand
+		const roundedSalary = Math.round(salary / 1000)
+
+		// Format with dollar sign and add 'K' or '/y' suffix based on the flag
+		if (withYearSuffix) {
+			return `$${roundedSalary}K/y`
+		}
+
+		return `$${roundedSalary}K`
+	}
+
+	// Adds company and salary to beginning for description
+	let finalDescrip = `${employer.name} is hiring in ${address.state.name}, ${address.city.name}.`
+
+	let twitterSalary: undefined | string
+	if (minSalary !== null) {
+		const salaryDescrip = formatSalaryInThousands(minSalary)
+		twitterSalary = formatSalaryInThousands(minSalary, true) // Remove 'K' and add '/y'
+		//TODO: Fix that we add dot for both finaldscript and salary
+		finalDescrip = `${finalDescrip}(💰~${salaryDescrip}).`
+	}
+
+	finalDescrip = `${finalDescrip}${fullDescription.trimStart()}`
+
+	const cleanDescription = cleanAndTruncateDescription(finalDescrip)
 
 	const ogImageUrl = new URL(
 		`${data.baseUrl}/jobs/ogimage/${data.id}-${jobSlug}`,
 	)
-
-	console.log('THIS IS THE OG IMAGE LINK: ', ogImageUrl)
 
 	const jobPostingSchema: WithContext<JobPosting> = {
 		'@context': 'https://schema.org',
@@ -134,12 +175,17 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 				'@type': 'QuantitativeValue',
 				minValue: minSalary === null ? undefined : minSalary,
 				maxValue: maxSalary === null ? undefined : maxSalary,
-				unitText: payType === 'hr' ? 'HOUR' : 'YEAR',
+				unitText: payType === 'hr' ? 'hr' : 'yr',
 			},
 		},
 	}
 
 	return [
+		{
+			tagName: 'link',
+			rel: 'canonical',
+			href: `${data.baseUrl}/jobs/${data.id}-${jobSlug}`,
+		},
 		{ title: `${title} | ${employer.name}` },
 		{ name: 'description', content: cleanDescription },
 		{ property: 'og:title', content: `${title} at ${employer.name}` },
@@ -161,6 +207,11 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ property: 'twitter:title', content: `${title} at ${employer.name}` },
 		{ property: 'twitter:description', content: cleanDescription },
 		{ property: 'twitter:image', content: ogImageUrl.toString() },
+		{ property: 'twitter:label2', value: 'Salary' },
+		{
+			property: 'twitter:data2',
+			content: twitterSalary === undefined ? '' : twitterSalary,
+		},
 		{ 'script:ld+json': jobPostingSchema },
 	]
 }
@@ -206,7 +257,7 @@ export default function JobRoute() {
 						baseUrl={data.baseUrl}
 						description={data.fullDescription}
 						objectID={data.id.toString()}
-						job={formatJobSlug(data.title)}
+						job={slugify(data.title)}
 					/>
 				</div>
 			</div>
