@@ -6,9 +6,8 @@ import {
 } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
 import slugify from '@sindresorhus/slugify'
-import DOMPurify from 'dompurify'
+import DOMPurify from 'isomorphic-dompurify'
 import { eq } from 'drizzle-orm'
-import { JSDOM } from 'jsdom'
 import { type JobPosting, type WithContext } from 'schema-dts'
 import {
 	JobDescription,
@@ -73,10 +72,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	return json({ ...job, fullDescription: descriptionData.description, baseUrl })
 }
 
-// Initialize DOMPurify for server-side rendering
-const window = new JSDOM('').window
-const purify = DOMPurify(window)
-
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	if (!data) {
 		return [{ title: 'Oh no, there was an error!' }]
@@ -101,20 +96,16 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		maxLength: number = 250,
 	): string {
 		// Sanitize the HTML
-		const sanitizedHtml = purify.sanitize(fullDescription, {
+		const sanitizedHtml = DOMPurify.sanitize(fullDescription, {
 			ALLOWED_TAGS: [], // Remove all HTML tags
 			ALLOWED_ATTR: [], // Remove all attributes
 		})
 
-		// Convert HTML entities to their corresponding characters
-		const decoder = new JSDOM(sanitizedHtml).window.document
-		const decodedText = decoder.documentElement.textContent || ''
-
 		// Truncate the text and add ellipsis if necessary
-		if (decodedText.length <= maxLength) {
-			return decodedText
+		if (sanitizedHtml.length <= maxLength) {
+			return sanitizedHtml
 		} else {
-			return decodedText.substring(0, maxLength).trim() + '...'
+			return sanitizedHtml.substring(0, maxLength).trim() + '...'
 		}
 	}
 
@@ -144,7 +135,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		finalDescrip = `${finalDescrip} (💰~${salaryDescrip}).`
 	}
 
-	finalDescrip = finalDescrip + fullDescription
+	finalDescrip = `${finalDescrip}${fullDescription.trimStart()}`
 
 	const cleanDescription = cleanAndTruncateDescription(finalDescrip)
 
