@@ -6,9 +6,9 @@ import {
 } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
 import slugify from '@sindresorhus/slugify'
-import { JSDOM } from 'jsdom'
 import DOMPurify from 'dompurify'
 import { eq } from 'drizzle-orm'
+import { JSDOM } from 'jsdom'
 import { type JobPosting, type WithContext } from 'schema-dts'
 import {
 	JobDescription,
