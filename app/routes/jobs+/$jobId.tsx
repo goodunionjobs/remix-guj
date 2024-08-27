@@ -6,6 +6,7 @@ import {
 } from '@remix-run/node'
 import { useLoaderData, Link } from '@remix-run/react'
 import slugify from '@sindresorhus/slugify'
+import { JSDOM } from 'jsdom'
 import DOMPurify from 'dompurify'
 import { eq } from 'drizzle-orm'
 import { type JobPosting, type WithContext } from 'schema-dts'
@@ -72,6 +73,10 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	return json({ ...job, fullDescription: descriptionData.description, baseUrl })
 }
 
+// Initialize DOMPurify for server-side rendering
+const window = new JSDOM('').window
+const purify = DOMPurify(window)
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	if (!data) {
 		return [{ title: 'Oh no, there was an error!' }]
@@ -96,13 +101,13 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		maxLength: number = 250,
 	): string {
 		// Sanitize the HTML
-		const sanitizedHtml = DOMPurify.sanitize(fullDescription, {
+		const sanitizedHtml = purify.sanitize(fullDescription, {
 			ALLOWED_TAGS: [], // Remove all HTML tags
 			ALLOWED_ATTR: [], // Remove all attributes
 		})
 
 		// Convert HTML entities to their corresponding characters
-		const decoder = new DOMParser().parseFromString(sanitizedHtml, 'text/html')
+		const decoder = new JSDOM(sanitizedHtml).window.document
 		const decodedText = decoder.documentElement.textContent || ''
 
 		// Truncate the text and add ellipsis if necessary
