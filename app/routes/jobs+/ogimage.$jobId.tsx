@@ -255,8 +255,8 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 									maxHeight: '100%',
 									objectFit: 'contain',
 								}}
-								width="400"
-								height="400"
+								width="250"
+								height="250"
 							/>
 						) : (
 							<div style={{ fontSize: '24px', fontWeight: 'bold' }}>
