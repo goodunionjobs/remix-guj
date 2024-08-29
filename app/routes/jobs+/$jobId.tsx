@@ -50,6 +50,16 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 				},
 			},
 			employer: true,
+			industries: {
+				with: {
+					industry: true,
+				},
+			},
+			jobFunctions: {
+				with: {
+					jobFunction: true,
+				},
+			},
 		},
 	})
 
@@ -78,6 +88,9 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	}
 
 	const {
+		id,
+		industries,
+		jobFunctions,
 		employer,
 		address,
 		title,
@@ -167,6 +180,19 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 				addressRegion: address.state.name,
 				addressCountry: 'US',
 			},
+		},
+		identifier: {
+			'@type': 'PropertyValue',
+			name: 'Good Union Jobs',
+			value: id.toString(),
+		},
+		industry: industries.map(ind => ind.industry.label).join(', '),
+		occupationalCategory: jobFunctions
+			.map(jobfn => jobfn.jobFunction.description)
+			.join(', '),
+		applicantLocationRequirements: {
+			'@type': 'Country',
+			name: 'United States',
 		},
 		baseSalary: {
 			'@type': 'MonetaryAmount',
