@@ -39,6 +39,16 @@ const getHost = (req: { get: (key: string) => string | undefined }) =>
 // fly is our proxy
 app.set('trust proxy', true)
 
+// Add this block for www to non-www redirect
+app.use((req, res, next) => {
+	const host = getHost(req)
+	if (host.startsWith('www.')) {
+		const newHost = host.replace(/^www\./, '')
+		return res.redirect(301, `${req.protocol}://${newHost}${req.originalUrl}`)
+	}
+	next()
+})
+
 // ensure HTTPS only (X-Forwarded-Proto comes from Fly)
 app.use((req, res, next) => {
 	const proto = req.get('X-Forwarded-Proto')
