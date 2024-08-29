@@ -41,16 +41,27 @@ const employmentTypes = [
 	},
 ]
 
+type Option = {
+	value: string
+	label: string
+}
+
+interface AlgoliaFlexibleComboboxProps {
+	attribute: 'state' | 'employmentType'
+	placeholder: string
+	width?: string
+	options: Option[]
+}
+
 export function AlgoliaFlexibleCombobox({
 	attribute,
 	placeholder,
 	width = '200px',
 	options,
-}) {
+}: AlgoliaFlexibleComboboxProps) {
 	const [open, setOpen] = useState(false)
 	const { items, refine } = useMenu({
 		attribute,
-		limit: attribute === 'states' ? 50 : 10,
 		showMore: false,
 	})
 
@@ -105,6 +116,7 @@ export function AlgoliaFlexibleCombobox({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
+					aria-label={attribute}
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
