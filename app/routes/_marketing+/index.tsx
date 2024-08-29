@@ -75,7 +75,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 			name: 'description',
 			content: description,
 		},
-
+		{ property: 'robots', content: 'index,follow' },
 		{ 'script:ld+json': organizationSchema },
 	]
 }

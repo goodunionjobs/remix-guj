@@ -188,6 +188,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		},
 		{ title: `${title} | ${employer.name}` },
 		{ name: 'description', content: cleanDescription },
+		{ property: 'robots', content: 'index,follow' },
 		{ property: 'og:title', content: `${title} at ${employer.name}` },
 		{
 			property: 'og:url',
