@@ -45,8 +45,6 @@ export function Hit({ hit }: HitProps) {
 			? 'http://localhost:3000/'
 			: 'https://goodunionjobs.com/'
 
-	const jobPostUrl = `/jobs/${hit.objectID}-${slugify(hit.title)}`
-
 	return (
 		<div aria-label="Job post">
 			<div className="group pt-2" style={{ cursor: 'pointer' }}>
@@ -61,6 +59,7 @@ export function Hit({ hit }: HitProps) {
 					onClick={onClick}
 				/>
 
+				{/* TODO: Make the below expand if javascript is disabled and add in aria-expaned */}
 				{showResults && (
 					<JobDescription
 						url={hit.url}
