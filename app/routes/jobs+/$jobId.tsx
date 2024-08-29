@@ -18,10 +18,68 @@ import { db } from '#app/utils/db.server'
 import { FindTextColor } from '#app/utils/find-text-color'
 import { jobs } from '../../../drizzle/schema'
 import { useTheme } from '../resources+/theme-switch'
+import { cachified, cache } from '#app/utils/cache.server.ts'
+import { type Timings } from '#app/utils/timing.server.ts'
 
 type JobDescriptionResponse = {
 	description: string
 	error?: string
+}
+
+async function fetchJobData(jobId: number, timings: Timings) {
+	return cachified({
+		key: `job-data:${jobId}`,
+		cache,
+		timings,
+		getFreshValue: async () => {
+			const job = await db.query.jobs.findFirst({
+				where: eq(jobs.id, jobId),
+				with: {
+					address: {
+						with: {
+							city: true,
+							state: true,
+							country: true,
+						},
+					},
+					employer: true,
+					industries: {
+						with: {
+							industry: true,
+						},
+					},
+					jobFunctions: {
+						with: {
+							jobFunction: true,
+						},
+					},
+				},
+			})
+			if (!job) throw new Error('Job not found')
+			return job
+		},
+		checkValue: value => value !== null && typeof value === 'object',
+		ttl: 1000 * 60 * 60, // 1 hour
+		staleWhileRevalidate: 1000 * 60 * 60 * 24, // 1 day
+	})
+}
+
+async function fetchDescription(url: string, timings: Timings) {
+	return cachified({
+		key: `job-description:${url}`,
+		cache,
+		timings,
+		getFreshValue: async () => {
+			const response = await fetch(url)
+			if (!response.ok) throw new Error('Failed to fetch job description')
+			const data = (await response.json()) as JobDescriptionResponse
+			if (data.error) throw new Error(data.error)
+			return data.description
+		},
+		checkValue: value => typeof value === 'string',
+		ttl: 1000 * 60 * 60 * 24, // 1 day
+		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 7, // 1 week
+	})
 }
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
@@ -36,50 +94,23 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	const jobId = parseInt(jobIdString, 10)
 
 	if (isNaN(jobId)) {
-		throw json({ error: 'Post not found' }, { status: 404 })
+		throw json({ error: 'Job post not found' }, { status: 404 })
 	}
 
-	const job = await db.query.jobs.findFirst({
-		where: eq(jobs.id, jobId),
-		with: {
-			address: {
-				with: {
-					city: true,
-					state: true,
-					country: true,
-				},
-			},
-			employer: true,
-			industries: {
-				with: {
-					industry: true,
-				},
-			},
-			jobFunctions: {
-				with: {
-					jobFunction: true,
-				},
-			},
-		},
-	})
+	const timings: Timings = {}
 
-	if (!job) {
-		throw json({ error: 'Job not found' }, { status: 404 })
+	try {
+		const job = await fetchJobData(jobId, timings)
+		const fullDescription = await fetchDescription(
+			`${url.origin}/resources/job-description?descripUrl=${encodeURIComponent(job.descripUrl)}`,
+			timings,
+		)
+
+		return json({ ...job, fullDescription, baseUrl })
+	} catch (error) {
+		console.error('Error in loader:', error)
+		throw json({ error: 'Failed to fetch job data' }, { status: 500 })
 	}
-
-	// Fetch job description
-	const descriptionResponse = await fetch(
-		`${new URL(request.url).origin}/resources/job-description?descripUrl=${encodeURIComponent(job.descripUrl)}`,
-	)
-	const descriptionData =
-		(await descriptionResponse.json()) as JobDescriptionResponse
-
-	if (descriptionData.error) {
-		console.error('Error fetching job description:', descriptionData.error)
-		throw json({ error: 'Failed to fetch job description' }, { status: 500 })
-	}
-
-	return json({ ...job, fullDescription: descriptionData.description, baseUrl })
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -201,7 +232,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 				'@type': 'QuantitativeValue',
 				minValue: minSalary === null ? undefined : minSalary,
 				maxValue: maxSalary === null ? undefined : maxSalary,
-				unitText: payType === 'hr' ? 'hr' : 'yr',
+				unitText: payType === 'hr' ? 'HOUR' : 'YEAR',
 			},
 		},
 	}
