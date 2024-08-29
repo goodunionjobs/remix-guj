@@ -43,6 +43,7 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
+import { useIsBot } from './utils/is-bot.context.tsx'
 
 export const links: LinksFunction = () => {
 	return [
@@ -131,16 +132,30 @@ function Document({
 	theme = 'light',
 	env = {},
 	allowIndexing = true,
+	isBot,
 }: {
 	children: React.ReactNode
 	nonce: string
 	theme?: Theme
 	env?: Record<string, string>
 	allowIndexing?: boolean
+	isBot: boolean
 }) {
+	const isClient = typeof document !== 'undefined'
 	return (
-		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+		<html
+			lang="en"
+			className={`${theme} h-full overflow-x-hidden ${isClient ? 'has-js' : ''}`}
+		>
 			<head>
+				{isBot ? null : (
+					<script
+						nonce={nonce}
+						dangerouslySetInnerHTML={{
+							__html: `document.documentElement.classList.add('has-js');`,
+						}}
+					/>
+				)}
 				<ClientHintCheck nonce={nonce} />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -159,7 +174,9 @@ function Document({
 					}}
 				/>
 				<ScrollRestoration nonce={nonce} />
-				<Scripts nonce={nonce} />
+				{/* TODO: Make tests on clicking on links, especially title of jobpost component,  
+        and other places around website for when bot is true to make sure this work without javascript */}
+				{isBot ? null : <Scripts nonce={nonce} />}
 			</body>
 		</html>
 	)
@@ -177,6 +194,7 @@ function App() {
 	// const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
 	const allowIndexing = data.ENV.ALLOW_INDEXING !== 'false'
 	useToast(data.toast)
+	let isBot = useIsBot()
 
 	return (
 		<Document
@@ -184,6 +202,7 @@ function App() {
 			theme={theme}
 			allowIndexing={allowIndexing}
 			env={data.ENV}
+			isBot={isBot}
 		>
 			<div className="flex h-screen flex-col justify-between">
 				{/* <div className="flex items-center justify-center bg-blue-700 pt-0.5  text-white sm:py-1"> */}

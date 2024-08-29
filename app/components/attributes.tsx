@@ -1,6 +1,8 @@
+import './job_post.css'
+import { Link } from '@remix-run/react'
 import { Highlight } from 'react-instantsearch'
-import type { HitProps } from '#app/utils/types.tsx'
-import { jobs } from '../../drizzle/schema'
+import { type HitProps } from '#app/utils/types.tsx'
+import { type jobs } from '../../drizzle/schema'
 
 function formatSalaryInThousands(salary: number): string {
 	// Round to the nearest thousand
@@ -112,7 +114,7 @@ export function Attributes({
 	employer,
 	title,
 }: {
-	hit?: HitProps['hit']
+	hit: HitProps['hit']
 	minSalary?: number
 	maxSalary?: number
 	state: string
@@ -128,9 +130,13 @@ export function Attributes({
 				<p className="font-Atkinson line-clamp-2 text-sm leading-none sm:leading-tight">
 					{hit ? <Highlight attribute="employer" hit={hit} /> : employer}
 				</p>
-				<p className="font-Atkinson line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight">
+				<Link
+					itemProp="url"
+					to={`/jobs/${hit.objectID}-${hit.title}`}
+					className="job-post_ahref font-Atkinson line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight"
+				>
 					{hit ? <Highlight attribute="title" hit={hit} /> : title}
-				</p>
+				</Link>
 				{minSalary === null && maxSalary === null ? (
 					<span className="hidden"></span>
 				) : (
