@@ -28,9 +28,11 @@ import {
 } from '#app/components/algolia/combobox-menu.js'
 import { Hit } from '#app/components/algolia/hit'
 import { SalaryRangeSliderPopover } from '#app/components/algolia/salary-slider.js'
-import { db } from '#app/utils/db.server'
-import { users } from '../../../drizzle/schema'
-import { organizationSchema, description } from '#app/utils/constants.js'
+import {
+	organizationSchema,
+	webSiteSchema,
+	description,
+} from '#app/utils/constants.js'
 
 const searchClient = algoliasearch(
 	//WARNING: THESE ARE PUBLIC
@@ -77,6 +79,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		},
 		{ property: 'robots', content: 'index,follow' },
 		{ 'script:ld+json': organizationSchema },
+		{ 'script:ld+json': webSiteSchema },
 	]
 }
 
