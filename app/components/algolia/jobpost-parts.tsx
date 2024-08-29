@@ -94,6 +94,7 @@ export function JobHeader({
 	hit,
 	finalTime,
 	url,
+	jobPostUrl,
 	onClick,
 }: {
 	color: string
@@ -103,6 +104,7 @@ export function JobHeader({
 	hit: any //TODO: ? Replace 'any' with a more specific type
 	finalTime: [number, TimeFormat]
 	url: string
+	jobPostUrl: string
 	onClick?: () => void
 }) {
 	return (
@@ -130,6 +132,7 @@ lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5
 					employmentType={hit.employmentType}
 					employer={employer}
 					title={hit.title}
+					jobPostUrl={jobPostUrl}
 				/>
 				<FinalTime finalTime={finalTime} />
 				<ApplyButton

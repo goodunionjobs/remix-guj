@@ -11,6 +11,7 @@ import chalk from 'chalk'
 import { isbot } from 'isbot'
 import { renderToPipeableStream } from 'react-dom/server'
 import { getEnv, init } from './utils/env.server.ts'
+import { IsBotProvider } from './utils/is-bot.context.tsx'
 import { getInstanceInfo } from './utils/litefs.server.ts'
 import { NonceProvider } from './utils/nonce-provider.ts'
 import { makeTimings } from './utils/timing.server.ts'
@@ -53,7 +54,9 @@ export default async function handleRequest(...args: DocRequestArgs) {
 
 		const { pipe, abort } = renderToPipeableStream(
 			<NonceProvider value={nonce}>
-				<RemixServer context={remixContext} url={request.url} />
+				<IsBotProvider isBot={isbot(request.headers.get('User-Agent') ?? '')}>
+					<RemixServer context={remixContext} url={request.url} />
+				</IsBotProvider>
 			</NonceProvider>,
 			{
 				[callbackName]: () => {
