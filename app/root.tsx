@@ -139,7 +139,7 @@ function Document({
 	theme?: Theme
 	env?: Record<string, string>
 	allowIndexing?: boolean
-	isBot: boolean
+	isBot?: boolean
 }) {
 	const isClient = typeof document !== 'undefined'
 	return (
