@@ -58,10 +58,13 @@ ENV DATABASE_PATH="$LITEFS_DIR/$DATABASE_FILENAME"
 # ENV DATABASE_URL="file:$DATABASE_PATH"
 ENV CACHE_DATABASE_FILENAME="cache.db"
 ENV CACHE_DATABASE_PATH="$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
-ENV INTERNAL_COMMAND_TOKEN=$(openssl rand -hex 32)
 ENV INTERNAL_PORT="8080"
 ENV PORT="8081"
 ENV NODE_ENV="production"
+
+# Generate random value and set it as environment variable
+RUN INTERNAL_COMMAND_TOKEN=$(openssl rand -hex 32) && \
+  echo "INTERNAL_COMMAND_TOKEN=$INTERNAL_COMMAND_TOKEN" >> /etc/environment
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
