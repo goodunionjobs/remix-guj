@@ -66,12 +66,38 @@ type SearchProps = {
 	serverUrl?: string
 }
 
+function generateCanonicalUrl(url: string): string {
+	const parsedUrl = new URL(url)
+
+	// Remove query, state, and jobtype parameters
+	parsedUrl.searchParams.delete('q')
+	parsedUrl.searchParams.delete('state')
+	parsedUrl.searchParams.delete('jobtype')
+
+	// Keep the page parameter if it exists and is greater than 1
+	const page = parsedUrl.searchParams.get('page')
+	if (page && parseInt(page) > 1) {
+		parsedUrl.searchParams.set('page', page)
+	} else {
+		parsedUrl.searchParams.delete('page')
+	}
+
+	return parsedUrl.toString()
+}
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	if (!data) {
+		return [
+			{ title: 'Error | Good Union Jobs' },
+			{ name: 'robots', content: 'noindex' },
+		]
+	}
+
+	const canonicalUrl = generateCanonicalUrl(data.serverUrl)
+
 	return [
 		{
-			title: data
-				? 'Good Union Jobs - Browse nationwide union jobs, get daily alerts'
-				: 'Error | Good Union Jobs',
+			title: 'Good Union Jobs - Browse nationwide union jobs, get daily alerts',
 		},
 		{
 			name: 'description',
@@ -80,6 +106,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{ property: 'robots', content: 'index,follow' },
 		{ 'script:ld+json': organizationSchema },
 		{ 'script:ld+json': webSiteSchema },
+		{ tagName: 'link', rel: 'canonical', href: canonicalUrl },
 	]
 }
 
@@ -166,7 +193,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 				>
 					<Configure hitsPerPage={40} />
 					<div className="mt-10 grid justify-items-center">
-						<div className=" justify-center">
+						<div className="justify-center">
 							<SearchBox
 								loadingIconComponent={() => 'loading...'}
 								placeholder="Search for Union Jobs"
