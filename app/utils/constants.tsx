@@ -30,4 +30,4 @@ export const webSiteSchema: WithContext<WebSite> = {
 }
 
 export const description =
-	'GoodUnionJobs.com is your go-to platform for browsing union job postings across all industries nationwide. Stay updated with daily email alerts on the latest opportunities, ensuring you never miss a chance to find your next union job.'
+	'Good Union Jobs is your go-to platform for browsing union job postings across all industries nationwide. Stay updated with daily email alerts on the latest opportunities, ensuring you never miss a chance to find your next union job.'

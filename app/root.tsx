@@ -80,7 +80,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 		{
 			name: 'description',
 			content:
-				'GoodUnionJobs.com is your go-to platform for browsing union job postings across all industries nationwide. Stay updated with daily email alerts on the latest opportunities, ensuring you never miss a chance to find your next union job.',
+				'GoodUnionJobs is your go-to platform for browsing union job postings across all industries nationwide. Stay updated with daily email alerts on the latest opportunities, ensuring you never miss a chance to find your next union job.',
 		},
 		{ 'script:ld+json': organizationSchema },
 	]
