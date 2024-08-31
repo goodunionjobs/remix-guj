@@ -23,6 +23,11 @@ export default defineConfig({
 
 		sourcemap: true,
 	},
+	server: {
+		watch: {
+			ignored: ['**/playwright-report/**'],
+		},
+	},
 	plugins: [
 		remixDevTools(),
 		remix({

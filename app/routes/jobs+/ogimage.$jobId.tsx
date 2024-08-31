@@ -287,7 +287,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	return new Response(pngBuffer, {
 		headers: {
 			'Content-Type': 'image/png',
-			'Cache-Control': 'public, max-age=31536000, immutable',
+			'Cache-Control': 'public, max-age=604800, immutable',
 		},
 	})
 }

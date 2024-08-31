@@ -1,6 +1,5 @@
-import { ProfilingIntegration } from '@sentry/profiling-node'
-import * as Sentry from '@sentry/remix'
-// import { prisma } from './db.server.ts'
+import { nodeProfilingIntegration } from '@sentry/profiling-node'
+import Sentry from '@sentry/remix'
 
 export function init() {
 	Sentry.init({
@@ -18,11 +17,11 @@ export function init() {
 			/\/site\.webmanifest/,
 		],
 		integrations: [
-			new Sentry.Integrations.Http({ tracing: true }),
+			Sentry.httpIntegration(),
+			nodeProfilingIntegration(),
 			//TODO: Work on integrating drizzle
 			//https://github.com/getsentry/sentry-javascript/discussions/8117#discussioncomment-9260637
 			// new Sentry.Integrations.Prisma({ client: prisma }),
-			new ProfilingIntegration(),
 		],
 		tracesSampler(samplingContext) {
 			// ignore healthcheck transactions by other services (consul, etc.)
