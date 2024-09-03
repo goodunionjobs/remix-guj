@@ -358,7 +358,8 @@ export function ErrorBoundary() {
 							</p>
 						</div>
 						<Link to="/" className="text-body-md underline">
-							<Icon name="arrow-left">Back to home</Icon>
+							<Icon name="arrow-left" />
+							Back to home
 						</Link>
 					</div>
 				),
