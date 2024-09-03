@@ -1,4 +1,4 @@
-import { invariant } from '@epic-web/invariant'
+import { invariant, invariantResponse } from '@epic-web/invariant'
 import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -20,6 +20,9 @@ import { jobs } from '../../../drizzle/schema'
 import { useTheme } from '../resources+/theme-switch'
 import { cachified, cache } from '#app/utils/cache.server.ts'
 import { type Timings } from '#app/utils/timing.server.ts'
+import { GeneralErrorBoundary } from '#app/components/error-boundary'
+import { Icon } from '#app/components/ui/icon.tsx'
+import { Home } from 'lucide-react'
 
 type JobDescriptionResponse = {
 	description: string
@@ -55,7 +58,7 @@ async function fetchJobData(jobId: number, timings: Timings) {
 					},
 				},
 			})
-			if (!job) throw new Error('Job not found')
+			if (!job) throw new Error('Job post not found')
 			return job
 		},
 		checkValue: value => value !== null && typeof value === 'object',
@@ -93,9 +96,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	const jobIdString = params.jobId.split('-')[0]
 	const jobId = parseInt(jobIdString, 10)
 
-	if (isNaN(jobId)) {
-		throw json({ error: 'Job post not found' }, { status: 404 })
-	}
+	invariantResponse(!isNaN(jobId), 'Bad Request')
 
 	const timings: Timings = {}
 
@@ -109,7 +110,11 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 		return json({ ...job, fullDescription, baseUrl })
 	} catch (error) {
 		console.error('Error in loader:', error)
-		throw json({ error: 'Failed to fetch job data' }, { status: 500 })
+		//TODO: Fixup. Don't make it just 404... Could sometimes be due to something else
+		if (error instanceof Error) {
+			throw json({ message: 'Job post not found' }, { status: 404 })
+		}
+		throw json({ message: 'An unexpected error occurred' }, { status: 500 })
 	}
 }
 
@@ -320,5 +325,44 @@ export default function JobRoute() {
 				</div>
 			</div>
 		</div>
+	)
+}
+
+//TODO: Redirect jobs/ without anything after as 301 back to home page
+
+export function ErrorBoundary() {
+	return (
+		<GeneralErrorBoundary
+			statusHandlers={{
+				400: () => (
+					<div className="flex flex-col gap-6">
+						<div className="flex flex-col gap-3">
+							<h1>Invalid Job ID</h1>
+							<p>The job ID you've entered is not in the correct format.</p>
+						</div>
+						<Link to="/" className="text-body-md underline">
+							{/* //TODO: Add in home button nicely vs arrow left */}
+							{/* <Home className="mr-2 h-4 w-4" /> */}
+							<Icon name="arrow-left" />
+							Back to home
+						</Link>
+					</div>
+				),
+				404: () => (
+					<div className="flex flex-col gap-6">
+						<div className="flex flex-col gap-3">
+							<h1>Job Post Not Found</h1>
+							<p>
+								The job post you're looking for doesn't exist or has been
+								removed.
+							</p>
+						</div>
+						<Link to="/" className="text-body-md underline">
+							<Icon name="arrow-left">Back to home</Icon>
+						</Link>
+					</div>
+				),
+			}}
+		/>
 	)
 }
