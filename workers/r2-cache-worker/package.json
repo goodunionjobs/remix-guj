@@ -1,0 +1,10 @@
+{
+  "name": "r2-images-cache",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "npx wrangler deploy",
+    "deploy:staging": "npx wrangler deploy --env staging",
+    "dev": "npx wrangler dev --remote"
+  }
+}

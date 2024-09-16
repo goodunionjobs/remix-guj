@@ -91,7 +91,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	// Get the base URL from the request
 	const url = new URL(request.url)
 	const baseUrl = `${url.protocol}//${url.host}`
-	console.log('baseurl: ', baseUrl)
 
 	const jobIdString = params.jobId.split('-')[0]
 	const jobId = parseInt(jobIdString, 10)
@@ -330,6 +329,7 @@ export default function JobRoute() {
 
 //TODO: Redirect jobs/ without anything after as 301 back to home page
 
+//TODO: Add job application disclaimer. Look at writeup and put it in searches when pulling data
 export function ErrorBoundary() {
 	return (
 		<GeneralErrorBoundary

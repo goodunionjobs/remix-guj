@@ -1,12 +1,11 @@
 // File: app/components/jobs/shared-components.tsx
-
-import { Link } from '@remix-run/react'
 import dayjs from 'dayjs'
 import { ApplyButton } from '#app/components/apply-button'
 import { Attributes, DrizzleAttributes } from '#app/components/attributes'
 import { FinalTime } from '#app/components/final-time'
 import { LogoImage } from '#app/components/logo-image'
 import { jobs } from '../../../drizzle/schema'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 enum TimeFormat {
 	Hour = 'hr',
@@ -51,12 +50,7 @@ export function JobHeaderDrizzle({
 }) {
 	return (
 		<div
-			className="border-grey-200 border-1 relative z-10
-h-max overflow-hidden rounded-md  border
-text-black shadow-xl transition duration-300  ease-out dark:shadow-slate-800/60 
-lg:hover:transform-none lg:active:translate-x-0.5
-lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5
-2xl:active:translate-x-1 2xl:active:translate-y-1"
+			className="border-grey-200 border-1 relative z-10 h-max overflow-hidden rounded-md border text-black shadow-xl transition duration-300 ease-out dark:shadow-slate-800/60 lg:hover:transform-none lg:active:translate-x-0.5 lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5 2xl:active:translate-x-1 2xl:active:translate-y-1"
 			style={{ background: color, color: textColor }}
 		>
 			<div className="flex h-24 flex-row items-center" onClick={onClick}>
@@ -94,7 +88,6 @@ export function JobHeader({
 	hit,
 	finalTime,
 	url,
-	jobPostUrl,
 	onClick,
 }: {
 	color: string
@@ -104,17 +97,11 @@ export function JobHeader({
 	hit: any //TODO: ? Replace 'any' with a more specific type
 	finalTime: [number, TimeFormat]
 	url: string
-	jobPostUrl: string
 	onClick?: () => void
 }) {
 	return (
 		<div
-			className="border-grey-200 border-1 relative z-10
-h-max overflow-hidden rounded-md  border
-text-black shadow-xl transition duration-300  ease-out dark:shadow-slate-800/60 
-lg:hover:transform-none lg:active:translate-x-0.5
-lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5
-2xl:active:translate-x-1 2xl:active:translate-y-1"
+			className="border-grey-200 border-1 relative z-10 h-max overflow-hidden rounded-md border text-black shadow-xl transition duration-300 ease-out dark:shadow-slate-800/60 lg:hover:transform-none lg:active:translate-x-0.5 lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5 2xl:active:translate-x-1 2xl:active:translate-y-1"
 			style={{ background: color, color: textColor }}
 		>
 			<div className="flex h-24 flex-row items-center" onClick={onClick}>
@@ -132,7 +119,6 @@ lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5
 					employmentType={hit.employmentType}
 					employer={employer}
 					title={hit.title}
-					jobPostUrl={jobPostUrl}
 				/>
 				<FinalTime finalTime={finalTime} />
 				<ApplyButton
@@ -160,6 +146,12 @@ export function JobDescription({
 	job?: string
 	isLoading?: boolean
 }) {
+	const socialIcons = [
+		{ name: 'twitter', icon: 'social-x' },
+		{ name: 'facebook', icon: 'social-facebook' },
+		{ name: 'linkedin', icon: 'social-linkedin' },
+		{ name: 'reddit', icon: 'social-reddit' },
+	] as const
 	return (
 		<div className="light:bg-white light:border-black dark:border-gray -my-2 mr-2 w-full rounded-lg border-2 border-solid py-4 text-sm dark:bg-slate-900 sm:text-base">
 			{url && (
@@ -188,29 +180,6 @@ export function JobDescription({
 					/>
 				)}
 			</div>
-			{objectID && (
-				//TODO: Work on just making a button that says, maybe, "Click to Copy and share?"
-				<div className="mb-2 mt-1 flex flex-col">
-					<div className="text-center text-xl font-bold underline">
-						Share this job:
-					</div>
-					<div
-						onClick={e => {
-							e.preventDefault()
-							navigator.clipboard.writeText(`${baseUrl}jobs/${objectID}-${job}`)
-						}}
-						className="border-1.5 border-grey-400 mx-auto cursor-pointer justify-center rounded-md border bg-white px-2 text-base dark:bg-slate-800"
-					>
-						<Link
-							to={`/jobs/${objectID}-${job}`}
-							target="_blank"
-							className="block max-w-sm select-all overflow-hidden  sm:max-w-xl"
-						>
-							{`${baseUrl}jobs/${objectID}-${job}`}
-						</Link>
-					</div>
-				</div>
-			)}
 		</div>
 	)
 }
@@ -229,3 +198,47 @@ export function calculateFinalTime(timestamp: number): [number, TimeFormat] {
 	if (monthDiff < 12) return [monthDiff, TimeFormat.Month]
 	return [yearDiff, TimeFormat.Year]
 }
+
+// {objectID && (
+// 	//TODO: Work on just making a button that says, maybe, "Click to Copy and share?"
+// 	{/* <section className="mx-auto mt-4 w-fit overflow-hidden rounded-lg border border-gray-200 bg-transparent dark:border-white/10"> */}
+// 	{/* 	<div className="flex flex-col items-center justify-center gap-4 p-4 sm:flex-row"> */}
+// 	{/* 		<div className="flex items-center gap-1 whitespace-nowrap text-sm"> */}
+// 	{/* 			<svg */}
+// 	{/* 				xmlns="http://www.w3.org/2000/svg" */}
+// 	{/* 				viewBox="0 0 20 20" */}
+// 	{/* 				fill="currentColor" */}
+// 	{/* 				className="h-5 w-5 animate-pulse text-rose-400/90" */}
+// 	{/* 			> */}
+// 	{/* 				<path */}
+// 	{/* 					fillRule="evenodd" */}
+// 	{/* 					d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" */}
+// 	{/* 					clipRule="evenodd" */}
+// 	{/* 				/> */}
+// 	{/* 			</svg> */}
+// 	{/* 			Share with friends */}
+// 	{/* 		</div> */}
+// 	{/* 		<div className="flex flex-wrap items-center justify-center gap-2"> */}
+// 	{/* 			{socialIcons.map(({ name, icon }) => ( */}
+// 	{/* 				<a */}
+// 	{/* 					key={name} */}
+// 	{/* 					href={`https://${name}.com/share?url=https%3A%2F%2Fwww.epicreact.dev%2Freact-19-cheatsheet`} */}
+// 	{/* 					className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 transition hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700" */}
+// 	{/* 					target="_blank" */}
+// 	{/* 					rel="noopener noreferrer" */}
+// 	{/* 				> */}
+// 	{/* 					<span className="sr-only">share on {name}</span> */}
+// 	{/* 					<Icon name={icon} className="h-4 w-4" /> */}
+// 	{/* 				</a> */}
+// 	{/* 			))} */}
+// 	{/* 			<button */}
+// 	{/* 				type="button" */}
+// 	{/* 				className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 transition hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700" */}
+// 	{/* 			> */}
+// 	{/* 				<span className="sr-only">copy url to clipboard</span> */}
+// 	{/* 				<Icon name="social-link" className="h-4 w-4" /> */}
+// 	{/* 			</button> */}
+// 	{/* 		</div> */}
+// 	{/* 	</div> */}
+// 	{/* </section> */}
+// )}
