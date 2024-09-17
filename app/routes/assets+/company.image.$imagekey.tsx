@@ -17,7 +17,10 @@ export const loader: LoaderFunction = async ({ params }) => {
 		const response = await fetch(workerUrl)
 
 		if (!response.ok) {
-			return new Response('Image not found', { status: 404 })
+			console.log('here')
+			return new Response(`Image not found, here is workerUrl ${workerUrl}`, {
+				status: 404,
+			})
 		}
 
 		// Forward the body and headers from the worker response
