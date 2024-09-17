@@ -1,3 +1,4 @@
+//TODO: SETUP GITHUB C/I for this to make sure when done setting up staging you deploy new production cloudflare worker!
 export default {
 	async fetch(request, env, context) {
 		try {
@@ -43,8 +44,8 @@ export default {
 				headers.set('Content-Type', contentType)
 			}
 
-			// Set Cache-Control header for 2 weeks with immutable directive
-			headers.set('Cache-Control', 'public, max-age=1209600, immutable')
+			// Set Cache-Control header for a year with immutable directive
+			headers.set('Cache-Control', 'public, max-age=31536000, immutable')
 
 			response = new Response(object.body, {
 				headers,
