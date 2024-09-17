@@ -28,7 +28,7 @@ export function LogoImage({
 		.replace(/\.(avif|webp|jpeg)$/, '')
 	const encodedKey = encodeURIComponent(imageKey)
 
-	const imageUrl = `assets/company/image/${encodedKey}`
+	const imageUrl = `/assets/company/image/${encodedKey}`
 
 	const handleImageError = (
 		e: React.SyntheticEvent<HTMLImageElement, Event>,
