@@ -1,19 +1,10 @@
-import { type LoaderFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 export interface LogoImageProps {
 	employerImage: string
 	employer: string
 	size: number
 	layout: 'grid' | 'flex'
-}
-
-// Loader function to determine the environment
-export const loader: LoaderFunction = async ({ request }) => {
-	const url = new URL(request.url)
-	const isProduction = url.hostname === 'goodunionjobs.com'
-	return { isProduction }
 }
 
 export function LogoImage({
@@ -23,9 +14,6 @@ export function LogoImage({
 	layout,
 }: LogoImageProps) {
 	const [imgError, setImgError] = useState(false)
-	const { isProduction } = useLoaderData<{
-		isProduction: boolean
-	}>()
 
 	const containerClassName =
 		layout === 'flex'
@@ -39,15 +27,8 @@ export function LogoImage({
 		.replace(/^assets\/company\/image\//, '')
 		.replace(/\.(avif|webp|jpeg)$/, '')
 	const encodedKey = encodeURIComponent(imageKey)
-	// const encodedKey = imageKey
 
-	// Determine the correct workerUrl based on environment
-	const workerUrl =
-		process.env.NODE_ENV === 'development'
-			? 'http://localhost:8787/assets/company/image'
-			: `https://r2-images-cache${isProduction ? '' : '-staging'}.goodunionjobs.workers.dev/assets/company/image`
-
-	console.log(workerUrl + encodedKey)
+	const imageUrl = `assets/company/image/${encodedKey}`
 
 	const handleImageError = (
 		e: React.SyntheticEvent<HTMLImageElement, Event>,
@@ -67,10 +48,10 @@ export function LogoImage({
 	return (
 		<div className={containerClassName}>
 			<picture>
-				<source srcSet={`${workerUrl}/${encodedKey}.avif`} type="image/avif" />
-				<source srcSet={`${workerUrl}/${encodedKey}.webp`} type="image/webp" />
+				<source srcSet={`${imageUrl}.avif`} type="image/avif" />
+				<source srcSet={`${imageUrl}.webp`} type="image/webp" />
 				<img
-					src={`${workerUrl}/${encodedKey}.jpeg`}
+					src={`${imageUrl}.jpeg`}
 					alt={`${employer} Logo`}
 					className={imageClassName}
 					decoding="async"
@@ -83,70 +64,3 @@ export function LogoImage({
 		</div>
 	)
 }
-
-// import React, { useState } from 'react'
-//
-// export interface LogoImageProps {
-// 	employerImage: string
-// 	employer: string
-// 	size: number
-// 	layout: 'grid' | 'flex'
-// }
-//
-// export function LogoImage({
-// 	employerImage,
-// 	employer,
-// 	size,
-// 	layout,
-// }: LogoImageProps) {
-// 	const [imgError, setImgError] = useState(false)
-//
-// 	const containerClassName =
-// 		layout === 'flex'
-// 			? 'sm:flex-initial flex-none sm:mx-4 mt-4 mx-1 w-1/5 sm:w-auto h-16 text-sm font-light self-center'
-// 			: 'grid text-sm font-light justify-center rounded-lg self-center'
-//
-// 	const imageClassName = 'object-scale-down h-5/6 rounded-md shadow-xl text-xs'
-//
-// 	// Remove the file extension and the leading path
-// 	const imageKey = employerImage
-// 		.replace(/^assets\/company\/image\//, '')
-// 		.replace(/\.(avif|webp|jpeg)$/, '')
-// 	const encodedKey = encodeURIComponent(imageKey)
-// 	const basePath = `/assets/company/image/${encodedKey}`
-//
-// 	const handleImageError = (
-// 		e: React.SyntheticEvent<HTMLImageElement, Event>,
-// 	) => {
-// 		console.error('Image failed to load:', e)
-// 		setImgError(true)
-// 	}
-//
-// 	if (imgError) {
-// 		return (
-// 			<div className={containerClassName}>
-// 				<div className={imageClassName}>{employer.charAt(0)}</div>
-// 			</div>
-// 		)
-// 	}
-//
-// 	return (
-// 		<div className={containerClassName}>
-// 			<picture>
-// 				<source srcSet={`${basePath}.avif`} type="image/avif" />
-// 				<source srcSet={`${basePath}.webp`} type="image/webp" />
-// 				<img
-// 					src={`${basePath}.jpeg`}
-// 					alt={`${employer} Logo`}
-// 					className={imageClassName}
-// 					decoding="async"
-// 					loading="lazy"
-// 					width={size}
-// 					height={size}
-// 					onError={handleImageError}
-// 				/>
-// 			</picture>
-// 		</div>
-// 	)
-// }
-//

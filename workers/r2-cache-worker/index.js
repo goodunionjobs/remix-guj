@@ -43,8 +43,8 @@ export default {
 				headers.set('Content-Type', contentType)
 			}
 
-			// Set Cache-Control header for longer caching (e.g., 1 hour)
-			headers.set('Cache-Control', 'public, max-age=3600')
+			// Set Cache-Control header for 2 weeks with immutable directive
+			headers.set('Cache-Control', 'public, max-age=1209600, immutable')
 
 			response = new Response(object.body, {
 				headers,
