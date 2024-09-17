@@ -12,7 +12,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 	const workerUrl =
 		process.env.NODE_ENV === 'development'
 			? `http://localhost:8787/assets/company/image/${imagekey}`
-			: `https://r2-images-cache${url.hostname === 'goodunionjobs' ? '' : '-staging'}.goodunionjobs.workers.dev/assets/company/image/${imagekey}`
+			: `https://r2-images-cache${url.hostname === 'goodunionjobs.com' ? '' : '-staging'}.goodunionjobs.workers.dev/assets/company/image/${imagekey}`
 
 	try {
 		const response = await fetch(workerUrl)
