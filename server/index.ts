@@ -133,7 +133,13 @@ app.use(
 				].filter(Boolean),
 				'font-src': ["'self'"],
 				'frame-src': ["'self'", 'https://tenor.com'],
-				'img-src': ["'self'", 'data:', 'https://*.tenor.com'],
+				'img-src': [
+					"'self'",
+					'data:',
+					'https://*.tenor.com',
+					MODE === 'development' ? 'http://localhost:8787' : null, // Allow localhost in development. VERTY COOL
+					'https://*.goodunionjobs.workers.dev',
+				].filter(Boolean),
 				'script-src': [
 					'*.umami.is',
 					"'strict-dynamic'",

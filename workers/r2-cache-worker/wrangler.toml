@@ -1,0 +1,19 @@
+name = "r2-images-cache"
+main = "index.js"
+compatibility_date = "2023-01-01"
+
+# Production environment
+r2_buckets = [
+  { binding = "BUCKET", bucket_name = "goodunionjobs", preview_bucket_name = "goodunionjobs-dev" }
+]
+
+# Staging environment
+[env.staging]
+name = "r2-images-cache-staging"
+r2_buckets = [
+  { binding = "BUCKET", bucket_name = "goodunionjobs-dev" }
+]
+
+[dev]
+port = 8787
+local_protocol = "http"

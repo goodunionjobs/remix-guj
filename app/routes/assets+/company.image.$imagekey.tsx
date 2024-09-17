@@ -1,72 +1,38 @@
-// app/routes/assets.company.image.$imagekey.tsx
-import path from 'path'
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
-import { invariant, invariantResponse } from '@epic-web/invariant'
-import { type LoaderFunction } from '@remix-run/node'
+import type { LoaderFunction } from '@remix-run/node'
 
-// Allowed image extensions
-const allowedExtensions = ['.avif', '.webp', '.jpeg']
-
-// Initialize the S3 client
-const s3Client = new S3Client({
-	region: 'auto',
-	endpoint: process.env.GUJ_S3_ENDPOINT,
-	credentials: {
-		accessKeyId: process.env.GUJ_S3_ACCESS_KEY as string,
-		secretAccessKey: process.env.GUJ_S3_SECRET_KEY as string,
-	},
-})
-
-export const loader: LoaderFunction = async ({ params, request }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
 	const { imagekey } = params
-
-	invariantResponse(imagekey, 'Image key is required', { status: 400 })
-
-	// Get the extension from the imagekey
-	const extension = path.extname(imagekey)
-	const baseImageKey = path.basename(imagekey, extension)
-
-	// If no extension in imagekey, get it from the request URL
 	const url = new URL(request.url)
-	const urlExtension = path.extname(url.pathname)
 
-	// Use the extension from the imagekey if present, otherwise use the one from URL
-	const finalExtension = extension || urlExtension
+	if (!imagekey) {
+		throw new Response('Image key not provided', { status: 400 })
+	}
 
-	invariantResponse(
-		allowedExtensions.includes(finalExtension),
-		`Invalid file extension: ${finalExtension}`,
-		{ status: 404 },
-	)
-
-	// Construct the S3 key
-	const s3Key = `assets/company/image/${baseImageKey}${finalExtension}`
+	// Use the correct Cloudflare Workers URL based on the environment
+	const workerUrl =
+		process.env.NODE_ENV === 'development'
+			? `http://localhost:8787/assets/company/image/${imagekey}`
+			: `https://r2-images-cache${url.hostname === 'goodunionjobs.com' ? '' : '-staging'}.goodunionjobs.workers.dev/assets/company/image/${imagekey}`
 
 	try {
-		// Fetch the image from S3
-		const command = new GetObjectCommand({
-			Bucket: process.env.GUJ_S3_BUCKET_NAME,
-			Key: s3Key,
-		})
+		const response = await fetch(workerUrl)
 
-		const response = await s3Client.send(command)
+		if (!response.ok) {
+			console.log('here')
+			return new Response(
+				`Image not found, here is workerUrl ${workerUrl} and here is request: ${url.hostname}`,
+				{
+					status: 404,
+				},
+			)
+		}
 
-		invariant(response.Body, 'No image data received')
+		// Forward the body and headers from the worker response
+		const body = await response.arrayBuffer() // Buffer the image to send as binary
+		const headers = new Headers(response.headers) // Forward all headers
 
-		// Get the image data as a Buffer
-		const imageData = await response.Body.transformToByteArray()
-
-		// Determine the content type
-		const contentType =
-			response.ContentType || `image/${finalExtension.slice(1)}`
-
-		// Return the image data with appropriate headers
-		return new Response(imageData, {
-			status: 200,
-			headers: {
-				'Content-Type': contentType,
-				'Cache-Control': 'public, max-age=31536000, immutable',
-			},
+		return new Response(body, {
+			headers, // Use the headers set by the Cloudflare Worker
 		})
 	} catch (error) {
 		console.error('Error fetching image:', error)
