@@ -243,7 +243,7 @@ function App() {
 											asChild
 											variant="default"
 											size="lg"
-											className="w-3/4 sm:w-full "
+											className="w-3/4 sm:w-full"
 										>
 											<Link to={'/kinde-auth/register'}>
 												Sign Up - Job Notifications 💼
@@ -269,7 +269,7 @@ function App() {
 				</div>
 
 				<div className="container flex justify-between justify-items-center pb-5">
-					<div className="flex items-center justify-items-center  gap-4">
+					<div className="flex items-center justify-items-center gap-4">
 						<Logo />
 						<Link to="/" className="hidden self-center md:block">
 							<div className="font-light">Good</div>
@@ -297,7 +297,7 @@ function Logo() {
 			<img
 				src="/favicons/512x512.png"
 				alt="good union jobs logo"
-				// TODO Fix this to be dynamic
+				// TODO: Fix this to be dynamic
 				// multiply by 0.4 of logo.png to get size used now
 				width={60.8}
 				height={56}
