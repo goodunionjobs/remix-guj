@@ -138,6 +138,7 @@ app.use(
 					'data:',
 					'https://*.tenor.com',
 					MODE === 'development' ? 'http://localhost:8787' : null, // Allow localhost in development. VERTY COOL
+					'https://*.goodunionjobs.workers.dev',
 				].filter(Boolean),
 				'script-src': [
 					'*.umami.is',
