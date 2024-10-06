@@ -22,7 +22,6 @@ import { cachified, cache } from '#app/utils/cache.server.ts'
 import { type Timings } from '#app/utils/timing.server.ts'
 import { GeneralErrorBoundary } from '#app/components/error-boundary'
 import { Icon } from '#app/components/ui/icon.tsx'
-import { Home } from 'lucide-react'
 
 type JobDescriptionResponse = {
 	description: string
