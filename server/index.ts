@@ -1,7 +1,6 @@
 import crypto from 'crypto'
-import { createRequestHandler as _createRequestHandler } from '@remix-run/express'
-import { type ServerBuild, installGlobals } from '@remix-run/node'
-import * as Sentry from '@sentry/remix'
+import { createRequestHandler } from '@remix-run/express'
+import { type ServerBuild } from '@remix-run/node'
 import { ip as ipAddress } from 'address'
 import chalk from 'chalk'
 import closeWithGrace from 'close-with-grace'
@@ -12,16 +11,14 @@ import getPort, { portNumbers } from 'get-port'
 import helmet from 'helmet'
 import morgan from 'morgan'
 
-installGlobals()
-
 const MODE = process.env.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = process.env.ALLOW_INDEXING !== 'false'
 
-const createRequestHandler = IS_PROD
-	? Sentry.wrapExpressCreateRequestHandler(_createRequestHandler)
-	: _createRequestHandler
+if (IS_PROD && process.env.SENTRY_DSN) {
+	void import('./utils/monitoring.js').then(({ init }) => init())
+}
 
 const viteDevServer = IS_PROD
 	? undefined
@@ -51,6 +48,8 @@ app.use((req, res, next) => {
 
 // ensure HTTPS only (X-Forwarded-Proto comes from Fly)
 app.use((req, res, next) => {
+	if (req.method !== 'GET') return next()
+
 	const proto = req.get('X-Forwarded-Proto')
 	const host = getHost(req)
 	if (proto === 'http') {
@@ -167,9 +166,14 @@ const rateLimitDefault = {
 	max: 1000 * maxMultiple,
 	standardHeaders: true,
 	legacyHeaders: false,
-	// Fly.io prevents spoofing of X-Forwarded-For
-	// so no need to validate the trustProxy config
 	validate: { trustProxy: false },
+	// Malicious users can spoof their IP address which means we should not deault
+	// to trusting req.ip when hosted on Fly.io. However, users cannot spoof Fly-Client-Ip.
+	// When sitting behind a CDN such as cloudflare, replace fly-client-ip with the CDN
+	// specific header such as cf-connecting-ip
+	keyGenerator: (req: express.Request) => {
+		return req.get('cf-connecting-ip') ?? `${req.ip}`
+	},
 }
 
 const strongestRateLimit = rateLimit({

@@ -4,6 +4,7 @@ import { glob } from 'glob'
 import { flatRoutes } from 'remix-flat-routes'
 import { defineConfig } from 'vite'
 import { remixDevTools } from 'remix-development-tools'
+import { envOnlyMacros } from 'vite-env-only'
 
 const MODE = process.env.NODE_ENV
 
@@ -16,7 +17,11 @@ export default defineConfig({
 		},
 
 		assetsInlineLimit: (source: string) => {
-			if (source.endsWith('sprite.svg')) {
+			if (
+				source.endsWith('sprite.svg') ||
+				source.endsWith('favicon.svg') ||
+				source.endsWith('apple-touch-icon.png')
+			) {
 				return false
 			}
 		},
@@ -29,6 +34,7 @@ export default defineConfig({
 		},
 	},
 	plugins: [
+		envOnlyMacros(),
 		remixDevTools(),
 		remix({
 			ignoredRouteFiles: ['**/*'],

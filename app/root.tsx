@@ -19,6 +19,8 @@ import {
 import { withSentry } from '@sentry/remix'
 import { useRef } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
+import faviconAssetUrl from './assets/favicons/favicon.svg'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from './components/toaster.tsx'
@@ -49,23 +51,20 @@ export const links: LinksFunction = () => {
 	return [
 		// Preload svg sprite as a resource to avoid render blocking
 		{ rel: 'preload', href: iconsHref, as: 'image' },
-		// Preload CSS as a resource to avoid render blocking
-		{ rel: 'mask-icon', href: '/favicons/mask-icon.svg' },
 		{
-			rel: 'alternate icon',
-			type: 'image/png',
-			href: '/favicons/favicon-32x32.png',
+			rel: 'icon',
+			href: '/favicon.ico',
+			sizes: '48x48',
 		},
-		{ rel: 'apple-touch-icon', href: '/favicons/apple-touch-icon.png' },
+		{ rel: 'icon', type: 'image/svg+xml', href: faviconAssetUrl },
+		{ rel: 'apple-touch-icon', href: appleTouchIconAssetUrl },
 		{
 			rel: 'manifest',
 			href: '/site.webmanifest',
 			crossOrigin: 'use-credentials',
 		} as const, // necessary to make typescript happy
-		//These should match the css preloads above to avoid css as render blocking resource
 		//TODO: Fix svg icon. Shows in chrome and other browsers small!
 		// { rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' },
-		{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.ico' },
 		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
 	].filter(Boolean)
 }
