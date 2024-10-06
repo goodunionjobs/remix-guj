@@ -6,8 +6,6 @@ import { eq } from 'drizzle-orm'
 import satori, { type SatoriOptions } from 'satori'
 import { db } from '#app/utils/db.server'
 import { jobs } from '../../../drizzle/schema'
-import { cachified, cache } from '#app/utils/cache.server.ts'
-import { type Timings } from '#app/utils/timing.server.ts'
 
 type Weight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
 
@@ -96,198 +94,186 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
 	const timings = {}
 
-	const pngBuffer = await cachified({
-		key: `job-image:${jobIdNumber}`,
-		cache,
-		timings,
-		getFreshValue: async () => {
-			// Fetch the job from the database
-			const job = await db.query.jobs.findFirst({
-				where: eq(jobs.id, jobIdNumber),
+	// Fetch the job from the database
+	const job = await db.query.jobs.findFirst({
+		where: eq(jobs.id, jobIdNumber),
+		with: {
+			address: {
 				with: {
-					address: {
-						with: {
-							city: true,
-							state: true,
-							country: true,
-						},
-					},
-					employer: true,
+					city: true,
+					state: true,
+					country: true,
 				},
-			})
-
-			if (!job) {
-				throw json({ error: 'Job not found' }, { status: 404 })
-			}
-
-			const minSalary = job.minSalary
-			const maxSalary = job.maxSalary
-
-			const salaryRangeStr = formatSalaryRange(minSalary, maxSalary)
-
-			// Generate the image as before
-			const [fonts, logoDataUri, moneyBagEmoji, pushPinEmoji, clockEmoji] =
-				await Promise.all([
-					getFont('Atkinson Hyperlegible', [400, 700]),
-					fetchImageAsDataUri(`${url.origin}/${job.employer.s3Link}.jpeg`),
-					loadLocalEmoji('moneybag.png'),
-					loadLocalEmoji('pushpin.png'),
-					loadLocalEmoji('clock.png'),
-				])
-
-			const jsx = (
-				<div
-					style={{
-						height: '100%',
-						width: '100%',
-						display: 'flex',
-						backgroundColor: '#ffffff',
-						color: '#000000',
-						fontFamily: '"Atkinson Hyperlegible"',
-						padding: '40px',
-					}}
-				>
-					<div
-						style={{
-							flex: 2,
-							display: 'flex',
-							flexDirection: 'column',
-							justifyContent: 'space-between',
-							height: '100%',
-							paddingTop: '10px',
-							paddingBottom: '10px',
-						}}
-					>
-						<p style={{ fontSize: '50px', marginBottom: '10px' }}>
-							{job.employer.name}
-						</p>
-						<p
-							style={{
-								fontSize: '52px',
-								fontWeight: 'bold',
-								marginBottom: '20px',
-							}}
-						>
-							{job.title}
-						</p>
-						<div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
-							{salaryRangeStr && (
-								<span
-									style={{
-										backgroundColor: '#e2e8f0',
-										border: '2px solid #000000',
-										borderRadius: '4px',
-										padding: '6px 10px',
-										fontSize: '48px',
-										fontWeight: 'bold',
-										display: 'flex',
-										alignItems: 'center',
-										gap: '8px',
-									}}
-								>
-									<img
-										src={moneyBagEmoji}
-										alt="Moneybag"
-										style={{ width: '48px', height: '48px' }}
-									/>
-									{salaryRangeStr}
-								</span>
-							)}
-							{job.address.state.name && (
-								<span
-									style={{
-										backgroundColor: '#e2e8f0',
-										border: '2px solid #000000',
-										borderRadius: '4px',
-										padding: '6px 10px',
-										fontSize: '48px',
-										fontWeight: 'bold',
-										display: 'flex',
-										alignItems: 'center',
-										gap: '8px',
-									}}
-								>
-									<img
-										src={pushPinEmoji}
-										alt="Pushpin"
-										style={{ width: '48px', height: '48px' }}
-									/>
-									{job.address.state.name}
-								</span>
-							)}
-							{job.employmentType && (
-								<span
-									style={{
-										backgroundColor: '#e2e8f0',
-										border: '2px solid #000000',
-										borderRadius: '4px',
-										padding: '6px 10px',
-										fontSize: '48px',
-										fontWeight: 'bold',
-										display: 'flex',
-										alignItems: 'center',
-										gap: '8px',
-									}}
-								>
-									<img
-										src={clockEmoji}
-										alt="Clock"
-										style={{ width: '48px', height: '48px' }}
-									/>
-									{job.employmentType}
-								</span>
-							)}
-						</div>
-					</div>
-					<div
-						style={{
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}
-					>
-						{logoDataUri ? (
-							<img
-								src={logoDataUri}
-								alt="Company Logo"
-								style={{
-									maxWidth: '100%',
-									maxHeight: '100%',
-									objectFit: 'contain',
-								}}
-								width="250"
-								height="250"
-							/>
-						) : (
-							<div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-								{job.employer.name.slice(0, 2).toUpperCase()}
-							</div>
-						)}
-					</div>
-				</div>
-			)
-
-			const svg = await satori(jsx, {
-				width: 1200,
-				height: 630,
-				fonts,
-			})
-
-			const resvg = new Resvg(svg)
-			const pngData = resvg.render()
-			return pngData.asPng()
+			},
+			employer: true,
 		},
-		checkValue: value => value instanceof Buffer,
-		// Cache for 1 day
-		ttl: 1000 * 60 * 60 * 24,
-		// Stale while revalidate for 7 days
-		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 7,
 	})
 
-	return new Response(pngBuffer, {
+	if (!job) {
+		throw json({ error: 'Job not found' }, { status: 404 })
+	}
+
+	const minSalary = job.minSalary
+	const maxSalary = job.maxSalary
+
+	const salaryRangeStr = formatSalaryRange(minSalary, maxSalary)
+
+	// Generate the image as before
+	const [fonts, logoDataUri, moneyBagEmoji, pushPinEmoji, clockEmoji] =
+		await Promise.all([
+			getFont('Atkinson Hyperlegible', [400, 700]),
+			fetchImageAsDataUri(`${url.origin}/${job.employer.s3Link}.jpeg`),
+			loadLocalEmoji('moneybag.png'),
+			loadLocalEmoji('pushpin.png'),
+			loadLocalEmoji('clock.png'),
+		])
+
+	const jsx = (
+		<div
+			style={{
+				height: '100%',
+				width: '100%',
+				display: 'flex',
+				backgroundColor: '#ffffff',
+				color: '#000000',
+				fontFamily: '"Atkinson Hyperlegible"',
+				padding: '40px',
+			}}
+		>
+			<div
+				style={{
+					flex: 2,
+					display: 'flex',
+					flexDirection: 'column',
+					justifyContent: 'space-between',
+					height: '100%',
+					paddingTop: '10px',
+					paddingBottom: '10px',
+				}}
+			>
+				<p style={{ fontSize: '50px', marginBottom: '10px' }}>
+					{job.employer.name}
+				</p>
+				<p
+					style={{
+						fontSize: '52px',
+						fontWeight: 'bold',
+						marginBottom: '20px',
+					}}
+				>
+					{job.title}
+				</p>
+				<div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+					{salaryRangeStr && (
+						<span
+							style={{
+								backgroundColor: '#e2e8f0',
+								border: '2px solid #000000',
+								borderRadius: '4px',
+								padding: '6px 10px',
+								fontSize: '48px',
+								fontWeight: 'bold',
+								display: 'flex',
+								alignItems: 'center',
+								gap: '8px',
+							}}
+						>
+							<img
+								src={moneyBagEmoji}
+								alt="Moneybag"
+								style={{ width: '48px', height: '48px' }}
+							/>
+							{salaryRangeStr}
+						</span>
+					)}
+					{job.address.state.name && (
+						<span
+							style={{
+								backgroundColor: '#e2e8f0',
+								border: '2px solid #000000',
+								borderRadius: '4px',
+								padding: '6px 10px',
+								fontSize: '48px',
+								fontWeight: 'bold',
+								display: 'flex',
+								alignItems: 'center',
+								gap: '8px',
+							}}
+						>
+							<img
+								src={pushPinEmoji}
+								alt="Pushpin"
+								style={{ width: '48px', height: '48px' }}
+							/>
+							{job.address.state.name}
+						</span>
+					)}
+					{job.employmentType && (
+						<span
+							style={{
+								backgroundColor: '#e2e8f0',
+								border: '2px solid #000000',
+								borderRadius: '4px',
+								padding: '6px 10px',
+								fontSize: '48px',
+								fontWeight: 'bold',
+								display: 'flex',
+								alignItems: 'center',
+								gap: '8px',
+							}}
+						>
+							<img
+								src={clockEmoji}
+								alt="Clock"
+								style={{ width: '48px', height: '48px' }}
+							/>
+							{job.employmentType}
+						</span>
+					)}
+				</div>
+			</div>
+			<div
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+				}}
+			>
+				{logoDataUri ? (
+					<img
+						src={logoDataUri}
+						alt="Company Logo"
+						style={{
+							maxWidth: '100%',
+							maxHeight: '100%',
+							objectFit: 'contain',
+						}}
+						width="250"
+						height="250"
+					/>
+				) : (
+					<div style={{ fontSize: '24px', fontWeight: 'bold' }}>
+						{job.employer.name.slice(0, 2).toUpperCase()}
+					</div>
+				)}
+			</div>
+		</div>
+	)
+
+	const svg = await satori(jsx, {
+		width: 1200,
+		height: 630,
+		fonts,
+	})
+
+	const resvg = new Resvg(svg)
+	const pngData = resvg.render()
+
+	return new Response(pngData.asPng(), {
 		headers: {
 			'Content-Type': 'image/png',
-			'Cache-Control': 'public, max-age=604800, immutable',
+			'Cache-Control':
+				'public, max-age=0, s-maxage=604800, stale-while-revalidate=604800',
 		},
 	})
 }
