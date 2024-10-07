@@ -142,6 +142,8 @@ app.use(
 				'script-src': [
 					'*.umami.is',
 					"'strict-dynamic'",
+					'https://account.goodunionjobs.com',
+					'https://static.cloudflareinsights.com',
 					"'self'",
 					// @ts-expect-error
 					(_, res) => `'nonce-${res.locals.cspNonce}'`,
