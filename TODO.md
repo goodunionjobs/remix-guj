@@ -28,6 +28,8 @@
 - Look through and try to remove any unused Icons in other folder. Look for
   stuff like this below and see which ones aren't used
   <Icon name="arrow-left">Back to home</Icon>
+- Set this up for alerts when caching is too high and other things
+  https://dejager.sh/articles/running-grafana-enterprise-on-fly
 
 ```
   // app/routes/api/image-proxy.ts
