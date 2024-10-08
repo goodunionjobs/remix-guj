@@ -56,6 +56,31 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		},
 	})
 
+	if (dbUser === undefined) {
+		await db
+			.insert(users)
+			.values({
+				kindeUserId: user.id,
+				email: user.email,
+				firstName: user.given_name,
+				lastName: user.family_name,
+			})
+			.returning()
+
+		// Re-fetch the newly inserted user
+		// TODO: Can we improve so we don't do multiple fetches?
+		dbUser = await db.query.users.findFirst({
+			where: eq(users.email, user.email),
+			with: {
+				usersCategories: {
+					with: {
+						category: true,
+					},
+				},
+			},
+		})
+	}
+
 	//TODO: Think we need to still check if person does not exist
 	invariantResponse(dbUser, "User not found/doesn't exist")
 
