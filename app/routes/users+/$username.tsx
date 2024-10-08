@@ -180,6 +180,7 @@ export default function ProfileRoute() {
 				<div className="mb-8 mt-6 flex flex-col items-center justify-center rounded-lg bg-blue-100 p-4 text-blue-700 sm:flex-row">
 					<InfoIcon className="mb-2 h-8 w-8 sm:mb-0 sm:mr-3" />
 					<p className="text-center text-lg font-medium">
+						{/* //TODO: Add in "Green Update" notification when completed */}
 						Complete the form below to get job notifications sent to your email
 						inbox
 					</p>

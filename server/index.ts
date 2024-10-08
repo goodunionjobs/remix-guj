@@ -144,6 +144,8 @@ app.use(
 					"'strict-dynamic'",
 					'https://account.goodunionjobs.com',
 					'https://static.cloudflareinsights.com',
+					'https://cloudflareinsights.com',
+					'https://*.cloudflare.com',
 					"'self'",
 					// @ts-expect-error
 					(_, res) => `'nonce-${res.locals.cspNonce}'`,

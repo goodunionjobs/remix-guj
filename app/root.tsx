@@ -359,12 +359,14 @@ function UserDropdown({ user }: { user: KindeUser }) {
 							submit(formRef.current)
 						}}
 					>
-						<Icon className="text-body-md" name="exit">
+						{/* //TODO: Check if assceible and ok if div is around this. Removing it makes icon small */}
+						<div>
 							<button type="submit">
+								<Icon className="mr-1.5 text-body-md" name="exit"></Icon>
 								{/* //TODO: Work on making this look like the format of login/register button */}
 								<Link to={'/kinde-auth/logout'}>Logout</Link>
 							</button>
-						</Icon>
+						</div>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenuPortal>
