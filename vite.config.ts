@@ -9,6 +9,10 @@ import { envOnlyMacros } from 'vite-env-only'
 const MODE = process.env.NODE_ENV
 
 export default defineConfig({
+	//WARN: reason why https://threads.typesense.org/2Lb60
+	ssr: {
+		noExternal: ['typesense-instantsearch-adapter'],
+	},
 	build: {
 		cssMinify: MODE === 'production',
 
