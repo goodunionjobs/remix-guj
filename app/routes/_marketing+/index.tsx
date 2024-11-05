@@ -33,13 +33,36 @@ import {
 	webSiteSchema,
 	description,
 } from '#app/utils/constants.js'
+import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
+// import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter/src/TypesenseInstantsearchAdapter'
 
-const searchClient = algoliasearch(
-	//WARNING: THESE ARE PUBLIC
-	// MUST ONLY USE API KEY LIMITED TO HTTP REFERRER
-	ENV.ALGOLIA_ID!,
-	ENV.ALGOLIA_API!,
-)
+const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
+	server: {
+		apiKey: 'jXm6SRZvWLLJiR68PiSYmII2VYE3xZNF', // Be sure to use the search-only-api-key
+		nodes: [
+			{
+				host: 'rcnf5b3d74o1k9p2p-1.a1.typesense.net',
+				port: 443,
+				protocol: 'https',
+			},
+		],
+	},
+	// The following parameters are directly passed to Typesense's search API endpoint.
+	//  So you can pass any parameters supported by the search endpoint below.
+	//  query_by is required.
+	additionalSearchParameters: {
+		query_by: 'title',
+	},
+})
+
+const searchClient = typesenseInstantsearchAdapter.searchClient
+
+// const searchClient = algoliasearch(
+// 	//WARNING: THESE ARE PUBLIC
+// 	// MUST ONLY USE API KEY LIMITED TO HTTP REFERRER
+// 	ENV.ALGOLIA_ID!,
+// 	ENV.ALGOLIA_API!,
+// )
 
 export const links: LinksFunction = () => [
 	{
