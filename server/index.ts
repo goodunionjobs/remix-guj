@@ -126,6 +126,7 @@ app.use(
 					MODE === 'development' ? 'ws:' : null,
 					process.env.SENTRY_DSN ? '*.sentry.io' : null,
 					'*.algolia.net',
+					'*.typesense.net',
 					'*.umami.is',
 					'*.umami.dev',
 					"'self'",
