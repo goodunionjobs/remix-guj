@@ -33,8 +33,8 @@ import {
 	webSiteSchema,
 	description,
 } from '#app/utils/constants.js'
-// import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
-import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter/src/TypesenseInstantsearchAdapter'
+import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
+// import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter/src/TypesenseInstantsearchAdapter'
 
 const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
 	server: {

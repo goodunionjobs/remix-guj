@@ -5,14 +5,15 @@ import { flatRoutes } from 'remix-flat-routes'
 import { defineConfig } from 'vite'
 import { remixDevTools } from 'remix-development-tools'
 import { envOnlyMacros } from 'vite-env-only'
+import { cjsInterop } from 'vite-plugin-cjs-interop'
 
 const MODE = process.env.NODE_ENV
 
 export default defineConfig({
 	//WARN: reason why https://threads.typesense.org/2Lb60
-	ssr: {
-		noExternal: ['typesense-instantsearch-adapter'],
-	},
+	// ssr: {
+	// 	noExternal: ['typesense-instantsearch-adapter'],
+	// },
 	build: {
 		cssMinify: MODE === 'production',
 
@@ -40,6 +41,9 @@ export default defineConfig({
 	plugins: [
 		envOnlyMacros(),
 		remixDevTools(),
+		cjsInterop({
+			dependencies: ['typesense-instantsearch-adapter'],
+		}),
 		remix({
 			ignoredRouteFiles: ['**/*'],
 			serverModuleFormat: 'esm',
