@@ -127,8 +127,7 @@ app.use(
 					process.env.SENTRY_DSN ? '*.sentry.io' : null,
 					'*.algolia.net',
 					'*.typesense.net',
-					'*.umami.is',
-					'*.umami.dev',
+					'*.google-analytics.com',
 					"'self'",
 				].filter(Boolean),
 				'font-src': ["'self'"],
@@ -141,7 +140,7 @@ app.use(
 					'https://*.goodunionjobs.workers.dev',
 				].filter(Boolean),
 				'script-src': [
-					'*.umami.is',
+					'*.google-analytics.com',
 					"'strict-dynamic'",
 					'https://account.goodunionjobs.com',
 					'https://static.cloudflareinsights.com',

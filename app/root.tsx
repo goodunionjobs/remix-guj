@@ -17,7 +17,7 @@ import {
 	useSubmit,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { HoneypotProvider } from 'remix-utils/honeypot/react'
 import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
 import faviconAssetUrl from './assets/favicons/favicon.svg'
@@ -119,35 +119,42 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	)
 }
 
+function GoogleTagManager({
+	nonce,
+	GTM_ID,
+}: {
+	nonce: string
+	GTM_ID: string
+}) {
+	if (!GTM_ID) return null
+
+	return (
+		<>
+			<script
+				nonce={nonce}
+				dangerouslySetInnerHTML={{
+					__html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GTM_ID}');
+          `,
+				}}
+			/>
+			<script
+				nonce={nonce}
+				async
+				src={`https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`}
+			/>
+		</>
+	)
+}
+
 export const headers: HeadersFunction = ({ loaderHeaders }) => {
 	const headers = {
 		'Server-Timing': loaderHeaders.get('Server-Timing') ?? '',
 	}
 	return headers
-}
-
-// Adding GTM script https://github.com/remix-run/remix/discussions/8741
-let gtmScriptAdded = false
-function addGtmScript(GTM_ID: string) {
-	if (!GTM_ID || gtmScriptAdded) {
-		return
-	}
-
-	;(function (w: Window, d: Document, s: 'script', l: string, i: string) {
-		w[l] = w[l] || []
-		w[l].push({
-			'gtm.start': new Date().getTime(),
-			event: 'gtm.js',
-		})
-		const f = d.getElementsByTagName(s)[0]
-		const j = d.createElement<'script'>(s)
-		const dl = l != 'dataLayer' ? '&l=' + l : ''
-		j.async = true
-		j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl
-		f.parentNode?.insertBefore(j, f)
-	})(window, document, 'script', 'dataLayer', GTM_ID)
-
-	gtmScriptAdded = true
 }
 
 function Document({
@@ -168,10 +175,6 @@ function Document({
 	const isClient = typeof document !== 'undefined'
 	const { GTM_ID } = useLoaderData<typeof loader>()
 
-	useEffect(() => {
-		addGtmScript(GTM_ID)
-	}, [GTM_ID])
-
 	return (
 		<html
 			lang="en"
@@ -186,6 +189,7 @@ function Document({
 						}}
 					/>
 				)}
+				<GoogleTagManager nonce={nonce} GTM_ID={GTM_ID} />
 				<ClientHintCheck nonce={nonce} />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
