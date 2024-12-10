@@ -108,6 +108,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			ENV: getEnv(),
 			toast,
 			honeyProps,
+			GTM_ID: 'G-Y5XF93C0RL',
 		},
 		{
 			headers: combineHeaders(
@@ -115,6 +116,37 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				toastHeaders,
 			),
 		},
+	)
+}
+
+function GoogleTagManager({
+	nonce,
+	GTM_ID,
+}: {
+	nonce: string
+	GTM_ID: string
+}) {
+	if (!GTM_ID) return null
+
+	return (
+		<>
+			<script
+				nonce={nonce}
+				dangerouslySetInnerHTML={{
+					__html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GTM_ID}');
+          `,
+				}}
+			/>
+			<script
+				nonce={nonce}
+				async
+				src={`https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`}
+			/>
+		</>
 	)
 }
 
@@ -141,6 +173,8 @@ function Document({
 	isBot?: boolean
 }) {
 	const isClient = typeof document !== 'undefined'
+	const { GTM_ID } = useLoaderData<typeof loader>()
+
 	return (
 		<html
 			lang="en"
@@ -155,6 +189,7 @@ function Document({
 						}}
 					/>
 				)}
+				<GoogleTagManager nonce={nonce} GTM_ID={GTM_ID} />
 				<ClientHintCheck nonce={nonce} />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />

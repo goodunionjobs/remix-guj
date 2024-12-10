@@ -31,6 +31,10 @@
 - Set this up for alerts when caching is too high and other things
   https://dejager.sh/articles/running-grafana-enterprise-on-fly
 
+1. Change umami. See Google analytics if bots change. I’ll keep both up.  
+2. Categories Union admin  
+3. Talk about Cornell   
+
 ```
   // app/routes/api/image-proxy.ts
 import type { LoaderFunction } from '@remix-run/node';
