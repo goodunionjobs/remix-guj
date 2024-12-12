@@ -73,30 +73,21 @@ export function DrizzleAttributes({
 				maxSalary === undefined ? (
 					<span className="hidden"></span>
 				) : (
-					<span
-						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
-				              pt-0.5 text-xs font-bold text-black sm:text-sm"
-					>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
 						💰{salaryRangeStr}
 					</span>
 				)}
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span
-						className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200
-				              px-1 pt-0.5 text-xs font-bold text-black sm:text-sm"
-					>
+					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
 						📌{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span
-						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
-				              pt-0.5 text-xs font-bold text-black sm:text-sm"
-					>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
 						🕑{employmentType}
 					</span>
 				)}
@@ -137,33 +128,24 @@ export function Attributes({
 				>
 					{hit ? <Highlight attribute="title" hit={hit} /> : title}
 				</Link>
-				{minSalary === null && maxSalary === null ? (
+				{minSalary === 0 && maxSalary === 0 ? (
 					<span className="hidden"></span>
 				) : (
-					<span
-						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
-                  pt-0.5 text-xs font-bold text-black sm:text-sm"
-					>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
 						💰{salaryRangeStr}
 					</span>
 				)}
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span
-						className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200
-                  px-1 pt-0.5 text-xs font-bold text-black sm:text-sm"
-					>
+					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
 						📌{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span
-						className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1
-                  pt-0.5 text-xs font-bold text-black sm:text-sm"
-					>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
 						🕑{employmentType}
 					</span>
 				)}
