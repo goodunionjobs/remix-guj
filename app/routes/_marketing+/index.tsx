@@ -7,10 +7,7 @@ import {
 	type MetaFunction,
 } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import algoliasearch from 'algoliasearch/lite'
-import { eq } from 'drizzle-orm'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
-import { useEffect } from 'react'
 import { renderToString } from 'react-dom/server'
 import {
 	type InstantSearchServerState,
