@@ -373,7 +373,7 @@ export function ErrorBoundary() {
 								<div className="flex justify-center">
 									<Button asChild>
 										<Link to="/" reloadDocument>
-											<Home className="mr-2 h-4 w-4" /> Go back home
+											<Icon className="mr-2 h-4 w-4" name="home" />
 										</Link>
 									</Button>
 								</div>
