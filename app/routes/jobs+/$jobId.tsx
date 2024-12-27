@@ -350,6 +350,7 @@ export function ErrorBoundary() {
 									<Button asChild>
 										<Link to="/" reloadDocument>
 											<Icon className="mr-2 h-4 w-4" name="home" />
+											Go back home
 										</Link>
 									</Button>
 								</div>
@@ -374,6 +375,7 @@ export function ErrorBoundary() {
 									<Button asChild>
 										<Link to="/" reloadDocument>
 											<Icon className="mr-2 h-4 w-4" name="home" />
+											Go back home
 										</Link>
 									</Button>
 								</div>
