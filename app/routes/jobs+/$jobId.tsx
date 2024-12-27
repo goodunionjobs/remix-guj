@@ -22,6 +22,7 @@ import { cachified, cache } from '#app/utils/cache.server.ts'
 import { type Timings } from '#app/utils/timing.server.ts'
 import { GeneralErrorBoundary } from '#app/components/error-boundary'
 import { Icon } from '#app/components/ui/icon.tsx'
+import { Button } from '#app/components/ui/button.tsx'
 
 type JobDescriptionResponse = {
 	description: string
@@ -334,32 +335,50 @@ export function ErrorBoundary() {
 		<GeneralErrorBoundary
 			statusHandlers={{
 				400: () => (
-					<div className="flex flex-col gap-6">
-						<div className="flex flex-col gap-3">
-							<h1>Invalid Job ID</h1>
-							<p>The job ID you've entered is not in the correct format.</p>
+					<div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+						<div className="w-full max-w-md space-y-8">
+							<div className="text-center">
+								<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+									Invalid Job ID
+								</h2>
+								<p className="mt-2 text-2xl text-gray-600">
+									The job ID you've entered is not in the correct format.
+								</p>
+							</div>
+							<div className="mt-8 space-y-6">
+								<div className="flex justify-center">
+									<Button asChild>
+										<Link to="/" reloadDocument>
+											<Icon className="mr-2 h-4 w-4" name="home" />
+										</Link>
+									</Button>
+								</div>
+							</div>
 						</div>
-						<Link to="/" className="text-body-md underline">
-							{/* //TODO: Add in home button nicely vs arrow left */}
-							{/* <Home className="mr-2 h-4 w-4" /> */}
-							<Icon name="arrow-left" />
-							Back to home
-						</Link>
 					</div>
 				),
 				404: () => (
-					<div className="flex flex-col gap-6">
-						<div className="flex flex-col gap-3">
-							<h1>Job Post Not Found</h1>
-							<p>
-								The job post you're looking for doesn't exist or has been
-								removed.
-							</p>
+					<div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+						<div className="w-full max-w-md space-y-8">
+							<div className="text-center">
+								<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+									Job Post Not Found
+								</h2>
+								<p className="mt-2 text-2xl text-gray-600">
+									The job post you're looking for doesn't exist or has been
+									removed.
+								</p>
+							</div>
+							<div className="mt-8 space-y-6">
+								<div className="flex justify-center">
+									<Button asChild>
+										<Link to="/" reloadDocument>
+											<Home className="mr-2 h-4 w-4" /> Go back home
+										</Link>
+									</Button>
+								</div>
+							</div>
 						</div>
-						<Link to="/" className="text-body-md underline">
-							<Icon name="arrow-left" />
-							Back to home
-						</Link>
 					</div>
 				),
 			}}

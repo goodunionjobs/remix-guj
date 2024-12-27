@@ -108,7 +108,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			ENV: getEnv(),
 			toast,
 			honeyProps,
-			GTM_ID: 'G-Y5XF93C0RL',
 		},
 		{
 			headers: combineHeaders(
@@ -126,8 +125,6 @@ function GoogleTagManager({
 	nonce: string
 	GTM_ID: string
 }) {
-	if (!GTM_ID) return null
-
 	return (
 		<>
 			<script
@@ -173,7 +170,6 @@ function Document({
 	isBot?: boolean
 }) {
 	const isClient = typeof document !== 'undefined'
-	const { GTM_ID } = useLoaderData<typeof loader>()
 
 	return (
 		<html
@@ -189,7 +185,7 @@ function Document({
 						}}
 					/>
 				)}
-				<GoogleTagManager nonce={nonce} GTM_ID={GTM_ID} />
+				<GoogleTagManager nonce={nonce} GTM_ID="G-Y5XF93C0RL" />
 				<ClientHintCheck nonce={nonce} />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />

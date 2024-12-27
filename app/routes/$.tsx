@@ -7,7 +7,9 @@
 
 import { Link, useLocation } from '@remix-run/react'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+import { Button } from '#app/components/ui/button.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
+//TODO: Include icon Home in SVG load ins
 
 export async function loader() {
 	throw new Response('Not found', { status: 404 })
@@ -25,16 +27,26 @@ export function ErrorBoundary() {
 		<GeneralErrorBoundary
 			statusHandlers={{
 				404: () => (
-					<div className="flex flex-col gap-6">
-						<div className="flex flex-col gap-3">
-							<h1>We can't find this page:</h1>
-							<pre className="whitespace-pre-wrap break-all text-body-lg">
-								{location.pathname}
-							</pre>
+					<div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+						<div className="w-full max-w-md space-y-8">
+							<div className="text-center">
+								<h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+									We can't find this page
+								</h2>
+								<p className="mt-2 text-2xl text-gray-600">
+									{location.pathname}
+								</p>
+							</div>
+							<div className="mt-8 space-y-6">
+								<div className="flex justify-center">
+									<Button asChild>
+										<Link to="/" reloadDocument>
+											<Icon className="mr-2 h-4 w-4" name="home" />
+										</Link>
+									</Button>
+								</div>
+							</div>
 						</div>
-						<Link to="/" className="text-body-md underline">
-							<Icon name="arrow-left">Back to home</Icon>
-						</Link>
 					</div>
 				),
 			}}

@@ -257,6 +257,10 @@ export const categoriesRelations = relations(categories, ({ many }) => ({
 	usersCategories: many(usersToCategories),
 }))
 
+export const employersRelations = relations(employers, ({ many }) => ({
+	jobs: many(jobs),
+}))
+
 export const usersToCategories = pgTable(
 	'users_to_categories',
 	{

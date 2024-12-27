@@ -1,4 +1,4 @@
-Last updated: August 20, 2024
+_Last updated: December 22, 2024_
 
 From everyone at Good Union Jobs, thank you for using our products! We build
 them to help you do your best work. There are millions of people using Good
@@ -7,9 +7,6 @@ personally, we have to put in place some Terms of Service to help keep the ship
 afloat.
 
 When we say “Company”, “we”, “our”, or “us” in this document, we are referring
-
-<!-- TODO: CHANGE UP URL BELOW -->
-
 to Jobs for Life, LLC.
 
 When we say “Services”, we mean our website(s), including goodunionjobs.com, and
@@ -49,13 +46,14 @@ provision. **These Terms do contain a limitation of our liability.**
 
 If you violate any of the Terms, we may terminate your account. That’s a broad
 statement and it means you need to place a lot of trust in us. We do our best to
-deserve that trust by being open
+deserve that trust by being open and keeping an open door to
+[your feedback](mailto:support@goodunionjobs.com).
 
 <!-- about -->
 <!-- [who we are](https://basecamp.com/about/team), -->
 <!-- [how we work](https://basecamp.com/handbook),  -->
 
-and keeping an open door to [your feedback](support@goodunionjobs.com).
+<!-- and keeping an open door to [your feedback](mailto:support@goodunionjobs.com). -->
 
 ## Account Terms
 
@@ -230,11 +228,12 @@ and keeping an open door to [your feedback](support@goodunionjobs.com).
    run the Services. You can see a list of all subprocessors who handle personal
    data for us.
 
-[Cloudflare](https://www.cloudflare.com/trust-hub/gdpr/)
-[PostHog](https://posthog.com/docs/privacy/gdpr-compliance)
-[Fly.io](https://fly.io/documents/) [Neon](https://neon.tech/dpa)
-[Algolia](https://gdpr.algolia.com/gdpr-article-1)
-[Resend](https://resend.com/security)
+- [Cloudflare](https://www.cloudflare.com/trust-hub/gdpr/)
+- [Fly.io](https://fly.io/documents/)
+- [Neon](https://neon.tech/dpa)
+- [Typesense](https://cloud.typesense.org/legal/dpa)
+- [Resend](https://resend.com/security)
+- [Google](https://support.google.com/analytics/answer/6004245?hl=en#zippy=%2Cour-privacy-policy)
 
 <!-- Removed August 20th -->
 <!-- 6. Under the California Consumer Privacy Act (“CCPA”), Good Union Jobs is a -->
@@ -242,11 +241,6 @@ and keeping an open door to [your feedback](support@goodunionjobs.com).
 <!--    use of the Services. That means we process any data you share with us only -->
 <!--    for the purpose you signed up for and as described in these Terms, the -->
 <!--    [Privacy Policy](https://goodunionjobs.com/privacy). -->
-
-      <!-- TODO: Check later -->
-      <!-- , and [other policies](../index.md).  -->
-
-    <!-- Removed August 20th -->
 
    <!-- We do not retain, use, disclose, or sell any of that information for any -->
    <!-- other commercial purposes unless we have your explicit permission. And on the -->
@@ -279,8 +273,8 @@ and keeping an open door to [your feedback](support@goodunionjobs.com).
    design elements without express written permission from the Company. You must
    request permission to use the Company’s logos or any Service logos for
    promotional purposes. Please [email us]({{ site.email_support }}) requests to
-   use logos. We reserve the right to rescind any permissions if you violate
-   these Terms.
+   use logos. We reserve the right to rescind any permissions if you violate these
+   Terms.
 5. You agree not to reproduce, duplicate, copy, sell, resell or exploit any
    portion of the Services, use of the Services, or access to the Services
    without the express written permission of the Company.
