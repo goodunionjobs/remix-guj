@@ -48,7 +48,7 @@ const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
 	//  So you can pass any parameters supported by the search endpoint below.
 	//  query_by is required.
 	additionalSearchParameters: {
-		query_by: 'title',
+		query_by: 'title, employer',
 	},
 })
 

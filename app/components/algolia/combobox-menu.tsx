@@ -67,6 +67,8 @@ export function AlgoliaFlexibleCombobox({
 
 	const [selectedValue, setSelectedValue] = useState('')
 
+	//TODO: Fix it up somehow since when clicking a place that doesn't have jobs like job type or state it doesn't change
+
 	// TODO: Fixup with types and make it switch case
 	const allOptionLabel = attribute === 'state' ? 'All States' : 'All Job Types'
 

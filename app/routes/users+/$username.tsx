@@ -17,7 +17,7 @@ import {
 	useFetcher,
 } from '@remix-run/react'
 import { eq } from 'drizzle-orm'
-import { InfoIcon } from 'lucide-react'
+import { Icon } from '#app/components/ui/icon.tsx'
 import { z } from 'zod'
 import { CheckboxGroupConform } from '#app/components/conform/CheckboxGroup.js'
 import { RadioGroupConform } from '#app/components/conform/RadioGroup.js'
@@ -178,7 +178,7 @@ export default function ProfileRoute() {
 		<div className="container mb-48 mt-36 flex flex-col items-center justify-center">
 			<div className="container flex flex-col items-center rounded-3xl bg-muted p-12">
 				<div className="mb-8 mt-6 flex flex-col items-center justify-center rounded-lg bg-blue-100 p-4 text-blue-700 sm:flex-row">
-					<InfoIcon className="mb-2 h-8 w-8 sm:mb-0 sm:mr-3" />
+					<Icon className="mb-2 h-8 w-8 sm:mb-0 sm:mr-3" name="info-circled" />
 					<p className="text-center text-lg font-medium">
 						{/* //TODO: Add in "Green Update" notification when completed */}
 						Complete the form below to get job notifications sent to your email

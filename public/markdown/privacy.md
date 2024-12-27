@@ -1,4 +1,4 @@
-_Last updated: August 20, 2024_
+_Last updated: December 22, 2024_
 
 The privacy of your data—and it is your data, not ours!—is a big deal to us. In
 this policy, we lay out: what data we collect and why; how your data is handled;
@@ -90,11 +90,16 @@ account, we’ll delete the content within 60 days.
 
 ### General Geolocation data
 
-For most of our products, we log the full IP address used to sign up a product
-account and retain that for use in mitigating future spammy signups. We also log
-all account access by full IP address for security and fraud prevention
-purposes, and we keep this login data for as long as your product account is
-active.
+We do not log the full IP address. Our analytics service, Google Analytics, does
+collects metadata about the city-level location and granular device details of
+your site and app visitors so it can provide location and device-based
+capabilities.
+
+<!-- For most of our products, we log the full IP address used to sign up a product -->
+<!-- account and retain that for use in mitigating future spammy signups. We also log -->
+<!-- all account access by full IP address for security and fraud prevention -->
+<!-- purposes, and we keep this login data for as long as your product account is -->
+<!-- active. -->
 
 ### Website interactions
 
@@ -123,7 +128,7 @@ spam score results; we do not have access to the evaluated information.
 
 Good Union Jobs runs contextual ads on various third-party platforms such as
 Google, Reddit, and LinkedIn. Users who click on one of our ads will be sent to
-the Basecamp marketing site. Where permissible under law, we may load an
+the GoodUnionJobs marketing site. Where permissible under law, we may load an
 ad-company script on their browsers that sets a third-party cookie and sends
 information to the ad network to enable evaluation of the effectiveness of our
 ads, e.g., which ad they clicked and which keyword triggered the ad, and whether
@@ -140,6 +145,25 @@ viewed, and other click-stream data. You can adjust cookie retention settings
 and accept or block individual cookies in your browser settings, although our
 apps won’t work and other aspects of our service may not function properly if
 you turn cookies off.
+
+### Our use of Google Analytics 4
+
+We use Google Analytics 4 to collect, monitor, and analyze certain information
+about how visitors use our website. This helps us understand traffic patterns
+and improve the user experience.
+
+1. IP address anonymization. We configure Google Analytics 4 to anonymize IP
+   addresses, which means your full IP is never stored on Google’s servers.
+2. Restricted Data Processing. Google Analytics will only act as a service
+   provider (or processor) as we have disabled sharing with Google products and
+   services. Here is more information on how Google helps partners
+   [restrict data processing](https://business.safety.google/rdp/)
+
+We only share Google Analytics website traffic data with our third-party SEO
+partner, [Embarque.io](https://embarque.io/), who assists us in analyzing our
+website and boosting our search engine visibility. Here is a link to their
+[Privacy Policy](https://www.embarque.io/privacy-policy). We do not otherwise
+sell, rent, or share this data.
 
 ### Voluntary correspondence
 
@@ -177,11 +201,13 @@ without it, though some features may be unavailable.
 **To provide products or services you’ve requested**. We use some third-party
 subprocessors to help run our applications and provide the Services to you. You
 can view the third-party subprocessors we use:
-[Cloudflare](https://www.cloudflare.com/trust-hub/gdpr/)
-[PostHog](https://posthog.com/docs/privacy/gdpr-compliance)
-[Fly.io](https://fly.io/documents/) [Neon](https://neon.tech/dpa)
-[Algolia](https://gdpr.algolia.com/gdpr-article-1)
-[Resend](https://resend.com/security)
+
+- [Cloudflare](https://www.cloudflare.com/trust-hub/gdpr/)
+- [Fly.io](https://fly.io/documents/)
+- [Neon](https://neon.tech/dpa)
+- [Typesense](https://cloud.typesense.org/legal/dpa)
+- [Resend](https://resend.com/security)
+- [Google](https://support.google.com/analytics/answer/6004245?hl=en#zippy=%2Cour-privacy-policy)
 
 We may disclose your information at your direction if you integrate a
 third-party service into your use of our products. For example, we may allow

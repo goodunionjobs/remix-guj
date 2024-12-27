@@ -75,6 +75,7 @@ export default function TermsOfServiceRoute() {
         .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4, .markdown-content h5, .markdown-content h6 {
           margin-top: 1.5em;
           margin-bottom: 0.5em;
+          text-decoration: underline;
         }
         .markdown-content ul, .markdown-content ol {
           margin-bottom: 1em;
