@@ -65,57 +65,56 @@ export function AlgoliaFlexibleCombobox({
 		showMore: false,
 	})
 
-	const [selectedValue, setSelectedValue] = useState('')
+	// Maintain a separate state for user selection that doesn't depend on Algolia results
+	const [userSelectedValue, setUserSelectedValue] = useState('')
 
-	//TODO: Fix it up somehow since when clicking a place that doesn't have jobs like job type or state it doesn't change
-
-	// TODO: Fixup with types and make it switch case
 	const allOptionLabel = attribute === 'state' ? 'All States' : 'All Job Types'
 
-	// Add specific "All" option to the beginning of the options array
+	// Add "All" option to the beginning of the options array
 	const allOptions = useMemo(
 		() => [{ value: '', label: allOptionLabel }, ...options],
 		[options, allOptionLabel],
 	)
 
-	// Merge Algolia items with our predefined options
+	// Merge Algolia items with our predefined options, maintaining user selection
 	const mergedItems = useMemo(() => {
 		return allOptions.map(option => {
 			if (option.value === '') {
-				// Special case for "All" option
 				return {
 					...option,
 					count: items.reduce((sum, item) => sum + item.count, 0),
-					isRefined: !items.some(item => item.isRefined),
+					isRefined: !items.some(item => item.isRefined) && !userSelectedValue,
 				}
 			}
 			const algoliaItem = items.find(item => item.value === option.value)
 			return {
 				...option,
 				count: algoliaItem ? algoliaItem.count : 0,
-				isRefined: algoliaItem ? algoliaItem.isRefined : false,
+				isRefined: option.value === userSelectedValue,
 			}
 		})
-	}, [allOptions, items])
+	}, [allOptions, items, userSelectedValue])
 
-	// Update selected value when refinement changes
-	useEffect(() => {
-		const refinedItem = mergedItems.find(item => item.isRefined)
-		setSelectedValue(refinedItem ? refinedItem.value : '')
-	}, [mergedItems])
-
-	const handleSelect = currentValue => {
-		if (currentValue === '') {
-			// If "All States" or "All Employment Types" is selected, remove the refinement
-			refine(null)
-		} else {
-			refine(currentValue)
-		}
+	// Handle selection
+	const handleSelect = (currentValue: string) => {
+		setUserSelectedValue(currentValue)
+		refine(currentValue || null) // Refine with null for "All" option
 		setOpen(false)
 	}
 
+	// Get display label based on user selection
+	const getDisplayLabel = () => {
+		if (userSelectedValue) {
+			const selectedItem = allOptions.find(
+				item => item.value === userSelectedValue,
+			)
+			return selectedItem ? selectedItem.label : allOptionLabel
+		}
+		return allOptionLabel
+	}
+
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover open={open} onOpenChange={setOpen} modal={true}>
 			<PopoverTrigger asChild>
 				<Button
 					aria-label={attribute}
@@ -124,13 +123,11 @@ export function AlgoliaFlexibleCombobox({
 					aria-expanded={open}
 					className={`dark:border-white dark:bg-black w-[${width}] justify-between`}
 				>
-					{selectedValue
-						? mergedItems.find(item => item.value === selectedValue)?.label
-						: allOptionLabel}
+					{getDisplayLabel()}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className={`w-[${width}] p-0`}>
+			<PopoverContent className={` w-[${width}] p-0`}>
 				<Command>
 					<CommandInput
 						placeholder={`Search ${placeholder.toLowerCase()}...`}
@@ -152,15 +149,9 @@ export function AlgoliaFlexibleCombobox({
 									/>
 									<div>
 										<div>
-											{/* //TODO: Check over count...not working? */}
-											{/* {item.label} {item.value !== '' && `(${item.count})`} */}
-											{item.label} {item.value !== ''}
+											{item.label}{' '}
+											{item.value !== '' && item.count > 0 && `(${item.count})`}
 										</div>
-										{item.description && (
-											<div className="text-sm text-gray-500">
-												{item.description}
-											</div>
-										)}
 									</div>
 								</CommandItem>
 							))}
@@ -177,7 +168,7 @@ export function StateCombobox() {
 		<AlgoliaFlexibleCombobox
 			attribute="state"
 			placeholder="Select state"
-			options={states} // You'll need to import or define the states array
+			options={states}
 		/>
 	)
 }
