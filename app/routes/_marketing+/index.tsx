@@ -1,5 +1,3 @@
-import { getKindeSession } from '@kinde-oss/kinde-remix-sdk'
-import { type KindeUser } from '@kinde-oss/kinde-remix-sdk/types'
 import {
 	json,
 	type LoaderFunctionArgs,
@@ -30,8 +28,48 @@ import {
 	webSiteSchema,
 	description,
 } from '#app/utils/constants.js'
+import { Button } from '#app/components/ui/button.tsx'
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from '#app/components/ui/sheet'
+import { Icon } from '#app/components/ui/icon.tsx'
 import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter'
-// import TypesenseInstantSearchAdapter from 'typesense-instantsearch-adapter/src/TypesenseInstantsearchAdapter'
+
+const ResponsiveFilters = ({ children }) => {
+	return (
+		<>
+			{/* Show filters directly on larger screens */}
+			<div className="hidden md:flex md:space-x-2">{children}</div>
+
+			{/* Show sheet trigger and sheet on smaller screens */}
+			<div className="md:hidden">
+				<Sheet>
+					<SheetTrigger asChild>
+						<Button
+							variant="outline"
+							size="default"
+							className="border-2 border-black dark:border-white"
+						>
+							<Icon name="mixer-horizontal" className="h-4 w-4">
+								Filters
+							</Icon>
+						</Button>
+					</SheetTrigger>
+					<SheetContent>
+						<SheetHeader>
+							<SheetTitle>Filters</SheetTitle>
+						</SheetHeader>
+						<div className="mt-4 flex flex-col space-y-4">{children}</div>
+					</SheetContent>
+				</Sheet>
+			</div>
+		</>
+	)
+}
 
 const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
 	server: {
@@ -234,9 +272,11 @@ function Search({ serverState, serverUrl }: SearchProps) {
 						</div>
 						{/* Later when we have more filters get rid of the margins. They'll line up in the middle. Easier to handle */}
 						<div className="z-20 mb-3 mt-2">
-							<EmploymentTypeCombobox />
-							<StateCombobox />
-							<SalaryRangeSliderPopover />
+							<ResponsiveFilters>
+								<EmploymentTypeCombobox />
+								<StateCombobox />
+								<SalaryRangeSliderPopover />
+							</ResponsiveFilters>
 						</div>
 					</div>
 					<div className="mt-1 flex justify-center dark:bg-slate-950">
