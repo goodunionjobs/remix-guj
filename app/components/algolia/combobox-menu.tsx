@@ -66,7 +66,7 @@ export function AlgoliaFlexibleCombobox({
 	})
 
 	// Maintain a separate state for user selection that doesn't depend on Algolia results
-	const [userSelectedValue, setUserSelectedValue] = useState('')
+	const [userSelectedValue, setUserSelectedValue] = useState<string>('')
 
 	const allOptionLabel = attribute === 'state' ? 'All States' : 'All Job Types'
 
@@ -98,7 +98,7 @@ export function AlgoliaFlexibleCombobox({
 	// Handle selection
 	const handleSelect = (currentValue: string) => {
 		setUserSelectedValue(currentValue)
-		refine(currentValue || null) // Refine with null for "All" option
+		refine(currentValue || '') // Refine with null for "All" option
 		setOpen(false)
 	}
 
