@@ -6,7 +6,9 @@ import {
 	RefinementList,
 } from 'react-instantsearch'
 import { cn } from '#app/utils/misc.js'
+//TODO: Remove this below
 import states from '#app/utils/statelist.js'
+import { useMemo } from 'react'
 import { Button, FilterClearButton } from '../ui/button'
 import {
 	Command,
@@ -116,31 +118,69 @@ function getSearchParamType(
 	}
 }
 
+interface ComboboxProps {
+	items: Array<{
+		value: string
+		label: string
+		count: number
+		isRefined: boolean
+	}>
+	refine: (value: string) => void
+	placeholder: string
+	width?: string
+}
+
 export function AlgoliaFlexibleCombobox({
 	items,
 	refine,
 	placeholder,
 	width = '200px',
-}: {
-	items: any
-	refine: any
-	placeholder: string
-	width?: string
-}) {
+}: ComboboxProps) {
 	const [open, setOpen] = useState(false)
+	const [searchTerm, setSearchTerm] = useState('')
 
 	const refinedItems = items.filter(item => item.isRefined)
 
-	const clearSearch = () => {
-		const refinedItems = items.filter(item => item.isRefined)
+	// Enhanced filtering logic
+	const filteredItems = useMemo(() => {
+		if (!searchTerm) return items
+
+		const term = searchTerm.toLowerCase().trim()
+
+		return items
+			.filter(item => {
+				const labelMatch = item.label.toLowerCase().includes(term)
+				const valueMatch = item.value.toLowerCase() === term
+				const partialValueMatch =
+					term.length >= 2 && item.value.toLowerCase().includes(term)
+
+				return labelMatch || valueMatch || partialValueMatch
+			})
+			.sort((a, b) => {
+				// Prioritize exact matches and then alphabetically
+				const aLowerLabel = a.label.toLowerCase()
+				const bLowerLabel = b.label.toLowerCase()
+				const termLength = term.length
+
+				if (aLowerLabel.startsWith(term) && !bLowerLabel.startsWith(term))
+					return -1
+				if (!aLowerLabel.startsWith(term) && bLowerLabel.startsWith(term))
+					return 1
+
+				return aLowerLabel.localeCompare(bLowerLabel)
+			})
+	}, [items, searchTerm])
+
+	const clearSearch = useCallback(() => {
 		refinedItems.forEach(item => refine(item.value))
-	}
-	const label =
-		refinedItems.length === 1
-			? refinedItems[0].label
-			: refinedItems.length > 1
-				? `${refinedItems[0].label} + ${refinedItems.length - 1} more`
-				: placeholder
+		setSearchTerm('')
+	}, [refinedItems, refine])
+
+	const label = useMemo(() => {
+		if (refinedItems.length === 0) return placeholder
+		if (refinedItems.length === 1) return refinedItems[0].label
+		return `${refinedItems[0].label} + ${refinedItems.length - 1} more`
+	}, [refinedItems, placeholder])
 
 	return (
 		<Popover open={open} onOpenChange={setOpen} modal>
@@ -161,15 +201,22 @@ export function AlgoliaFlexibleCombobox({
 			<PopoverContent isInsideSheet className="max-h-64 overflow-y-auto p-0">
 				<Command>
 					<FilterClearButton onClear={clearSearch} />
-					<CommandInput placeholder="Search job types..." />
+					<CommandInput
+						placeholder={`Search ${placeholder}`}
+						value={searchTerm}
+						onValueChange={setSearchTerm}
+					/>
 					<CommandList>
-						<CommandEmpty>No job types found.</CommandEmpty>
+						<CommandEmpty>No results found.</CommandEmpty>
 						<CommandGroup>
-							{items.map(item => (
+							{filteredItems.map(item => (
 								<CommandItem
 									key={item.value}
-									value={item.value}
-									onSelect={() => refine(item.value)}
+									value={item.label} // Changed to use label for better matching
+									onSelect={() => {
+										refine(item.value)
+										setSearchTerm('')
+									}}
 								>
 									<Check
 										className={cn(
@@ -179,8 +226,9 @@ export function AlgoliaFlexibleCombobox({
 									/>
 									<div>
 										{item.label}
-										{/* //TODO: Do this only in dev mode */}
-										{item.count > 0 && `(${item.count})`}
+										{/* TODO: It changes the results depending on filters... don't */}
+										{/* think it is good to include */}
+										{/* {item.count > 0 && ` (${item.count})`} */}
 									</div>
 								</CommandItem>
 							))}
@@ -191,7 +239,6 @@ export function AlgoliaFlexibleCombobox({
 		</Popover>
 	)
 }
-
 export function StateCombobox() {
 	if (typeof window === 'undefined') {
 		// Return a non-interactive placeholder or null
