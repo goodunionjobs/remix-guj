@@ -20,6 +20,7 @@ import {
 import {
 	StateCombobox,
 	EmploymentTypeCombobox,
+	ClearAllButton,
 } from '#app/components/algolia/combobox-menu.js'
 import { Hit } from '#app/components/algolia/hit'
 import { SalaryRangeSliderPopover } from '#app/components/algolia/salary-slider.js'
@@ -87,6 +88,8 @@ const typesenseInstantsearchAdapter = new TypesenseInstantSearchAdapter({
 	//  query_by is required.
 	additionalSearchParameters: {
 		query_by: 'title, employer',
+		//TODO: Try out again later
+		// facet_by: 'state,employmentType,minSalary',
 	},
 })
 
@@ -127,10 +130,10 @@ type SearchProps = {
 function generateCanonicalUrl(url: string): string {
 	const parsedUrl = new URL(url)
 
-	// Remove query, state, and jobtype parameters
+	// Remove query, state, and employmenttype parameters
 	parsedUrl.searchParams.delete('q')
 	parsedUrl.searchParams.delete('state')
-	parsedUrl.searchParams.delete('jobtype')
+	parsedUrl.searchParams.delete('employmenttype')
 
 	// Keep the page parameter if it exists and is greater than 1
 	const page = parsedUrl.searchParams.get('page')
@@ -182,8 +185,39 @@ function queryHook(query, search) {
 	timerId = setTimeout(() => search(query), timeout)
 }
 
+function arrayify(value) {
+	// If it's already an array or null/undefined, handle gracefully
+	if (Array.isArray(value)) return value
+	if (value == null) return []
+	// Otherwise wrap single value in array
+	return [value]
+}
+
 function Search({ serverState, serverUrl }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
+
+	// Get initial state from URL
+	const url =
+		typeof window !== 'undefined' ? window.location : new URL(serverUrl!)
+	const params = new URLSearchParams(url.search)
+	// const initialState = {
+	// 	state: params.get('state'),
+	// 	jobtype: params.get('jobtype'),
+	// }
+
+	// Create facetFilters array for Configure widget
+	const states = params.getAll('state')
+	const employmentTypes = params.getAll('employmentType')
+	// Then build an array:
+	const facetFilters = [
+		...states.map(st => `state:${st}`),
+		...employmentTypes.map(jt => `employmentType:${jt}`),
+	]
+
+	// const facetFilters = [
+	// 	initialState.state && `state:${initialState.state}`,
+	// 	initialState.jobtype && `employmentType:${initialState.jobtype}`,
+	// ].filter(Boolean)
 	return (
 		<>
 			<div className="mt-10 justify-center p-6">
@@ -214,42 +248,81 @@ function Search({ serverState, serverUrl }: SearchProps) {
 							cleanUrlOnDispose: false,
 							getLocation() {
 								if (typeof window === 'undefined') {
-									return new URL(serverUrl!) as unknown as Location
+									// On server: parse from your request.url
+									return new URL(serverUrl) as unknown as Location
 								}
 								return window.location
 							},
+							/**
+							 * Converts the final routeState into an actual URL string.
+							 * You can set the path to `/jobs/all` (or anything you like).
+							 */
+							createURL({ qsModule, routeState, location }) {
+								// Typically base it on location.origin so it works locally too
+								const baseUrl = `${location.origin}${location.pathname}`
+
+								// Turn routeState into query params
+								const queryString = qsModule.stringify(routeState, {
+									addQueryPrefix: true,
+									arrayFormat: 'repeat', // Multiple values
+								})
+
+								// result: "https://goodunionjobs.com/?employmentType=full_time&employmentType=contractor"
+								return `${baseUrl}${queryString}`
+							},
+
+							// Parse the existing URL back into an object for routeToState
+							parseURL({ qsModule, location }) {
+								const parsed = qsModule.parse(location.search.slice(1))
+								console.log('🚀 parseURL', parsed)
+								// This reads everything after the "?" in e.g. example.com/?employmentType=full_time
+								return qsModule.parse(location.search.slice(1))
+							},
 						}),
+
+						/**
+						 * stateMapping: how to convert between InstantSearch internal uiState
+						 * and our custom routeState above.
+						 */
 						stateMapping: {
 							stateToRoute(uiState) {
-								const indexUiState = uiState[ALGOLIA_INDEX]
+								// Our index is e.g. "yourIndexName"
+								const indexUiState = uiState[ALGOLIA_INDEX] || {}
+
 								return {
 									q: indexUiState.query,
-									state: indexUiState.menu?.state,
-									jobtype: indexUiState.menu?.employmentType,
 									page: indexUiState.page,
+									employmentType: indexUiState.refinementList?.employmentType,
+									state: indexUiState.refinementList?.state,
+									salary: indexUiState.range?.minSalary,
 								}
 							},
+
 							routeToState(routeState) {
+								console.log('🚀 routeToState input', routeState)
+
 								return {
 									[ALGOLIA_INDEX]: {
-										query: routeState.q,
-										menu: {
-											categories: routeState.state,
-											// Set other menu properties if needed
+										query: routeState.q || '',
+										page: routeState.page || 1,
+										refinementList: {
+											// Need this because if single string, might not be seen as array
+											employmentType: arrayify(routeState.employmentType),
+											state: arrayify(routeState.state),
 										},
-										page: routeState.page,
+										range: {
+											minSalary: routeState.salary,
+										},
 									},
 								}
 							},
 						},
-						onRouteChange() {
-							// This callback is called when the route changes
-							// You can implement any additional logic here if needed
-						},
-						// initialRouteState, // Uncomment and set initial route state if needed
 					}}
 				>
-					<Configure hitsPerPage={40} />
+					<Configure
+						hitsPerPage={40}
+						// facetFilters={facetFilters}
+					/>
 					<div className="mt-10 grid justify-items-center">
 						<div className="justify-center">
 							<SearchBox
@@ -276,6 +349,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 								<EmploymentTypeCombobox />
 								<StateCombobox />
 								<SalaryRangeSliderPopover />
+								<ClearAllButton />
 							</ResponsiveFilters>
 						</div>
 					</div>
