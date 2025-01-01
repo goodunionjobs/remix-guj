@@ -55,4 +55,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = 'Button'
 
-export { Button, buttonVariants }
+function FilterClearButton({ onClear }: { onClear: () => void }) {
+	return (
+		<Button
+			variant="ghost"
+			className="absolute right-2 top-2 h-auto p-0 text-sm text-muted-foreground hover:text-foreground"
+			onClick={e => {
+				e.preventDefault()
+				e.stopPropagation()
+				onClear()
+			}}
+		>
+			Clear
+		</Button>
+	)
+}
+
+export { Button, buttonVariants, FilterClearButton }
