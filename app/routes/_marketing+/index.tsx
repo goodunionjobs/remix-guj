@@ -294,6 +294,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 									page: indexUiState.page,
 									employmentType: indexUiState.refinementList?.employmentType,
 									state: indexUiState.refinementList?.state,
+									// TODO: Fix that %3A (a `:` character) shows up after the salary
 									salary: indexUiState.range?.minSalary,
 								}
 							},

@@ -15,13 +15,19 @@ export function SalaryRangeSliderPopover() {
 	})
 
 	const [isOpen, setIsOpen] = useState(false)
+	const [displayValue, setDisplayValue] = useState<number>(
+		start[0] ?? range.min ?? 0,
+	)
 
 	// If user hasn’t refined yet, `start[0]` might be `undefined`;
 	// let’s default to range.min or some sensible default:
 	const minValue = start[0] ?? range.min ?? 0
 	const maxValue = range.max ?? 999_999 // or however big your salaries can get
 
-	const clearRange = () => refine(defaultRange)
+	const clearRange = () => {
+		refine(defaultRange)
+		setDisplayValue(range.min ?? 0)
+	}
 
 	const formatSalary = (value: number) => {
 		// Return 'Pay' if there's no start value or if value is invalid
@@ -38,8 +44,8 @@ export function SalaryRangeSliderPopover() {
 					className="dark:border-white dark:bg-black"
 					disabled={!canRefine}
 				>
-					<Icon className="mr-2 h-4 w-4" name="circle-dollar-sign" />
-					{canRefine ? formatSalary(minValue) : 'Pay'}
+					<span className="mr-2">💰</span>
+					{canRefine ? formatSalary(displayValue) : 'Pay'}
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-80">
@@ -62,9 +68,13 @@ export function SalaryRangeSliderPopover() {
 									min={range.min ?? 0}
 									max={range.max ?? 999_999}
 									step={1000}
-									value={[minValue]}
+									value={[displayValue]}
 									onValueChange={newValue => {
-										// We call refine([MIN, MAX])
+										// Update the display value immediately
+										setDisplayValue(newValue[0])
+									}}
+									onValueCommit={newValue => {
+										// Only update the search when the user finishes dragging
 										refine([newValue[0], maxValue])
 									}}
 									className="mb-2"

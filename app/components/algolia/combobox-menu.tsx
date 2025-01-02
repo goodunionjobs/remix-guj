@@ -190,9 +190,9 @@ export function AlgoliaFlexibleCombobox({
 					className={`dark:border-white dark:bg-black w-[${width}] justify-between`}
 				>
 					{placeholder === 'Job Types' ? (
-						<Icon className="mr-2 h-4 w-4" name="briefcase-business" />
+						<span className="mr-2">💼</span>
 					) : (
-						<Icon className="mr-2 h-4 w-4" name="map-pin" />
+						<span className="mr-2">📌</span>
 					)}
 					{label}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

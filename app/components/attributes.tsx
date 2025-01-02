@@ -9,7 +9,7 @@ function formatSalaryInThousands(salary: number): string {
 	const roundedSalary = Math.round(salary / 1000)
 
 	// Format with dollar sign and add 'K' suffix
-	return `$${roundedSalary}K`
+	return `${roundedSalary}K`
 }
 
 function formatSalaryRange(
@@ -73,22 +73,25 @@ export function DrizzleAttributes({
 				maxSalary === undefined ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						💰{salaryRangeStr}
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
+						<span className="mr-1">💰</span>
+						{salaryRangeStr}
 					</span>
 				)}
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						📌{state}
+					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
+						<span className="mr-1">📌</span>
+						{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						🕑{employmentType}
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
+						<span className="mr-1">💼</span>
+						{employmentType}
 					</span>
 				)}
 			</div>
@@ -131,22 +134,25 @@ export function Attributes({
 				{minSalary === 0 && maxSalary === 0 ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						💰{salaryRangeStr}
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
+						<span className="mr-1">💰</span>
+						{salaryRangeStr}
 					</span>
 				)}
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						📌{state}
+					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
+						<span className="mr-1">📌</span>
+						{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm border-2 border-solid border-black bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						🕑{employmentType}
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
+						<span className="mr-1">💼</span>
+						{employmentType}
 					</span>
 				)}
 			</div>
