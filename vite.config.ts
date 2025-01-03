@@ -18,7 +18,7 @@ export default defineConfig({
 		cssMinify: MODE === 'production',
 
 		rollupOptions: {
-			external: [/node:.*/, 'stream', 'fsevents', 'posthog'],
+			external: [/node:.*/, 'fsevents'],
 		},
 
 		assetsInlineLimit: (source: string) => {
