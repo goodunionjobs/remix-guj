@@ -340,7 +340,7 @@ function Logo() {
 		<Link
 			to="/"
 			className="rounded-full bg-blue-500"
-			aria-label="Good Union Jobs - Return to homepage"
+			aria-label="Good Union Jobs Logo - Return to homepage"
 		>
 			<img
 				src="/favicons/512x512.png"
