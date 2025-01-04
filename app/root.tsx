@@ -241,7 +241,7 @@ function App() {
 
 	return (
 		<>
-			<div className="flex h-screen flex-col justify-between">
+			<div className="flex min-h-screen flex-col justify-between">
 				{/* <div className="flex items-center justify-center bg-blue-700 pt-0.5  text-white sm:py-1"> */}
 				{/* 	<span> */}
 				{/* 		<a href="https://www.ukrainefreedomproject.org/"> */}
