@@ -146,7 +146,7 @@ app.use(
 					'https://account.goodunionjobs.com',
 					'https://static.cloudflareinsights.com',
 					'https://cloudflareinsights.com',
-					'https://*.cloudflare.com',
+					'https://ajax.cloudflare.com',
 					"'self'",
 					// @ts-expect-error
 					(_, res) => `'nonce-${res.locals.cspNonce}'`,

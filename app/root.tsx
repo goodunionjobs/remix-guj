@@ -257,7 +257,11 @@ function App() {
 					<nav className="flex items-center justify-between gap-1">
 						<div className="flex justify-between gap-2">
 							<Logo />
-							<Link to="/" className="hidden self-center md:block">
+							<Link
+								to="/"
+								className="hidden self-center md:block"
+								aria-label="Good Union Jobs - Return to homepage"
+							>
 								<div className="font-light">Good</div>
 								<div className="font-bold">Union Jobs</div>
 							</Link>
@@ -333,7 +337,11 @@ function App() {
 
 function Logo() {
 	return (
-		<Link to="/" className="rounded-full bg-blue-500">
+		<Link
+			to="/"
+			className="rounded-full bg-blue-500"
+			aria-label="Good Union Jobs - Return to homepage"
+		>
 			<img
 				src="/favicons/512x512.png"
 				alt="good union jobs logo"
