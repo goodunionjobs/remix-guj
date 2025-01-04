@@ -365,7 +365,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 								}}
 								submitIconComponent={({ classNames }) => (
 									<div className={`${classNames.submitIcon}`}>
-										<Icon name="search" />
+										<Icon name="search" className="h-6 w-6 sm:h-8 sm:w-8" />
 									</div>
 								)}
 								queryHook={queryHook}
