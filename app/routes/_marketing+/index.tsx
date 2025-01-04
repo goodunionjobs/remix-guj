@@ -5,6 +5,7 @@ import {
 	type MetaFunction,
 } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
+import { ClientOnly } from 'remix-utils/client-only'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
 import { renderToString } from 'react-dom/server'
 import {
@@ -193,6 +194,45 @@ function arrayify(value) {
 	return [value]
 }
 
+function PlaceholderFilters() {
+	return (
+		<>
+			<Button variant="outline" className="dark:border-white dark:bg-black">
+				<span className="mr-2">💼</span>
+				Job Types
+			</Button>
+			<Button variant="outline" className="dark:border-white dark:bg-black">
+				<span className="mr-2">📌</span>
+				States
+			</Button>
+			<Button variant="outline" className="dark:border-white dark:bg-black">
+				<span className="mr-2">💰</span>
+				Pay
+			</Button>
+		</>
+	)
+}
+
+function SearchHeader() {
+	return (
+		<div className="mt-10 justify-center p-6">
+			<h1 className="flex flex-col text-3xl font-bold sm:text-4xl">
+				<span className="inline-flex justify-center">
+					<span className="rounded-sm bg-[#0730FD] px-1 text-white">
+						Make your job
+					</span>
+				</span>
+				<span className="inline-flex justify-center pt-1.5">
+					<span className="rounded-sm bg-amber-300 px-1 text-black">
+						work for{' '}
+						<span className="decoration-3 text-black underline">you</span>
+					</span>
+				</span>
+			</h1>
+		</div>
+	)
+}
+
 function Search({ serverState, serverUrl }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
 
@@ -220,22 +260,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 	// ].filter(Boolean)
 	return (
 		<>
-			<div className="mt-10 justify-center p-6">
-				<h1 className="flex flex-col text-3xl font-bold sm:text-4xl">
-					<span className="inline-flex justify-center">
-						<span className="rounded-sm bg-[#0730FD] px-1 text-white">
-							Make your job
-						</span>
-					</span>
-					<span className="inline-flex justify-center pt-1.5">
-						<span className="rounded-sm bg-amber-300 px-1 text-black">
-							work for{' '}
-							<span className="decoration-3 text-black underline">you</span>
-						</span>
-					</span>
-				</h1>
-			</div>
-
+			<SearchHeader /> {/* Rendered outside InstantSearch */}
 			<InstantSearchSSRProvider {...serverState}>
 				<InstantSearch
 					searchClient={searchClient}
@@ -347,10 +372,16 @@ function Search({ serverState, serverUrl }: SearchProps) {
 						{/* Later when we have more filters get rid of the margins. They'll line up in the middle. Easier to handle */}
 						<div className="z-20 mb-3 mt-2">
 							<ResponsiveFilters>
-								<EmploymentTypeCombobox />
-								<StateCombobox />
-								<SalaryRangeSliderPopover />
-								<ClearAllButton />
+								<ClientOnly fallback={<PlaceholderFilters />}>
+									{() => (
+										<>
+											<EmploymentTypeCombobox />
+											<StateCombobox />
+											<SalaryRangeSliderPopover />
+											<ClearAllButton />
+										</>
+									)}
+								</ClientOnly>
 							</ResponsiveFilters>
 						</div>
 					</div>
