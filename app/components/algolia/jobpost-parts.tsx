@@ -160,8 +160,8 @@ export function JobDescription({
 						href={url}
 						className="light:bg-yellow-100 mx-auto mb-1 justify-center rounded-md border-2 border-solid border-black px-2 text-2xl font-bold hover:bg-white dark:bg-blue-600"
 					>
-						Apply
-						<Icon className="h-6 w-6" name="link-2" />
+						Apply for Job
+						<Icon className="ml-0.5 h-6 w-6" name="link-2" />
 					</a>
 				</div>
 			)}
