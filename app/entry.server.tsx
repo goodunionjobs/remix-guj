@@ -1,4 +1,4 @@
-import { PassThrough } from 'stream'
+import { PassThrough } from 'node:stream'
 import {
 	createReadableStreamFromReadable,
 	type LoaderFunctionArgs,
@@ -114,7 +114,7 @@ export function handleError(
 			true,
 		)
 	} else {
-		console.error(chalk.red(error))
+		console.error(error)
 		Sentry.captureException(error)
 	}
 }

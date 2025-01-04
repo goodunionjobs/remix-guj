@@ -5,6 +5,8 @@ import { getDomainUrl } from '#app/utils/misc.tsx'
 import { jobs } from '../../../drizzle/schema'
 import slugify from '@sindresorhus/slugify'
 
+//TODO: Go to the below at some point and fix up once you know what SEO routes to show
+// https://github.com/epicweb-dev/epic-stack/blob/main/app/routes/_seo%2B/sitemap%5B.%5Dxml.ts
 export const loader: LoaderFunction = async ({ request }) => {
 	const baseUrl = getDomainUrl(request)
 

@@ -2,23 +2,26 @@ import { vitePlugin as remix } from '@remix-run/dev'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { glob } from 'glob'
 import { flatRoutes } from 'remix-flat-routes'
-import { defineConfig } from 'vite'
 import { remixDevTools } from 'remix-development-tools'
 import { envOnlyMacros } from 'vite-env-only'
+import { type ViteUserConfig } from 'vitest/config'
 import { cjsInterop } from 'vite-plugin-cjs-interop'
 
 const MODE = process.env.NODE_ENV
 
-export default defineConfig({
+export default {
 	//WARN: reason why https://threads.typesense.org/2Lb60
 	// ssr: {
 	// 	noExternal: ['typesense-instantsearch-adapter'],
 	// },
+	optimizeDeps: {
+		exclude: ['@resvg/resvg-js'],
+	},
 	build: {
 		cssMinify: MODE === 'production',
 
 		rollupOptions: {
-			external: [/node:.*/, 'stream', 'fsevents', 'posthog'],
+			external: [/node:.*/, 'fsevents', '@resvg/resvg-js'],
 		},
 
 		assetsInlineLimit: (source: string) => {
@@ -44,27 +47,36 @@ export default defineConfig({
 		cjsInterop({
 			dependencies: ['typesense-instantsearch-adapter'],
 		}),
-		remix({
-			ignoredRouteFiles: ['**/*'],
-			serverModuleFormat: 'esm',
-			routes: async defineRoutes => {
-				return flatRoutes('routes', defineRoutes, {
-					ignoredRouteFiles: [
-						'.*',
-						'**/*.css',
-						'**/*.test.{js,jsx,ts,tsx}',
-						'**/__*.*',
-						// This is for server-side utilities you want to colocate
-						// next to your routes without making an additional
-						// directory. If you need a route that includes "server" or
-						// "client" in the filename, use the escape brackets like:
-						// my-route.[server].tsx
-						'**/*.server.*',
-						'**/*.client.*',
-					],
-				})
-			},
-		}),
+		process.env.NODE_ENV === 'test'
+			? null
+			: remix({
+					ignoredRouteFiles: ['**/*'],
+					serverModuleFormat: 'esm',
+					future: {
+						unstable_optimizeDeps: true,
+						v3_fetcherPersist: true,
+						v3_lazyRouteDiscovery: true,
+						v3_relativeSplatPath: true,
+						v3_throwAbortReason: true,
+					},
+					routes: async defineRoutes => {
+						return flatRoutes('routes', defineRoutes, {
+							ignoredRouteFiles: [
+								'.*',
+								'**/*.css',
+								'**/*.test.{js,jsx,ts,tsx}',
+								'**/__*.*',
+								// This is for server-side utilities you want to colocate
+								// next to your routes without making an additional
+								// directory. If you need a route that includes "server" or
+								// "client" in the filename, use the escape brackets like:
+								// my-route.[server].tsx
+								'**/*.server.*',
+								'**/*.client.*',
+							],
+						})
+					},
+				}),
 		process.env.SENTRY_AUTH_TOKEN
 			? sentryVitePlugin({
 					disable: MODE !== 'production',
@@ -86,4 +98,14 @@ export default defineConfig({
 				})
 			: null,
 	],
-})
+	test: {
+		include: ['./app/**/*.test.{ts,tsx}'],
+		setupFiles: ['./tests/setup/setup-test-env.ts'],
+		globalSetup: ['./tests/setup/global-setup.ts'],
+		restoreMocks: true,
+		coverage: {
+			include: ['app/**/*.{ts,tsx}'],
+			all: true,
+		},
+	},
+} satisfies ViteUserConfig

@@ -1,4 +1,4 @@
-import fs from 'fs'
+import crypto from 'node:crypto'
 import { faker } from '@faker-js/faker'
 import { type NoteImage, type Note } from '@prisma/client'
 import { prisma } from '#app/utils/db.server.ts'

@@ -343,7 +343,7 @@ export function EmploymentTypeCombobox() {
 export function ClearAllButton() {
 	return (
 		<ClearRefinements
-			translations={{ resetButtonText: 'Clear all' }}
+			translations={{ resetButtonText: 'Clear filters' }}
 			// If you only want to reset certain facets, pass `excludedAttributes`
 		/>
 	)

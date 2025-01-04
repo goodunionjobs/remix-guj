@@ -1,6 +1,7 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import { createRequestHandler } from '@remix-run/express'
 import { type ServerBuild } from '@remix-run/node'
+import Sentry from '@sentry/remix'
 import { ip as ipAddress } from 'address'
 import chalk from 'chalk'
 import closeWithGrace from 'close-with-grace'
@@ -15,8 +16,9 @@ const MODE = process.env.NODE_ENV ?? 'development'
 const IS_PROD = MODE === 'production'
 const IS_DEV = MODE === 'development'
 const ALLOW_INDEXING = process.env.ALLOW_INDEXING !== 'false'
+const SENTRY_ENABLED = IS_PROD && process.env.SENTRY_DSN
 
-if (IS_PROD && process.env.SENTRY_DSN) {
+if (SENTRY_ENABLED) {
 	void import('./utils/monitoring.js').then(({ init }) => init())
 }
 
@@ -49,7 +51,6 @@ app.use((req, res, next) => {
 // ensure HTTPS only (X-Forwarded-Proto comes from Fly)
 app.use((req, res, next) => {
 	if (req.method !== 'GET') return next()
-
 	const proto = req.get('X-Forwarded-Proto')
 	const host = getHost(req)
 	if (proto === 'http') {
@@ -222,13 +223,18 @@ app.use((req, res, next) => {
 })
 
 async function getBuild() {
-	const build = viteDevServer
-		? viteDevServer.ssrLoadModule('virtual:remix/server-build')
-		: // @ts-ignore this should exist before running the server
-			// but it may not exist just yet.
-			await import('../build/server/index.js')
-	// not sure how to make this happy 🤷‍♂️
-	return build as unknown as ServerBuild
+	try {
+		const build = viteDevServer
+			? await viteDevServer.ssrLoadModule('virtual:remix/server-build')
+			: // @ts-expect-error - the file might not exist yet but it will
+				// eslint-disable-next-line import/no-unresolved
+				await import('../build/server/index.js')
+		return { build: build as unknown as ServerBuild, error: null }
+	} catch (error) {
+		// Catch error and return null to make express happy and avoid an unrecoverable crash
+		console.error('Error creating build:', error)
+		return { error: error, build: null as unknown as ServerBuild }
+	}
 }
 
 if (!ALLOW_INDEXING) {
@@ -246,7 +252,14 @@ app.all(
 			serverBuild: getBuild(),
 		}),
 		mode: MODE,
-		build: getBuild,
+		build: async () => {
+			const { error, build } = await getBuild()
+			// gracefully "catch" the error
+			if (error) {
+				throw error
+			}
+			return build
+		},
 	}),
 )
 
@@ -288,8 +301,16 @@ ${chalk.bold('Press Ctrl+C to stop')}
 	)
 })
 
-closeWithGrace(async () => {
+closeWithGrace(async ({ err }) => {
 	await new Promise((resolve, reject) => {
 		server.close(e => (e ? reject(e) : resolve('ok')))
 	})
+	if (err) {
+		console.error(chalk.red(err))
+		console.error(chalk.red(err.stack))
+		if (SENTRY_ENABLED) {
+			Sentry.captureException(err)
+			await Sentry.flush(500)
+		}
+	}
 })
