@@ -5,6 +5,7 @@ import {
 	type HeadersFunction,
 	type LinksFunction,
 	type MetaFunction,
+	type ActionFunctionArgs,
 } from '@remix-run/node'
 import {
 	Link,
@@ -25,6 +26,7 @@ import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from './components/toaster.tsx'
 import { Button } from './components/ui/button.tsx'
+import DelayedPopupForm from './components/signup-popup-form.tsx'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -49,6 +51,11 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { type Theme, getTheme } from './utils/theme.server.ts'
 import { makeTimings } from './utils/timing.server.ts'
 import { getToast } from './utils/toast.server.ts'
+import {
+	checkPopupStatus,
+	dismissPopup,
+	setPopupShown,
+} from './utils/check-pop-up.server.ts'
 import { useIsBot } from './utils/is-bot.context.tsx'
 
 export const links: LinksFunction = () => {
@@ -89,11 +96,33 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	]
 }
 
+export async function action({ request }: ActionFunctionArgs) {
+	const formData = await request.formData()
+	const intent = formData.get('intent')
+
+	if (intent === 'closePopup') {
+		return json(
+			{ success: true },
+			{
+				headers: await setPopupShown(request), // This sets the cookie
+			},
+		)
+	}
+
+	// Handle other intents or return a default response
+	return json({ success: false }, { status: 400 })
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
 	const timings = makeTimings('root loader')
 
 	const { getUser } = await getKindeSession(request)
 	const user = await getUser()
+
+	// Only check popup status if user is not logged in
+	const { shouldShowSignupPopup } = !user
+		? await checkPopupStatus(request)
+		: { shouldShowSignupPopup: false }
 
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const honeyProps = honeypot.getInputProps()
@@ -111,6 +140,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 			},
 			ENV: getEnv(),
 			toast,
+			shouldShowSignupPopup,
+
 			honeyProps,
 		},
 		{
@@ -228,6 +259,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		<Document nonce={nonce} theme={theme} isBot={isBot} env={data?.ENV}>
 			{children}
+
+			{/* //TODO: Most likely shouldn't we just load this up on pages like jobs, companies, and main page? Not in root */}
+			<DelayedPopupForm
+				shouldShow={data?.shouldShowSignupPopup}
+				isBot={isBot}
+				user={data?.user}
+			/>
 		</Document>
 	)
 }
@@ -283,19 +321,19 @@ function App() {
 									<UserDropdown user={data.user} />
 								) : (
 									<>
+										{/* <Button */}
+										{/* 	asChild */}
+										{/* 	variant="default" */}
+										{/* 	size="lg" */}
+										{/* 	className="w-3/4 sm:w-full" */}
+										{/* > */}
+										{/* 	<Link to={'/kinde-auth/register'}> */}
+										{/* 		Sign Up - Job Notifications 💼 */}
+										{/* 	</Link> */}
+										{/* </Button> */}
 										<Button
 											asChild
 											variant="default"
-											size="lg"
-											className="w-3/4 sm:w-full"
-										>
-											<Link to={'/kinde-auth/register'}>
-												Sign Up - Job Notifications 💼
-											</Link>
-										</Button>
-										<Button
-											asChild
-											variant="outline"
 											size="lg"
 											className="w-3/4 sm:w-full"
 										>
@@ -312,7 +350,7 @@ function App() {
 					<Outlet />
 				</div>
 
-				<div className="container flex justify-between justify-items-center pb-5">
+				<div className="container mt-4 flex justify-between justify-items-center pb-5 sm:mt-6">
 					<div className="flex items-center justify-items-center gap-4">
 						<Logo />
 						<Link to="/" className="hidden self-center md:block">
