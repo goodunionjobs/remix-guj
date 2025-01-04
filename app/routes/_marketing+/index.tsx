@@ -213,6 +213,26 @@ function PlaceholderFilters() {
 	)
 }
 
+function SearchHeader() {
+	return (
+		<div className="mt-10 justify-center p-6">
+			<h1 className="flex flex-col text-3xl font-bold sm:text-4xl">
+				<span className="inline-flex justify-center">
+					<span className="rounded-sm bg-[#0730FD] px-1 text-white">
+						Make your job
+					</span>
+				</span>
+				<span className="inline-flex justify-center pt-1.5">
+					<span className="rounded-sm bg-amber-300 px-1 text-black">
+						work for{' '}
+						<span className="decoration-3 text-black underline">you</span>
+					</span>
+				</span>
+			</h1>
+		</div>
+	)
+}
+
 function Search({ serverState, serverUrl }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
 
@@ -240,22 +260,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 	// ].filter(Boolean)
 	return (
 		<>
-			<div className="mt-10 justify-center p-6">
-				<h1 className="flex flex-col text-3xl font-bold sm:text-4xl">
-					<span className="inline-flex justify-center">
-						<span className="rounded-sm bg-[#0730FD] px-1 text-white">
-							Make your job
-						</span>
-					</span>
-					<span className="inline-flex justify-center pt-1.5">
-						<span className="rounded-sm bg-amber-300 px-1 text-black">
-							work for{' '}
-							<span className="decoration-3 text-black underline">you</span>
-						</span>
-					</span>
-				</h1>
-			</div>
-
+			<SearchHeader /> {/* Rendered outside InstantSearch */}
 			<InstantSearchSSRProvider {...serverState}>
 				<InstantSearch
 					searchClient={searchClient}
