@@ -6,6 +6,7 @@ import {
 	Link,
 } from '@remix-run/react'
 import { captureRemixErrorBoundaryError } from '@sentry/remix'
+import { type ReactElement } from 'react'
 import { Icon } from './ui/icon.tsx'
 import { getErrorMessage } from '#app/utils/misc.tsx'
 import { Alert, AlertTitle, AlertDescription } from './ui/alert'
@@ -29,7 +30,7 @@ const ErrorDisplay = ({
 type StatusHandler = (info: {
 	error: ErrorResponse
 	params: Record<string, string | undefined>
-}) => JSX.Element | null
+}) => ReactElement | null
 
 export function GeneralErrorBoundary({
 	defaultStatusHandler = ({ error }) => (
@@ -45,7 +46,7 @@ export function GeneralErrorBoundary({
 }: {
 	defaultStatusHandler?: StatusHandler
 	statusHandlers?: Record<number, StatusHandler>
-	unexpectedErrorHandler?: (error: unknown) => JSX.Element | null
+	unexpectedErrorHandler?: (error: unknown) => ReactElement | null
 }) {
 	const error = useRouteError()
 	captureRemixErrorBoundaryError(error)
