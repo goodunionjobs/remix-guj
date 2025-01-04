@@ -21,8 +21,8 @@ import { useTheme } from '../resources+/theme-switch'
 import { cachified, cache } from '#app/utils/cache.server.ts'
 import { type Timings } from '#app/utils/timing.server.ts'
 import { GeneralErrorBoundary } from '#app/components/error-boundary'
-import { Icon } from '#app/components/ui/icon.tsx'
 import { Button } from '#app/components/ui/button.tsx'
+import { Icon } from '#app/components/ui/icon.tsx'
 
 type JobDescriptionResponse = {
 	description: string
@@ -299,10 +299,11 @@ export default function JobRoute() {
 			<div className="min-h-screen [width:1115px]">
 				<Link
 					to="/"
-					className="rounded-md border-[3px] border-black px-1.5 py-1 text-sm sm:text-lg"
-					style={{ background: `orangered`, color: `white` }}
+					className="rounded-md px-1.5 pb-1.5 pt-1 text-sm sm:text-lg"
+					style={{ background: `#ff8400`, color: `white` }}
 				>
-					← Back to Search
+					<Icon className="h-6 w-6" name="arrow-big-left" />
+					Back to Search
 				</Link>
 				<div className="group pt-2">
 					<JobHeaderDrizzle

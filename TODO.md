@@ -30,10 +30,11 @@
   <Icon name="arrow-left">Back to home</Icon>
 - Set this up for alerts when caching is too high and other things
   https://dejager.sh/articles/running-grafana-enterprise-on-fly
+- Add a way to see when cache is close to hitting memory!
 
-1. Change umami. See Google analytics if bots change. I’ll keep both up.  
-2. Categories Union admin  
-3. Talk about Cornell   
+1. Change umami. See Google analytics if bots change. I’ll keep both up.
+2. Categories Union admin
+3. Talk about Cornell
 
 ```
   // app/routes/api/image-proxy.ts

@@ -1,5 +1,6 @@
 import { Link } from '@remix-run/react'
 import { Suspense } from 'react'
+import { Icon } from './ui/icon'
 
 //TODO: Not used? Remove after looking into it more
 export function BodyText({
@@ -23,17 +24,17 @@ export function BodyText({
 		<div key={objectID}>
 			{(showResults || showResults === undefined) && (
 				<div
-					className={`light:bg-white light:border-black dark:border-gray -my-2 mr-2 w-full rounded-lg border-2 border-solid py-4  text-sm dark:bg-slate-900 sm:text-base`}
+					className={`light:bg-white light:border-black dark:border-gray -my-2 mr-2 w-full rounded-lg border-2 border-solid py-4 text-sm dark:bg-slate-900 sm:text-base`}
 					onClick={handleButtonClick}
 				>
 					{url && (
 						<div className="flex">
 							<a
 								href={url}
-								className="light:bg-yellow-100 mx-auto mb-1 justify-center rounded-md
-            border-2 border-solid border-black px-2 text-2xl font-bold hover:bg-white dark:bg-blue-600"
+								className="light:bg-yellow-100 mx-auto mb-1 justify-center rounded-md border-2 border-solid border-black px-2 text-2xl font-bold hover:bg-white dark:bg-blue-600"
 							>
-								Apply 📎
+								Apply for Job
+								<Icon className="ml-0.5 h-6 w-6" name="link-2" />
 							</a>
 						</div>
 					)}
@@ -67,8 +68,7 @@ export function BodyText({
 										`${baseUrl}jobs/${objectID}-${job}`,
 									)
 								}}
-								className="border-1.5 border-grey-400 mx-auto cursor-pointer justify-center
-								rounded-md border bg-white px-2 text-base dark:bg-slate-800"
+								className="border-1.5 border-grey-400 mx-auto cursor-pointer justify-center rounded-md border bg-white px-2 text-base dark:bg-slate-800"
 							>
 								<Link
 									to={`/jobs/${objectID}-${job}`}

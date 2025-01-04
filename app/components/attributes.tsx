@@ -3,6 +3,7 @@ import { Link } from '@remix-run/react'
 import { Highlight } from 'react-instantsearch'
 import { type HitProps } from '#app/utils/types.tsx'
 import { type jobs } from '../../drizzle/schema'
+import { Icon } from './ui/icon'
 
 function formatSalaryInThousands(salary: number): string {
 	// Round to the nearest thousand
@@ -73,24 +74,24 @@ export function DrizzleAttributes({
 				maxSalary === undefined ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						<span className="mr-1">💰</span>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+						<Icon className="mr-0.5 h-4 w-4" name="circle-dollar-sign" />
 						{salaryRangeStr}
 					</span>
 				)}
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						<span className="mr-1">📌</span>
+					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+						<Icon className="mr-0.5 h-4 w-4" name="map-pin" />
 						{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						<span className="mr-1">💼</span>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+						<Icon className="mr-0.5 h-4 w-4" name="briefcase-business" />
 						{employmentType}
 					</span>
 				)}
@@ -134,24 +135,25 @@ export function Attributes({
 				{minSalary === 0 && maxSalary === 0 ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						<span className="mr-1">💰</span>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+						<Icon className="mr-0.5 h-4 w-4" name="circle-dollar-sign" />
 						{salaryRangeStr}
 					</span>
 				)}
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						<span className="mr-1">📌</span>
+					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+						<Icon className="mr-0.5 h-4 w-4" name="map-pin" />
+
 						{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 pt-0.5 text-xs font-bold text-black sm:text-sm">
-						<span className="mr-1">💼</span>
+					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+						<Icon className="mr-0.5 h-4 w-4" name="briefcase-business" />
 						{employmentType}
 					</span>
 				)}
