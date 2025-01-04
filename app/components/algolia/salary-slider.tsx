@@ -44,7 +44,7 @@ export function SalaryRangeSliderPopover() {
 					className="dark:border-white dark:bg-black"
 					disabled={!canRefine}
 				>
-					<span className="mr-2">💰</span>
+					<Icon className="mr-2 h-4 w-4" name="circle-dollar-sign" />
 					{canRefine ? formatSalary(displayValue) : 'Pay'}
 				</Button>
 			</PopoverTrigger>
