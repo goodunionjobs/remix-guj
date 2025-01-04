@@ -5,6 +5,7 @@ import {
 	type MetaFunction,
 } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
+import { ClientOnly } from 'remix-utils/client-only'
 import { history } from 'instantsearch.js/es/lib/routers/index.js'
 import { renderToString } from 'react-dom/server'
 import {
@@ -193,6 +194,25 @@ function arrayify(value) {
 	return [value]
 }
 
+function PlaceholderFilters() {
+	return (
+		<>
+			<Button variant="outline" className="dark:border-white dark:bg-black">
+				<span className="mr-2">💼</span>
+				Job Types
+			</Button>
+			<Button variant="outline" className="dark:border-white dark:bg-black">
+				<span className="mr-2">📌</span>
+				States
+			</Button>
+			<Button variant="outline" className="dark:border-white dark:bg-black">
+				<span className="mr-2">💰</span>
+				Pay
+			</Button>
+		</>
+	)
+}
+
 function Search({ serverState, serverUrl }: SearchProps) {
 	const ALGOLIA_INDEX = ENV.ALGOLIA_INDEX!
 
@@ -347,10 +367,16 @@ function Search({ serverState, serverUrl }: SearchProps) {
 						{/* Later when we have more filters get rid of the margins. They'll line up in the middle. Easier to handle */}
 						<div className="z-20 mb-3 mt-2">
 							<ResponsiveFilters>
-								<EmploymentTypeCombobox />
-								<StateCombobox />
-								<SalaryRangeSliderPopover />
-								<ClearAllButton />
+								<ClientOnly fallback={<PlaceholderFilters />}>
+									{() => (
+										<>
+											<EmploymentTypeCombobox />
+											<StateCombobox />
+											<SalaryRangeSliderPopover />
+											<ClearAllButton />
+										</>
+									)}
+								</ClientOnly>
 							</ResponsiveFilters>
 						</div>
 					</div>
