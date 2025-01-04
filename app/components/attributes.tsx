@@ -66,7 +66,7 @@ export function DrizzleAttributes({
 				<p className="font-Atkinson line-clamp-2 text-sm leading-none sm:leading-tight">
 					{employer}
 				</p>
-				<p className="font-Atkinson line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight">
+				<p className="font-Atkinson mb-1.5 line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight">
 					{title}
 				</p>
 				{minSalary === null ||
@@ -74,7 +74,7 @@ export function DrizzleAttributes({
 				maxSalary === undefined ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+					<span className="font-Atkinson inline-flex items-center whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
 						<Icon className="mr-0.5 h-4 w-4" name="circle-dollar-sign" />
 						{salaryRangeStr}
 					</span>
@@ -82,7 +82,7 @@ export function DrizzleAttributes({
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+					<span className="font-Atkinson mx-1 inline-flex items-center whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
 						<Icon className="mr-0.5 h-4 w-4" name="map-pin" />
 						{state}
 					</span>
@@ -90,7 +90,7 @@ export function DrizzleAttributes({
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+					<span className="font-Atkinson inline-flex items-center whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
 						<Icon className="mr-0.5 h-4 w-4" name="briefcase-business" />
 						{employmentType}
 					</span>
@@ -128,14 +128,14 @@ export function Attributes({
 				<Link
 					itemProp="url"
 					to={`/jobs/${hit.objectID}-${hit.title}`}
-					className="job-post_ahref font-Atkinson line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight"
+					className="job-post_ahref font-Atkinson mb-1.5 line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight"
 				>
 					{hit ? <Highlight attribute="title" hit={hit} /> : title}
 				</Link>
 				{minSalary === 0 && maxSalary === 0 ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+					<span className="font-Atkinson inline-flex items-center whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
 						<Icon className="mr-0.5 h-4 w-4" name="circle-dollar-sign" />
 						{salaryRangeStr}
 					</span>
@@ -143,16 +143,15 @@ export function Attributes({
 				{state === '' || state === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson mx-1 whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+					<span className="font-Atkinson mx-1 inline-flex items-center whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
 						<Icon className="mr-0.5 h-4 w-4" name="map-pin" />
-
 						{state}
 					</span>
 				)}
 				{employmentType === '' || employmentType === null ? (
 					<span className="hidden"></span>
 				) : (
-					<span className="font-Atkinson whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
+					<span className="font-Atkinson inline-flex items-center whitespace-nowrap rounded-sm bg-gray-200 px-1 py-0.5 text-xs font-bold text-black sm:text-sm">
 						<Icon className="mr-0.5 h-4 w-4" name="briefcase-business" />
 						{employmentType}
 					</span>
