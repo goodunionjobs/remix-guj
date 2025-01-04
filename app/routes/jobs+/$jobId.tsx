@@ -299,7 +299,7 @@ export default function JobRoute() {
 			<div className="min-h-screen [width:1115px]">
 				<Link
 					to="/"
-					className="rounded-md px-1.5 pb-1.5 pt-1 text-sm sm:text-lg"
+					className="rounded-md border-2 border-solid border-black px-1.5 pb-1.5 pt-1 text-sm sm:text-lg"
 					style={{ background: `#ff8400`, color: `white` }}
 				>
 					<Icon className="h-6 w-6" name="arrow-big-left" />
