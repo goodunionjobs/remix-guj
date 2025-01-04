@@ -395,7 +395,7 @@ function Search({ serverState, serverUrl }: SearchProps) {
 					<Pagination
 						padding={1}
 						classNames={{
-							root: `sm:text-4xl text-3xl sm:max-w-sm mx-auto`,
+							root: `sm:text-4xl text-3xl sm:max-w-sm mx-auto mt-3 sm:mt-6`,
 							list: 'flex flex-row justify-center gap-4',
 							selectedItem: 'border-b-4 border-black ',
 						}}
