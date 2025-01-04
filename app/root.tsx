@@ -180,6 +180,7 @@ function Document({
 			className={`${theme} h-full overflow-x-hidden ${isClient ? 'has-js' : ''}`}
 		>
 			<head>
+				{/* //TODO: Shouldn't we add has-js if the person also chooses not to run js? */}
 				{isBot ? null : (
 					<script
 						nonce={nonce}
@@ -188,7 +189,6 @@ function Document({
 						}}
 					/>
 				)}
-				<GoogleTagManager nonce={nonce} GTM_ID="G-Y5XF93C0RL" />
 				<ClientHintCheck nonce={nonce} />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -210,6 +210,9 @@ function Document({
 				{/* TODO: Make tests on clicking on links, especially title of jobpost component,  
         and other places around website for when bot is true to make sure this work without javascript */}
 				{isBot ? null : <Scripts nonce={nonce} />}
+				{isBot ? null : (
+					<GoogleTagManager nonce={nonce} GTM_ID="G-Y5XF93C0RL" />
+				)}
 			</body>
 		</html>
 	)
