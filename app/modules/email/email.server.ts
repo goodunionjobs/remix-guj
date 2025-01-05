@@ -2,6 +2,10 @@ import { render } from '@react-email/components'
 import { type ReactElement } from 'react'
 import { z } from 'zod'
 
+const resendSuccessSchema = z.object({
+	id: z.string(),
+})
+
 const resendErrorSchema = z.union([
 	z.object({
 		name: z.string(),
@@ -15,11 +19,8 @@ const resendErrorSchema = z.union([
 		cause: z.any(),
 	}),
 ])
-type ResendError = z.infer<typeof resendErrorSchema>
 
-const resendSuccessSchema = z.object({
-	id: z.string(),
-})
+type ResendError = z.infer<typeof resendErrorSchema>
 
 export async function sendEmail({
 	react,
