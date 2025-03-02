@@ -31,6 +31,8 @@
 - Set this up for alerts when caching is too high and other things
   https://dejager.sh/articles/running-grafana-enterprise-on-fly
 - Add a way to see when cache is close to hitting memory!
+- Implement the bottom and all else
+  https://sergiodxa.com/tutorials/find-and-remove-unused-code-with-knip
 
 1. Change umami. See Google analytics if bots change. I’ll keep both up.
 2. Categories Union admin
