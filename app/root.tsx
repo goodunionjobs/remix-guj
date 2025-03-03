@@ -350,23 +350,113 @@ function App() {
 					<Outlet />
 				</div>
 
-				<div className="container mt-4 flex justify-between justify-items-center pb-5 sm:mt-6">
-					<div className="flex items-center justify-items-center gap-4">
-						<Logo />
-						<Link to="/" className="hidden self-center md:block">
-							<div className="font-light">Good</div>
-							<div className="font-bold">Union Jobs</div>
-						</Link>
-						<Link to="/tos" className="">
-							Terms & Conditions
-						</Link>
-						<Link to="/privacy" className="">
-							Privacy Policy
-						</Link>
-					</div>
-				</div>
-			</div>
+				<footer className="mt-12 bg-gray-100 py-8 dark:bg-gray-900">
+					<div className="container mx-auto px-4">
+						<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+							{/* Company Info */}
+							<div>
+                {/* TODO: Fix footer logo to have full image and words link back to home */}
+								<div className="mb-4 flex items-center">
+									<Logo />
+									<div className="ml-2">
+										<div className="font-light">Good</div>
+										<div className="font-bold">Union Jobs</div>
+									</div>
+								</div>
+								<p className="mb-4 text-gray-600 dark:text-gray-300">
+									Good Union Jobs connects job seekers with unionized
+									opportunities in manufacturing, healthcare, education, and
+									public service.
+								</p>
+								<Button asChild variant="outline" className="mt-2">
+									{/* TODO: Maybe change? */}
+									<Link to="/">Explore Union Careers Now</Link>
+								</Button>
+							</div>
 
+							{/* About Section */}
+							<div>
+								<h3 className="mb-4 text-lg font-semibold">About Us</h3>
+								<p className="text-gray-600 dark:text-gray-300">
+									Our platform features roles with job security, strong
+									benefits, and fair pay while offering insights into union
+									advocacy.
+								</p>
+							</div>
+
+							{/* TODO: BRING BACK */}
+							{/* Resources */}
+							{/* <div> */}
+							{/* 	<h3 className="mb-4 text-lg font-semibold">Resources</h3> */}
+							{/* 	<ul className="space-y-2"> */}
+							{/* 		<li> */}
+							{/* 			<Link */}
+							{/* 				to="/jobs" */}
+							{/* 				className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" */}
+							{/* 			> */}
+							{/* 				Browse Jobs */}
+							{/* 			</Link> */}
+							{/* 		</li> */}
+							{/* 		<li> */}
+							{/* 			<Link */}
+							{/* 				to="/employers" */}
+							{/* 				className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" */}
+							{/* 			> */}
+							{/* 				Top Employers */}
+							{/* 			</Link> */}
+							{/* 		</li> */}
+							{/* 		<li> */}
+							{/* 			<Link */}
+							{/* 				to="/blog" */}
+							{/* 				className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400" */}
+							{/* 			> */}
+							{/* 				Union Resources */}
+							{/* 			</Link> */}
+							{/* 		</li> */}
+							{/* 	</ul> */}
+							{/* </div> */}
+
+							{/* Legal */}
+							<div>
+								<h3 className="mb-4 text-lg font-semibold">Legal</h3>
+								<ul className="space-y-2">
+									<li>
+										<Link
+											to="/tos"
+											className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+										>
+											Terms & Conditions
+										</Link>
+									</li>
+									<li>
+										<Link
+											to="/privacy"
+											className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+										>
+											Privacy Policy
+										</Link>
+									</li>
+									<li>
+										<Link
+											to="/accessibility"
+											className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+										>
+											Accessibility
+										</Link>
+									</li>
+								</ul>
+							</div>
+						</div>
+
+						<div className="mt-8 border-t border-gray-200 pt-6 text-center dark:border-gray-700">
+							<p className="text-gray-500 dark:text-gray-400">
+								© {new Date().getFullYear()} Jobs For Life, LLC. All rights
+								reserved.
+							</p>
+						</div>
+					</div>
+				</footer>
+			</div>
 			<EpicToaster closeButton position="bottom-right" theme={theme} />
 			<EpicProgress />
 		</>
