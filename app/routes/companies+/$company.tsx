@@ -538,14 +538,6 @@ export default function EmployerRoute() {
 		})
 	}
 
-	// Handle email submission for job alerts
-	const handleEmailSubmit = (e: React.FormEvent) => {
-		e.preventDefault()
-		// Implement email subscription logic here
-		// For now, we'll just show an alert
-		alert('Thank you for signing up for job alerts!')
-	}
-
 	// Handle location filter changes
 	const handleLocationFilterChange = (cities: string[]) => {
 		setSelectedCities(cities)
@@ -573,14 +565,14 @@ export default function EmployerRoute() {
 			<div className="bg-gradient-to-r from-blue-700/70 to-blue-500/70 py-10 text-white">
 				<div className="container mx-auto px-4">
 					<div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 md:flex-row">
-            {/* TODO: On all parts using image emit an error if not found or also have backup. Not just here but everywhere */}
+						{/* TODO: On all parts using image emit an error if not found or also have backup. Not just here but everywhere */}
 						{companyLogo && (
-							<div className="flex-shrink-0 rounded-lg bg-white p-3">
+							<div className="rounded-lg bg-white ">
 								<LogoImage
 									employerImage={employer.s3Link}
 									employer={employer.name}
 									size={80}
-									layout="grid"
+									layout="flex"
 								/>
 							</div>
 						)}
@@ -736,7 +728,7 @@ export default function EmployerRoute() {
 														{job.minSalary && job.maxSalary && job.payType && (
 															<div className="flex items-center gap-2">
 																<Icon
-																	name="dollar-sign"
+																	name="circle-dollar-sign"
 																	className="h-3.5 w-3.5 text-gray-500"
 																/>
 																<span>
