@@ -4,7 +4,7 @@ import {
 	type MetaFunction,
 	json,
 } from '@remix-run/node'
-import { eq, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { cachified, cache } from '#app/utils/cache.server'
 import { type Timings } from '#app/utils/timing.server'
 import { db } from '#app/utils/db.server'
@@ -13,12 +13,6 @@ import { employers, jobs } from '../../../drizzle/schema'
 import { Link } from '@remix-run/react'
 import { useLoaderData } from '@remix-run/react'
 import { GraphQLClient, gql } from 'graphql-request'
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardContent,
-} from '#app/components/ui/card'
 import { Button } from '#app/components/ui/button.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
@@ -26,6 +20,14 @@ import { PaginationBar } from '#app/components/pagination'
 import { LogoImage } from '#app/components/logo-image.tsx'
 import { useMemo, useState, useEffect } from 'react'
 import DOMPurify from 'isomorphic-dompurify'
+import slugify from '@sindresorhus/slugify'
+import {
+	JobHeaderDrizzle,
+	JobDescription,
+	calculateFinalTime,
+} from '#app/components/algolia/jobpost-parts.tsx'
+import { useTheme } from '../resources+/theme-switch'
+import { FindTextColor } from '#app/utils/find-text-color'
 
 // Meta function (unchanged)
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -493,6 +495,7 @@ export default function EmployerRoute() {
 	const [selectedCities, setSelectedCities] = useState<string[]>([])
 	const [filteredJobs, setFilteredJobs] = useState(employer.jobs)
 
+	const theme = useTheme()
 	const displayName = employer.name || ''
 	const companyLogo = employer.s3Link || null
 
@@ -717,171 +720,108 @@ export default function EmployerRoute() {
 			</section>
 
 			{/* Open Positions Section */}
-			<section
-				className="bg-gray-50 py-10 dark:bg-gray-900"
-				itemScope
-				itemType="https://schema.org/JobPosting"
-			>
-				<div className="container mx-auto px-4">
-					<div className="mx-auto max-w-5xl">
-						<h2 className="mb-4 text-2xl font-bold" itemProp="title">
-							{displayName} Open Positions
-						</h2>
+      <section
+        className="bg-gray-50 py-10 dark:bg-gray-900"
+        itemScope
+        itemType="https://schema.org/JobPosting"
+      >
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="mb-4 text-2xl font-bold" itemProp="title">
+              {displayName} Open Positions
+            </h2>
 
-						<div className="mb-6 grid gap-6 lg:grid-cols-4">
-							<div className="lg:col-span-1">
-								<LocationFilters
-									jobs={employer.jobs}
-									onFilterChange={handleLocationFilterChange}
-								/>
-							</div>
+            <div className="mb-6 grid gap-6 lg:grid-cols-4">
+              <div className="lg:col-span-1">
+                <LocationFilters
+                  jobs={employer.jobs}
+                  onFilterChange={handleLocationFilterChange}
+                />
+              </div>
 
-							<div className="lg:col-span-3">
-								<p className="mb-3 text-sm">
-									Showing {filteredJobs.length} of {employer.jobs.length}{' '}
-									positions
-									{selectedCities.length > 0 &&
-										` in ${selectedCities.length} selected ${selectedCities.length === 1 ? 'location' : 'locations'}`}
-								</p>
+              <div className="lg:col-span-3">
+                <p className="mb-3 text-sm">
+                  Showing {filteredJobs.length} of {employer.jobs.length}{' '}
+                  positions
+                  {selectedCities.length > 0 &&
+                    ` in ${selectedCities.length} selected ${selectedCities.length === 1 ? 'location' : 'locations'}`}
+                </p>
 
-								{filteredJobs.length === 0 ? (
-									<div className="rounded-lg border bg-card p-6 text-center">
-										<h3 className="mb-2 text-lg font-semibold">
-											No jobs match your filter
-										</h3>
-										<p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
-											Try selecting different locations or clearing your
-											filters.
-										</p>
-									</div>
-								) : (
-									<div className="grid gap-3">
-										{filteredJobs.map(job => (
-											<Card
-												key={job.id}
-												className="w-full transition-shadow hover:shadow-sm"
-												itemProp="jobPosting"
-												itemScope
-												itemType="https://schema.org/JobPosting"
-											>
-												<CardHeader className="p-4 pb-2">
-													<CardTitle className="flex flex-col items-start justify-between space-y-1 text-base sm:flex-row sm:items-center sm:space-y-0">
-														<span itemProp="title">{job.title}</span>
-														<span
-															className="rounded-full bg-blue-100 px-2 py-1 text-xs font-normal text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-															itemProp="employmentType"
-														>
-															{job.employmentType}
-														</span>
-													</CardTitle>
-												</CardHeader>
-												<CardContent className="p-4 pt-0 text-sm">
-													<div className="grid gap-2">
-														{job.address && (
-															<div
-																className="flex items-center gap-2"
-																itemProp="jobLocation"
-																itemScope
-																itemType="https://schema.org/Place"
-															>
-																<Icon
-																	name="map-pin"
-																	className="h-3.5 w-3.5 text-gray-500"
-																/>
-																<span
-																	itemProp="address"
-																	itemScope
-																	itemType="https://schema.org/PostalAddress"
-																>
-																	<span itemProp="addressLocality">
-																		{job.address.city?.name || ''}
-																	</span>
-																	{job.address.city?.name ? ', ' : ''}
-																	<span itemProp="addressRegion">
-																		{job.address.state?.name || ''}
-																	</span>
-																	{job.address.state?.name ? ', ' : ''}
-																	<span itemProp="addressCountry">
-																		{job.address.country?.name || ''}
-																	</span>
-																</span>
-															</div>
-														)}
+                {filteredJobs.length === 0 ? (
+                  <div className="rounded-lg border bg-card p-6 text-center">
+                    <h3 className="mb-2 text-lg font-semibold">
+                      No jobs match your filter
+                    </h3>
+                    <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
+                      Try selecting different locations or clearing your
+                      filters.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-2">
+                    {filteredJobs.map(job => {
+                      // Calculate the necessary values for JobHeaderDrizzle
+                      const jobSlug = slugify(job.title);
+                      const unixTimestamp = Math.floor(new Date(job.timeStamp).getTime() / 1000);
+                      const finalTime = calculateFinalTime(unixTimestamp);
+                      
+                      // Default color based on theme or use employer color if available
+                      const defaultColor = theme === 'light' ? '#FFFFFF' : '#0f172a';
+                      const color = job.color 
+                        ? '#' + ('000000' + job.color.toString(16)).slice(-6)
+                        : defaultColor;
+                      const textColor = FindTextColor(color, '#FFFFFF', '#000000');
+                      
+                      // Generate URL for the job post
+                      const jobUrl = `/jobs/${job.id}-${jobSlug}`;
+                      
+                      return (
+                        <Link 
+                          key={job.id} 
+                          to={jobUrl} 
+                          prefetch="intent"
+                          className="block"
+                        >
+                          <JobHeaderDrizzle
+                            color={color}
+                            textColor={textColor}
+                            employerImage={employer.s3Link}
+                            employer={employer.name}
+                            hit={job}
+                            finalTime={finalTime}
+                            url={jobUrl}
+                            // We don't need onClick now that we're using Link
+                            // The Link component will handle the navigation
+                          />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
 
-														{job.minSalary && job.maxSalary && job.payType && (
-															<div
-																className="flex items-center gap-2"
-																itemProp="baseSalary"
-																itemScope
-																itemType="https://schema.org/MonetaryAmount"
-															>
-																<Icon
-																	name="circle-dollar-sign"
-																	className="h-3.5 w-3.5 text-gray-500"
-																/>
-																<span
-																	itemProp="value"
-																	itemScope
-																	itemType="https://schema.org/QuantitativeValue"
-																>
-																	{formatSalary(
-																		job.minSalary,
-																		job.maxSalary,
-																		job.payType,
-																	)}
-																</span>
-															</div>
-														)}
+            <div className="mx-auto max-w-3xl">
+              <PaginationBar
+                total={pagination.total}
+                $top={pagination.$top}
+                $skip={pagination.$skip}
+              />
+            </div>
 
-														<div className="flex flex-wrap items-center gap-2">
-															<Icon
-																name="clock"
-																className="h-3.5 w-3.5 text-gray-500"
-															/>
-															<span itemProp="datePosted">
-																Posted {formatDate(job.timeStamp)}
-															</span>
-															<Button
-																asChild
-																variant="link"
-																className="justify-start p-0 text-sm"
-															>
-																<Link to={`/jobs/${job.id}`} prefetch="intent">
-																	View Job Details
-																</Link>
-															</Button>
-														</div>
-													</div>
-												</CardContent>
-											</Card>
-										))}
-									</div>
-								)}
-							</div>
-						</div>
-
-						<div className="mx-auto max-w-3xl">
-							<PaginationBar
-								total={pagination.total}
-								$top={pagination.$top}
-								$skip={pagination.$skip}
-							/>
-						</div>
-
-						<div className="mt-6 flex justify-center">
-							<Link to="/" prefetch="intent">
-								<Button
-									size="sm"
-									className="bg-blue-600 px-6 text-sm hover:bg-blue-700"
-								>
-									Browse All Positions
-								</Button>
-							</Link>
-						</div>
-					</div>
-				</div>
-			</section>
-
+            <div className="mt-6 flex justify-center">
+              <Link to="/" prefetch="intent">
+                <Button
+                  size="sm"
+                  className="bg-blue-600 px-6 text-sm hover:bg-blue-700"
+                >
+                  Browse All Positions
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 			{/* Job Alerts Section */}
 			<section className="bg-blue-50 py-8 dark:bg-blue-900">
 				<div className="container mx-auto px-4">
