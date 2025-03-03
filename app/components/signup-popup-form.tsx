@@ -86,7 +86,7 @@ const DelayedPopupForm = ({
 						<Button
 							type="submit"
 							variant="ghost"
-							size="lg"
+							size="sm"
 							name="intent"
 							value="closePopup"
 							className="w-full"

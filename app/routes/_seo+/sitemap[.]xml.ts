@@ -1,67 +1,73 @@
+// File: app/routes/_seo+/sitemap[.]xml.ts
 import { type LoaderFunction } from '@remix-run/node'
 import { cachified, cache } from '#app/utils/cache.server.ts'
-import { db } from '#app/utils/db.server'
 import { getDomainUrl } from '#app/utils/misc.tsx'
+import { db } from '#app/utils/db.server'
 import { jobs } from '../../../drizzle/schema'
-import slugify from '@sindresorhus/slugify'
+import { count } from 'drizzle-orm'
+import {
+	generateSitemapIndex,
+	createSitemapResponse,
+} from '#app/utils/sitemap.server'
 
-//TODO: Go to the below at some point and fix up once you know what SEO routes to show
-// https://github.com/epicweb-dev/epic-stack/blob/main/app/routes/_seo%2B/sitemap%5B.%5Dxml.ts
+// This is the main sitemap index file that references all other sitemaps
 export const loader: LoaderFunction = async ({ request }) => {
+	console.log('Sitemap index loader triggered')
 	const baseUrl = getDomainUrl(request)
 
-	const sitemap = await cachified({
+	const sitemapIndex = await cachified({
 		key: 'sitemap',
 		cache,
-		ttl: 600_000, // 10 minutes in milliseconds
+		ttl: 600_000, // 10 minutes
 		async getFreshValue() {
-			const staticRoutes = [
-				{ loc: `${baseUrl}/*`, priority: 0.8 },
-				{ loc: `${baseUrl}/abuse`, priority: 0.6 },
-				{ loc: `${baseUrl}/ccpa`, priority: 0.6 },
-				{ loc: `${baseUrl}/copyright`, priority: 0.6 },
-				{ loc: `${baseUrl}`, priority: 0.8 },
-				{ loc: `${baseUrl}/privacy`, priority: 0.6 },
-				{ loc: `${baseUrl}/support`, priority: 0.6 },
-				{ loc: `${baseUrl}/tos`, priority: 0.6 },
-			]
+			try {
+				// Get the job count to determine how many job sitemap files we need
+				const jobCount = await db
+					.select({ count: count() })
+					.from(jobs)
+					.then(result => Number(result[0]?.count || 0))
 
-			const jobsquery = await db.select().from(jobs)
+				console.log(`Total job count: ${jobCount}`)
 
-			const dynamicRoutes = jobsquery.map(job => ({
-				loc: `${baseUrl}/jobs/${job.id}-${slugify(job.title)}`,
-				priority: 0.7,
-				lastmod: job.timeStamp.toISOString(),
-			}))
+				// Calculate how many job sitemap files we need (50,000 URLs per file)
+				const jobSitemapCount = Math.max(1, Math.ceil(jobCount / 50000))
+				console.log(`Will generate ${jobSitemapCount} job sitemap files`)
 
-			const allRoutes = [...staticRoutes, ...dynamicRoutes]
+				// Build the array of sitemaps for the index
+				const sitemaps = [
+					// Static routes sitemap
+					{
+						loc: `${baseUrl}/sitemap-static.xml`,
+						lastmod: new Date(),
+					},
 
-			const sitemapEntries = allRoutes
-				.map(route => {
-					return `
-          <url>
-            <loc>${route.loc}</loc>
-            <priority>${route.priority}</priority>
-          </url>
-        `
-				})
-				.join('')
+					// Job sitemaps with dynamic parameters
+					...Array.from({ length: jobSitemapCount }, (_, i) => ({
+						loc: `${baseUrl}/sitemap-jobs/${i + 1}.xml`,
+						lastmod: new Date(),
+					})),
 
-			return `
-        <?xml version="1.0" encoding="UTF-8"?>
-        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-          ${sitemapEntries}
-        </urlset>
-      `.trim()
+					// Union sitemap
+					{
+						loc: `${baseUrl}/sitemap-unions.xml`,
+						lastmod: new Date(),
+					},
+
+					// Company sitemap
+					{
+						loc: `${baseUrl}/sitemap-companies.xml`,
+						lastmod: new Date(),
+					},
+				]
+
+				// Generate the sitemap index XML
+				return generateSitemapIndex(sitemaps)
+			} catch (error) {
+				console.error('Error generating sitemap index:', error)
+				throw error
+			}
 		},
 	})
 
-	const headers = {
-		'Content-Type': 'application/xml',
-		'Cache-Control': 'public, max-age=600, immutable', // Cache for 10 minutes
-	}
-
-	return new Response(sitemap, {
-		headers,
-	})
+	return createSitemapResponse(sitemapIndex)
 }
