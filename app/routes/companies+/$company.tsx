@@ -19,6 +19,7 @@ import { Button } from '#app/components/ui/button.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
 import { PaginationBar } from '#app/components/pagination.tsx'
+import { LogoImage } from '#app/components/logo-image.tsx'
 import { useMemo, useState, useEffect } from 'react'
 
 // ... GraphQL query and interfaces remain the same ...
@@ -572,12 +573,14 @@ export default function EmployerRoute() {
 			<div className="bg-gradient-to-r from-blue-700/70 to-blue-500/70 py-10 text-white">
 				<div className="container mx-auto px-4">
 					<div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 md:flex-row">
+            {/* TODO: On all parts using image emit an error if not found or also have backup. Not just here but everywhere */}
 						{companyLogo && (
 							<div className="flex-shrink-0 rounded-lg bg-white p-3">
-								<img
-									src={companyLogo}
-									alt={`${employer.name} logo`}
-									className="h-20 w-auto max-w-full object-contain"
+								<LogoImage
+									employerImage={employer.s3Link}
+									employer={employer.name}
+									size={80}
+									layout="grid"
 								/>
 							</div>
 						)}
