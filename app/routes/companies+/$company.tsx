@@ -1,5 +1,9 @@
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
+import {
+	type LoaderFunctionArgs,
+	type MetaFunction,
+	json,
+} from '@remix-run/node'
 import { eq, sql } from 'drizzle-orm'
 import { cachified, cache } from '#app/utils/cache.server'
 import { type Timings } from '#app/utils/timing.server'
@@ -18,26 +22,44 @@ import {
 import { Button } from '#app/components/ui/button.tsx'
 import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 import { Icon } from '#app/components/ui/icon.tsx'
-import { PaginationBar } from '#app/components/pagination.tsx'
+import { PaginationBar } from '#app/components/pagination'
 import { LogoImage } from '#app/components/logo-image.tsx'
 import { useMemo, useState, useEffect } from 'react'
+import DOMPurify from 'isomorphic-dompurify'
 
-// GraphQL query for CMS data
+// Meta function (unchanged)
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return [
+		{
+			title: `Good Union Jobs - Find ${data?.employer.name} Opportunities`,
+		},
+		{
+			name: 'description',
+			content: `Explore union job opportunities at ${data?.employer.name}. GoodUnionJobs offers daily updated job postings with union benefits across various industries nationwide.`,
+		},
+		{
+			name: 'keywords',
+			content: `${data?.employer.name}, union jobs, job opportunities, career, employment, benefits`,
+		},
+	]
+}
+
+// GraphQL query using html fields
 const GetCompanyByName = gql`
 	query CompanyPageQuery($name: String!) {
 		companies(where: { title: $name }) {
 			id
 			title
 			about {
-				text
+				html
 			}
 			whyWorkHereIntro {
-				text
+				html
 			}
 			whyWorkHereTitleDetails {
 				title
 				description {
-					text
+					html
 				}
 			}
 			updatedAt
@@ -49,13 +71,13 @@ interface CompanyResponse {
 	companies: Array<{
 		id: string
 		title: string
-		about: { text: string }
-		whyWorkHereIntro: { text: string } | null
+		about: { html: string }
+		whyWorkHereIntro: { html: string } | null
 		whyWorkHereTitleDetails: Array<{
 			title: string
-			description: { text: string }
+			description: { html: string }
 		}> | null
-		updatedAt: string // ISO 8601 timestamp
+		updatedAt: string
 	}>
 }
 
@@ -70,13 +92,9 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 		key: `cms-data:${normalizedCompanyName}`,
 		cache,
 		timings,
-		ttl: 1000 * 60 * 60 * 24, // Default TTL: 24 hours
-		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 7, // Default SWR: 7 days
+		ttl: 1000 * 60 * 60 * 24,
+		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 7,
 		getFreshValue: async context => {
-			console.log(
-				'🔍 CMS: Fresh value fetch triggered for:',
-				normalizedCompanyName,
-			)
 			try {
 				const endpoint =
 					'https://us-west-2.cdn.hygraph.com/content/cm54azrfc020507w3w8k8ofon/master'
@@ -87,32 +105,26 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 				})
 
 				const variables = { name: normalizedCompanyName }
-				console.log('🔍 CMS: Query variables:', variables)
-				console.log('🔍 CMS: Query:', GetCompanyByName)
-
 				const result = await hygraph.request<CompanyResponse>(
 					GetCompanyByName,
 					variables,
 				)
-				console.log('🔍 CMS: Raw response:', JSON.stringify(result, null, 2))
-				console.log('🔍 CMS: Response timestamp:', new Date().toISOString())
 
 				const company = result.companies[0]
 				if (!company || !result.companies.length) {
-					console.log('🔍 CMS: No company found for:', normalizedCompanyName)
 					return {
 						description: null,
-						whyWorkHereIntro: `Working for ${companyName} provides rewarding opportunities with room for career growth.`,
+						whyWorkHereIntro: `<p>Working for ${companyName} provides rewarding opportunities with room for career growth.</p>`,
 						whyWorkHereTitleDetails: [
 							{
 								title: 'Diverse Career Paths',
 								description:
-									'Opportunities range from entry-level to leadership roles, with room for career growth.',
+									'<p>Opportunities range from entry-level to leadership roles, with room for career growth.</p>',
 							},
 							{
 								title: 'Strong Job Security & Benefits',
 								description:
-									'Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.',
+									'<p>Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.</p>',
 							},
 						],
 						_debug: {
@@ -125,47 +137,38 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 					}
 				}
 
-				console.log('🔍 CMS: Company found:', company.title)
 				const updatedAt = new Date(company.updatedAt)
 				const now = new Date()
-				const timeSinceUpdate = now.getTime() - updatedAt.getTime() // ms since last update
-
-				// Adjust TTL based on how recent the update was
-				const baseTtl = 1000 * 60 * 60 * 24 // 24 hours default
-				const ttl = Math.max(baseTtl - timeSinceUpdate, 1000 * 60) // Minimum 1 minute TTL
-
-				// Use updatedAt to influence SWR: shorter SWR for recently updated data
+				const timeSinceUpdate = now.getTime() - updatedAt.getTime()
+				const baseTtl = 1000 * 60 * 60 * 24
+				const ttl = Math.max(baseTtl - timeSinceUpdate, 1000 * 60)
 				const swr =
-					timeSinceUpdate < 1000 * 60 * 60 // Updated within last hour?
-						? 1000 * 60 * 60 // 1 hour SWR for recent updates
-						: 1000 * 60 * 60 * 24 * 7 // 7 days SWR for older data
+					timeSinceUpdate < 1000 * 60 * 60
+						? 1000 * 60 * 60
+						: 1000 * 60 * 60 * 24 * 7
 
-				console.log('🔍 CMS: Calculated TTL:', ttl, 'ms')
-				console.log('🔍 CMS: Calculated SWR:', swr, 'ms')
-
-				// Update context metadata for cachified
 				context.metadata = { ttl, swr, createdTime: now.getTime() }
 
 				return {
-					description: company.about?.text || null,
+					description: company.about?.html || null,
 					whyWorkHereIntro:
-						company.whyWorkHereIntro?.text ||
-						`Working for ${companyName} provides rewarding opportunities with room for career growth.`,
+						company.whyWorkHereIntro?.html ||
+						`<p>Working for ${companyName} provides rewarding opportunities with room for career growth.</p>`,
 					whyWorkHereTitleDetails: company.whyWorkHereTitleDetails?.length
 						? company.whyWorkHereTitleDetails.map(benefit => ({
 								title: benefit.title,
-								description: benefit.description.text,
+								description: benefit.description.html,
 							}))
 						: [
 								{
 									title: 'Diverse Career Paths',
 									description:
-										'Opportunities range from entry-level to leadership roles, with room for career growth.',
+										'<p>Opportunities range from entry-level to leadership roles, with room for career growth.</p>',
 								},
 								{
 									title: 'Strong Job Security & Benefits',
 									description:
-										'Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.',
+										'<p>Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.</p>',
 								},
 							],
 					_debug: {
@@ -186,17 +189,17 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 				)
 				return {
 					description: null,
-					whyWorkHereIntro: `Working for ${companyName} provides rewarding opportunities with room for career growth.`,
+					whyWorkHereIntro: `<p>Working for ${companyName} provides rewarding opportunities with room for career growth.</p>`,
 					whyWorkHereTitleDetails: [
 						{
 							title: 'Diverse Career Paths',
 							description:
-								'Opportunities range from entry-level to leadership roles, with room for career growth.',
+								'<p>Opportunities range from entry-level to leadership roles, with room for career growth.</p>',
 						},
 						{
 							title: 'Strong Job Security & Benefits',
 							description:
-								'Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.',
+								'<p>Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.</p>',
 						},
 					],
 					_debug: {
@@ -209,7 +212,6 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 			}
 		},
 		checkValue: value => value !== null && typeof value === 'object',
-		// Remove forceFresh since we now rely on updatedAt
 	})
 }
 
@@ -240,11 +242,6 @@ async function fetchEmployerData(companyName: string, timings: Timings) {
 					},
 				},
 			})
-
-			console.log(
-				'🔍 DB: Employer found:',
-				employer ? employer.name : 'Not found',
-			)
 			if (!employer) throw new Error('Employer not found')
 			return employer
 		},
@@ -258,8 +255,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	const companyName = decodeURIComponent(params.company)
 		.trim()
 		.replace(/\s+/g, ' ')
-	console.log('🔍 Loader: Company from URL:', companyName)
-
 	const url = new URL(request.url)
 	const baseUrl = `${url.protocol}//${url.host}`
 	const $top = Number(url.searchParams.get('$top')) || 10
@@ -272,11 +267,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 			fetchEmployerData(companyName, timings),
 			fetchCmsData(companyName, timings),
 		])
-
-		console.log(
-			'🔍 Loader: CMS data retrieved:',
-			JSON.stringify(cmsData._debug, null, 2),
-		)
 
 		const total = employer.jobs.length
 		const totalPages = Math.ceil(total / $top)
@@ -302,7 +292,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	}
 }
 
-// Rest of the file remains unchanged
 type Employer = InferSelectModel<typeof employers>
 type Job = InferSelectModel<typeof jobs>
 
@@ -335,62 +324,6 @@ type LoaderData = {
 	}
 	baseUrl: string
 }
-
-// export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-// 	invariant(params.company, 'Company name is required')
-//
-// 	const companyName = decodeURIComponent(params.company)
-// 		.trim()
-// 		.replace(/\s+/g, ' ')
-// 	console.log('🔍 Loader: Company from URL:', companyName)
-//
-// 	const url = new URL(request.url)
-// 	const baseUrl = `${url.protocol}//${url.host}`
-// 	const $top = Number(url.searchParams.get('$top')) || 10
-// 	const $skip = Number(url.searchParams.get('$skip')) || 0
-//
-// 	const timings: Timings = {}
-//
-// 	try {
-// 		const [employer, cmsData] = await Promise.all([
-// 			fetchEmployerData(companyName, timings),
-// 			fetchCmsData(companyName, timings),
-// 		])
-//
-// 		console.log('🔍 Loader: CMS data retrieved:', cmsData._debug)
-//
-// 		const total = employer.jobs.length
-// 		const totalPages = Math.ceil(total / $top)
-// 		const currentPage = Math.floor($skip / $top) + 1
-// 		const paginatedJobs = employer.jobs.slice($skip, $skip + $top)
-//
-// 		const paginatedEmployer = {
-// 			...employer,
-// 			jobs: paginatedJobs,
-// 		}
-//
-// 		const data: LoaderData = {
-// 			employer: paginatedEmployer,
-// 			cmsData,
-// 			pagination: {
-// 				total,
-// 				currentPage,
-// 				totalPages,
-// 				$top,
-// 				$skip,
-// 			},
-// 			baseUrl,
-// 		}
-//
-// 		return json(data)
-// 	} catch (error) {
-// 		console.error('❌ Loader Error:', error)
-// 		if (error instanceof Error && error.message === 'Employer not found') {
-// 			throw json({ message: 'Employer not found' }, { status: 404 })
-// 		}
-// 		throw json({ message: 'An unexpected error occurred' }, { status: 500 })
-// 	}
-// }
 
 // Type definition for location filter component
 type LocationGroup = {
@@ -560,6 +493,33 @@ export default function EmployerRoute() {
 	const [selectedCities, setSelectedCities] = useState<string[]>([])
 	const [filteredJobs, setFilteredJobs] = useState(employer.jobs)
 
+	const displayName = employer.name || ''
+	const companyLogo = employer.s3Link || null
+
+	// Sanitize HTML content with DOMPurify
+	const sanitizedDescription = cmsData.description
+		? DOMPurify.sanitize(cmsData.description, {
+				ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li'],
+				ALLOWED_ATTR: ['href', 'target'],
+			})
+		: null
+	const sanitizedWhyWorkHereIntro = DOMPurify.sanitize(
+		cmsData.whyWorkHereIntro,
+		{
+			ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li'],
+			ALLOWED_ATTR: ['href', 'target'],
+		},
+	)
+	const sanitizedWhyWorkHereDetails = cmsData.whyWorkHereTitleDetails.map(
+		benefit => ({
+			...benefit,
+			description: DOMPurify.sanitize(benefit.description, {
+				ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li'],
+				ALLOWED_ATTR: ['href', 'target'],
+			}),
+		}),
+	)
+
 	// Filter jobs based on selected cities
 	useEffect(() => {
 		if (selectedCities.length === 0) {
@@ -635,19 +595,12 @@ export default function EmployerRoute() {
 		return `${totalStates} ${totalStates === 1 ? 'state' : 'states'}, ${totalCities} ${totalCities === 1 ? 'city' : 'cities'}`
 	}, [jobLocations])
 
-	// Get company logo from s3Link
-	const companyLogo = employer.s3Link || null
-
-	// Ensure employer name is consistently displayed (keeping the database casing for display purposes)
-	const displayName = employer.name || ''
-
 	return (
 		<div className="flex flex-col">
-			{/* Hero Section with Company Name and Logo */}
-			<div className="bg-gradient-to-r from-blue-700/70 to-blue-500/70 py-10 text-white">
+			{/* Hero Section */}
+			<header className="bg-gradient-to-r from-blue-700/70 to-blue-500/70 py-10 text-white">
 				<div className="container mx-auto px-4">
 					<div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 md:flex-row">
-						{/* TODO: On all parts using image emit an error if not found or also have backup. Not just here but everywhere */}
 						{companyLogo && (
 							<LogoImage
 								employerImage={employer.s3Link}
@@ -657,40 +610,58 @@ export default function EmployerRoute() {
 							/>
 						)}
 						<div className="flex-grow">
-							<h1 className="mb-3 text-3xl font-bold md:text-4xl">
+							<h1
+								className="mb-3 text-3xl font-bold md:text-4xl"
+								itemProp="name"
+							>
 								Good Union Jobs at {displayName}
 							</h1>
-							<div className="flex items-center">
+							<div className="flex items-center" itemProp="jobLocation">
 								<Icon name="map-pin" className="mr-2 h-4 w-4" />
 								<span className="text-base">Locations: {locationSummary}</span>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			</header>
 
-			{/* Section 1 - Why Work Here */}
-			<section className="bg-white py-10 dark:bg-gray-800">
+			{/* Why Work Here Section */}
+			<section
+				className="bg-white py-10 dark:bg-gray-800"
+				itemScope
+				itemType="https://schema.org/Organization"
+			>
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-3xl">
-						<h2 className="mb-4 text-2xl font-bold">
+						<h2 className="mb-4 text-2xl font-bold" itemProp="name">
 							Why Work for {displayName}?
 						</h2>
 
-						{cmsData.whyWorkHereIntro && (
-							<div className="mb-6">
-								<p className="text-base">{cmsData.whyWorkHereIntro}</p>
-							</div>
-						)}
+						<div className="mb-6" itemProp="description">
+							<div
+								className="prose dark:prose-invert text-base"
+								dangerouslySetInnerHTML={{ __html: sanitizedWhyWorkHereIntro }}
+							/>
+						</div>
 
 						<div className="mt-6">
-							<ul className="space-y-4">
-								{cmsData.whyWorkHereTitleDetails?.map((benefit, index) => (
-									<li key={index}>
-										<h3 className="text-lg font-semibold">{benefit.title}</h3>
-										<p className="text-sm text-gray-600 dark:text-gray-300">
-											{benefit.description}
-										</p>
+							<ul className="space-y-3">
+								{sanitizedWhyWorkHereDetails.map((benefit, index) => (
+									<li
+										key={index}
+										className="text-sm"
+										itemProp="employeeBenefit"
+										itemScope
+										itemType="https://schema.org/EmployeeBenefit"
+									>
+										<h3 className="text-base font-semibold" itemProp="name">
+											{benefit.title}
+										</h3>
+										<div
+											className="text-xs text-gray-600 dark:text-gray-300"
+											itemProp="description"
+											dangerouslySetInnerHTML={{ __html: benefit.description }}
+										/>
 									</li>
 								))}
 							</ul>
@@ -699,16 +670,25 @@ export default function EmployerRoute() {
 				</div>
 			</section>
 
-			{/* Section 2 - About the Department */}
-			<section className="bg-white pb-10 dark:bg-gray-800">
+			{/* About Section */}
+			<section
+				className="bg-white pb-10 dark:bg-gray-800"
+				itemScope
+				itemType="https://schema.org/Organization"
+			>
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-3xl">
-						<h2 className="mb-4 text-2xl font-bold">About {displayName}</h2>
+						<h2 className="mb-4 text-2xl font-bold" itemProp="name">
+							About {displayName}
+						</h2>
 
-						<div className="prose prose-sm dark:prose-invert max-w-none">
-							{cmsData.description ? (
+						<div
+							className="prose prose-sm dark:prose-invert max-w-none"
+							itemProp="description"
+						>
+							{sanitizedDescription ? (
 								<div
-									dangerouslySetInnerHTML={{ __html: cmsData.description }}
+									dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
 								/>
 							) : (
 								<>
@@ -736,16 +716,19 @@ export default function EmployerRoute() {
 				</div>
 			</section>
 
-			{/* Section 3 - Open Positions */}
-			<section className="bg-gray-50 py-10 dark:bg-gray-900">
+			{/* Open Positions Section */}
+			<section
+				className="bg-gray-50 py-10 dark:bg-gray-900"
+				itemScope
+				itemType="https://schema.org/JobPosting"
+			>
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-5xl">
-						<h2 className="mb-4 text-2xl font-bold">
+						<h2 className="mb-4 text-2xl font-bold" itemProp="title">
 							{displayName} Open Positions
 						</h2>
 
 						<div className="mb-6 grid gap-6 lg:grid-cols-4">
-							{/* Location filters sidebar */}
 							<div className="lg:col-span-1">
 								<LocationFilters
 									jobs={employer.jobs}
@@ -753,7 +736,6 @@ export default function EmployerRoute() {
 								/>
 							</div>
 
-							{/* Jobs list */}
 							<div className="lg:col-span-3">
 								<p className="mb-3 text-sm">
 									Showing {filteredJobs.length} of {employer.jobs.length}{' '}
@@ -778,11 +760,17 @@ export default function EmployerRoute() {
 											<Card
 												key={job.id}
 												className="w-full transition-shadow hover:shadow-sm"
+												itemProp="jobPosting"
+												itemScope
+												itemType="https://schema.org/JobPosting"
 											>
 												<CardHeader className="p-4 pb-2">
 													<CardTitle className="flex flex-col items-start justify-between space-y-1 text-base sm:flex-row sm:items-center sm:space-y-0">
-														<span>{job.title}</span>
-														<span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-normal text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+														<span itemProp="title">{job.title}</span>
+														<span
+															className="rounded-full bg-blue-100 px-2 py-1 text-xs font-normal text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+															itemProp="employmentType"
+														>
 															{job.employmentType}
 														</span>
 													</CardTitle>
@@ -790,28 +778,52 @@ export default function EmployerRoute() {
 												<CardContent className="p-4 pt-0 text-sm">
 													<div className="grid gap-2">
 														{job.address && (
-															<div className="flex items-center gap-2">
+															<div
+																className="flex items-center gap-2"
+																itemProp="jobLocation"
+																itemScope
+																itemType="https://schema.org/Place"
+															>
 																<Icon
 																	name="map-pin"
 																	className="h-3.5 w-3.5 text-gray-500"
 																/>
-																<span>
-																	{job.address.city?.name || ''}
+																<span
+																	itemProp="address"
+																	itemScope
+																	itemType="https://schema.org/PostalAddress"
+																>
+																	<span itemProp="addressLocality">
+																		{job.address.city?.name || ''}
+																	</span>
 																	{job.address.city?.name ? ', ' : ''}
-																	{job.address.state?.name || ''}
+																	<span itemProp="addressRegion">
+																		{job.address.state?.name || ''}
+																	</span>
 																	{job.address.state?.name ? ', ' : ''}
-																	{job.address.country?.name || ''}
+																	<span itemProp="addressCountry">
+																		{job.address.country?.name || ''}
+																	</span>
 																</span>
 															</div>
 														)}
 
 														{job.minSalary && job.maxSalary && job.payType && (
-															<div className="flex items-center gap-2">
+															<div
+																className="flex items-center gap-2"
+																itemProp="baseSalary"
+																itemScope
+																itemType="https://schema.org/MonetaryAmount"
+															>
 																<Icon
 																	name="circle-dollar-sign"
 																	className="h-3.5 w-3.5 text-gray-500"
 																/>
-																<span>
+																<span
+																	itemProp="value"
+																	itemScope
+																	itemType="https://schema.org/QuantitativeValue"
+																>
 																	{formatSalary(
 																		job.minSalary,
 																		job.maxSalary,
@@ -826,7 +838,9 @@ export default function EmployerRoute() {
 																name="clock"
 																className="h-3.5 w-3.5 text-gray-500"
 															/>
-															<span>Posted {formatDate(job.timeStamp)}</span>
+															<span itemProp="datePosted">
+																Posted {formatDate(job.timeStamp)}
+															</span>
 															<Button
 																asChild
 																variant="link"
@@ -846,7 +860,6 @@ export default function EmployerRoute() {
 							</div>
 						</div>
 
-						{/* Pagination */}
 						<div className="mx-auto max-w-3xl">
 							<PaginationBar
 								total={pagination.total}
@@ -855,7 +868,6 @@ export default function EmployerRoute() {
 							/>
 						</div>
 
-						{/* Browse All Button */}
 						<div className="mt-6 flex justify-center">
 							<Link to="/" prefetch="intent">
 								<Button
@@ -870,7 +882,7 @@ export default function EmployerRoute() {
 				</div>
 			</section>
 
-			{/* Section 4 - Sign Up for Job Alerts */}
+			{/* Job Alerts Section */}
 			<section className="bg-blue-50 py-8 dark:bg-blue-900">
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
@@ -881,7 +893,6 @@ export default function EmployerRoute() {
 							Register now and get personalized {displayName} job postings
 							delivered straight to your inbox.
 						</p>
-
 						<div className="flex flex-col space-y-3 md:flex-row md:space-x-3 md:space-y-0">
 							<Link to="/kinde-auth/register">
 								<Button type="submit" className="text-sm md:w-auto">
