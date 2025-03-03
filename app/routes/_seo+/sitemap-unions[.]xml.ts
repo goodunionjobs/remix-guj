@@ -29,7 +29,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 				const encodedName = encodeURIComponent(guild.name)
 
 				return {
-					loc: `${baseUrl}/guilds/${encodedName}`,
+					loc: `${baseUrl}/unions/${encodedName}`,
 					priority: 0.7,
 					// lastmod: guild.dateScraped || new Date(),
 					changefreq: 'monthly', // Guilds/unions don't change very often
