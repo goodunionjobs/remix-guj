@@ -1,6 +1,6 @@
 import { invariant } from '@epic-web/invariant'
 import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { cachified, cache } from '#app/utils/cache.server'
 import { type Timings } from '#app/utils/timing.server'
 import { db } from '#app/utils/db.server'
@@ -22,7 +22,7 @@ import { PaginationBar } from '#app/components/pagination.tsx'
 import { LogoImage } from '#app/components/logo-image.tsx'
 import { useMemo, useState, useEffect } from 'react'
 
-// ... GraphQL query and interfaces remain the same ...
+// GraphQL query for CMS data
 const GetCompanyByName = gql`
 	query CompanyPageQuery($name: String!) {
 		companies(where: { title: $name }) {
@@ -40,6 +40,7 @@ const GetCompanyByName = gql`
 					text
 				}
 			}
+			updatedAt
 		}
 	}
 `
@@ -48,39 +49,37 @@ interface CompanyResponse {
 	companies: Array<{
 		id: string
 		title: string
-		about: {
-			text: string
-		}
-		whyWorkHereIntro: {
-			text: string
-		} | null
+		about: { text: string }
+		whyWorkHereIntro: { text: string } | null
 		whyWorkHereTitleDetails: Array<{
 			title: string
-			description: {
-				text: string
-			}
+			description: { text: string }
 		}> | null
+		updatedAt: string // ISO 8601 timestamp
 	}>
 }
 
-// ... fetchCmsData and fetchEmployerData remain the same ...
 async function fetchCmsData(companyName: string, timings: Timings) {
-	// Implementation unchanged
-	const normalizedCompanyName = companyName.toLowerCase().trim()
+	const normalizedCompanyName = companyName
+		.toLowerCase()
+		.trim()
+		.replace(/\s+/g, ' ')
+	console.log('🔍 CMS: Starting fetch for:', normalizedCompanyName)
 
 	return cachified({
 		key: `cms-data:${normalizedCompanyName}`,
 		cache,
 		timings,
-		ttl: 1000 * 60 * 60 * 24, // 24 hours
-		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 7, // 7 days
-		getFreshValue: async () => {
-			console.log('🔍 Starting CMS data fetch for company:', companyName)
+		ttl: 1000 * 60 * 60 * 24, // Default TTL: 24 hours
+		staleWhileRevalidate: 1000 * 60 * 60 * 24 * 7, // Default SWR: 7 days
+		getFreshValue: async context => {
+			console.log(
+				'🔍 CMS: Fresh value fetch triggered for:',
+				normalizedCompanyName,
+			)
 			try {
 				const endpoint =
 					'https://us-west-2.cdn.hygraph.com/content/cm54azrfc020507w3w8k8ofon/master'
-				console.log('🌐 Initializing Hygraph client with endpoint:', endpoint)
-
 				const hygraph = new GraphQLClient(endpoint, {
 					headers: {
 						Authorization: `Bearer ${process.env.HYGRAPH_BEARER_TOKEN}`,
@@ -88,81 +87,103 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 				})
 
 				const variables = { name: normalizedCompanyName }
-				console.log('📬 Sending GraphQL request:', {
-					query: GetCompanyByName.toString(),
-					variables,
-				})
+				console.log('🔍 CMS: Query variables:', variables)
+				console.log('🔍 CMS: Query:', GetCompanyByName)
 
 				const result = await hygraph.request<CompanyResponse>(
 					GetCompanyByName,
 					variables,
 				)
-
-				console.log('📥 Raw GraphQL response:', JSON.stringify(result, null, 2))
+				console.log('🔍 CMS: Raw response:', JSON.stringify(result, null, 2))
+				console.log('🔍 CMS: Response timestamp:', new Date().toISOString())
 
 				const company = result.companies[0]
-
-				// Prepare default data for when CMS data is not available
-				const defaultData = {
-					description: null,
-					whyWorkHereIntro: `Working for ${companyName} provides rewarding opportunities with room for career growth.`,
-					whyWorkHereTitleDetails: [
-						{
-							title: 'Diverse Career Paths',
-							description:
-								'Opportunities range from entry-level to leadership roles, with room for career growth.',
-						},
-						{
-							title: 'Strong Job Security & Benefits',
-							description:
-								'Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.',
-						},
-					],
-					_debug: {
-						source: 'hygraph',
-						timestamp: new Date().toISOString(),
-						companyFound: false,
-					},
-				}
-
 				if (!company || !result.companies.length) {
-					console.log('No company found in response', { companyName })
-					return defaultData
+					console.log('🔍 CMS: No company found for:', normalizedCompanyName)
+					return {
+						description: null,
+						whyWorkHereIntro: `Working for ${companyName} provides rewarding opportunities with room for career growth.`,
+						whyWorkHereTitleDetails: [
+							{
+								title: 'Diverse Career Paths',
+								description:
+									'Opportunities range from entry-level to leadership roles, with room for career growth.',
+							},
+							{
+								title: 'Strong Job Security & Benefits',
+								description:
+									'Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.',
+							},
+						],
+						_debug: {
+							source: 'hygraph',
+							timestamp: new Date().toISOString(),
+							companyFound: false,
+							cacheStatus: 'fresh',
+							rawResponse: result,
+						},
+					}
 				}
+
+				console.log('🔍 CMS: Company found:', company.title)
+				const updatedAt = new Date(company.updatedAt)
+				const now = new Date()
+				const timeSinceUpdate = now.getTime() - updatedAt.getTime() // ms since last update
+
+				// Adjust TTL based on how recent the update was
+				const baseTtl = 1000 * 60 * 60 * 24 // 24 hours default
+				const ttl = Math.max(baseTtl - timeSinceUpdate, 1000 * 60) // Minimum 1 minute TTL
+
+				// Use updatedAt to influence SWR: shorter SWR for recently updated data
+				const swr =
+					timeSinceUpdate < 1000 * 60 * 60 // Updated within last hour?
+						? 1000 * 60 * 60 // 1 hour SWR for recent updates
+						: 1000 * 60 * 60 * 24 * 7 // 7 days SWR for older data
+
+				console.log('🔍 CMS: Calculated TTL:', ttl, 'ms')
+				console.log('🔍 CMS: Calculated SWR:', swr, 'ms')
+
+				// Update context metadata for cachified
+				context.metadata = { ttl, swr, createdTime: now.getTime() }
 
 				return {
 					description: company.about?.text || null,
 					whyWorkHereIntro:
-						company.whyWorkHereIntro?.text || defaultData.whyWorkHereIntro,
+						company.whyWorkHereIntro?.text ||
+						`Working for ${companyName} provides rewarding opportunities with room for career growth.`,
 					whyWorkHereTitleDetails: company.whyWorkHereTitleDetails?.length
 						? company.whyWorkHereTitleDetails.map(benefit => ({
 								title: benefit.title,
 								description: benefit.description.text,
 							}))
-						: defaultData.whyWorkHereTitleDetails,
+						: [
+								{
+									title: 'Diverse Career Paths',
+									description:
+										'Opportunities range from entry-level to leadership roles, with room for career growth.',
+								},
+								{
+									title: 'Strong Job Security & Benefits',
+									description:
+										'Enjoy competitive pay with flexible schedules, good benefits, and long-term job security.',
+								},
+							],
 					_debug: {
 						source: 'hygraph',
 						timestamp: new Date().toISOString(),
 						companyFound: true,
-						rawData: company, // Add this to help debug
+						cacheStatus: 'fresh',
+						rawResponse: result,
+						updatedAt: company.updatedAt,
+						calculatedTtl: ttl,
+						calculatedSwr: swr,
 					},
 				}
 			} catch (error) {
-				console.error('❌ Error fetching from CMS:', {
-					companyName,
-					errorMessage:
-						error instanceof Error ? error.message : 'Unknown error',
-					fullError:
-						error instanceof Error
-							? {
-									name: error.name,
-									message: error.message,
-									stack: error.stack,
-								}
-							: error,
-				})
-
-				// Return default fallback data in case of error
+				console.error(
+					'❌ CMS Error:',
+					error instanceof Error ? error.message : error,
+				)
 				return {
 					description: null,
 					whyWorkHereIntro: `Working for ${companyName} provides rewarding opportunities with room for career growth.`,
@@ -182,31 +203,37 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 						source: 'hygraph',
 						timestamp: new Date().toISOString(),
 						error: error instanceof Error ? error.message : 'Unknown error',
+						cacheStatus: 'fresh',
 					},
 				}
 			}
 		},
 		checkValue: value => value !== null && typeof value === 'object',
+		// Remove forceFresh since we now rely on updatedAt
 	})
 }
 
 async function fetchEmployerData(companyName: string, timings: Timings) {
+	const normalizedCompanyName = companyName
+		.toLowerCase()
+		.trim()
+		.replace(/\s+/g, ' ')
+	console.log('🔍 DB: Querying employer:', normalizedCompanyName)
+
 	return cachified({
-		key: `employer-data:${companyName}`,
+		key: `employer-data:${normalizedCompanyName}`,
 		cache,
 		timings,
+		ttl: 1000 * 60 * 60,
+		staleWhileRevalidate: 1000 * 60 * 60 * 24,
 		getFreshValue: async () => {
 			const employer = await db.query.employers.findFirst({
-				where: eq(employers.name, companyName),
+				where: sql`lower(${employers.name}) = ${normalizedCompanyName}`,
 				with: {
 					jobs: {
 						with: {
 							address: {
-								with: {
-									city: true,
-									state: true,
-									country: true,
-								},
+								with: { city: true, state: true, country: true },
 							},
 						},
 						orderBy: (jobs, { desc }) => [desc(jobs.dateStamp)],
@@ -214,15 +241,68 @@ async function fetchEmployerData(companyName: string, timings: Timings) {
 				},
 			})
 
+			console.log(
+				'🔍 DB: Employer found:',
+				employer ? employer.name : 'Not found',
+			)
 			if (!employer) throw new Error('Employer not found')
 			return employer
 		},
 		checkValue: value => value !== null && typeof value === 'object',
-		ttl: 1000 * 60 * 60, // 1 hour
-		staleWhileRevalidate: 1000 * 60 * 60 * 24, // 1 day
 	})
 }
 
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+	invariant(params.company, 'Company name is required')
+
+	const companyName = decodeURIComponent(params.company)
+		.trim()
+		.replace(/\s+/g, ' ')
+	console.log('🔍 Loader: Company from URL:', companyName)
+
+	const url = new URL(request.url)
+	const baseUrl = `${url.protocol}//${url.host}`
+	const $top = Number(url.searchParams.get('$top')) || 10
+	const $skip = Number(url.searchParams.get('$skip')) || 0
+
+	const timings: Timings = {}
+
+	try {
+		const [employer, cmsData] = await Promise.all([
+			fetchEmployerData(companyName, timings),
+			fetchCmsData(companyName, timings),
+		])
+
+		console.log(
+			'🔍 Loader: CMS data retrieved:',
+			JSON.stringify(cmsData._debug, null, 2),
+		)
+
+		const total = employer.jobs.length
+		const totalPages = Math.ceil(total / $top)
+		const currentPage = Math.floor($skip / $top) + 1
+		const paginatedJobs = employer.jobs.slice($skip, $skip + $top)
+
+		const paginatedEmployer = { ...employer, jobs: paginatedJobs }
+
+		const data: LoaderData = {
+			employer: paginatedEmployer,
+			cmsData,
+			pagination: { total, currentPage, totalPages, $top, $skip },
+			baseUrl,
+		}
+
+		return json(data)
+	} catch (error) {
+		console.error('❌ Loader Error:', error)
+		if (error instanceof Error && error.message === 'Employer not found') {
+			throw json({ message: 'Employer not found' }, { status: 404 })
+		}
+		throw json({ message: 'An unexpected error occurred' }, { status: 500 })
+	}
+}
+
+// Rest of the file remains unchanged
 type Employer = InferSelectModel<typeof employers>
 type Job = InferSelectModel<typeof jobs>
 
@@ -256,62 +336,61 @@ type LoaderData = {
 	baseUrl: string
 }
 
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-	invariant(params.company, 'Company name is required')
-
-	const url = new URL(request.url)
-	const baseUrl = `${url.protocol}//${url.host}`
-
-	// Changed to 10 jobs per page
-	const $top = Number(url.searchParams.get('$top')) || 10
-	const $skip = Number(url.searchParams.get('$skip')) || 0
-
-	const timings: Timings = {}
-
-	try {
-		const [employer, cmsData] = await Promise.all([
-			fetchEmployerData(params.company, timings),
-			fetchCmsData(params.company, timings),
-		])
-
-		// Calculate pagination details
-		const total = employer.jobs.length
-		const totalPages = Math.ceil(total / $top)
-		const currentPage = Math.floor($skip / $top) + 1
-
-		// Slice the jobs array for the current page
-		const paginatedJobs = employer.jobs.slice($skip, $skip + $top)
-
-		// Create the final employer object with paginated jobs
-		const paginatedEmployer = {
-			...employer,
-			jobs: paginatedJobs,
-		}
-
-		const data: LoaderData = {
-			employer: paginatedEmployer,
-			cmsData,
-			pagination: {
-				total,
-				currentPage,
-				totalPages,
-				$top,
-				$skip,
-			},
-			baseUrl,
-		}
-
-		return json(data)
-	} catch (error) {
-		console.error('Error in employer loader:', error)
-
-		if (error instanceof Error && error.message === 'Employer not found') {
-			throw json({ message: 'Employer not found' }, { status: 404 })
-		}
-
-		throw json({ message: 'An unexpected error occurred' }, { status: 500 })
-	}
-}
+// export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+// 	invariant(params.company, 'Company name is required')
+//
+// 	const companyName = decodeURIComponent(params.company)
+// 		.trim()
+// 		.replace(/\s+/g, ' ')
+// 	console.log('🔍 Loader: Company from URL:', companyName)
+//
+// 	const url = new URL(request.url)
+// 	const baseUrl = `${url.protocol}//${url.host}`
+// 	const $top = Number(url.searchParams.get('$top')) || 10
+// 	const $skip = Number(url.searchParams.get('$skip')) || 0
+//
+// 	const timings: Timings = {}
+//
+// 	try {
+// 		const [employer, cmsData] = await Promise.all([
+// 			fetchEmployerData(companyName, timings),
+// 			fetchCmsData(companyName, timings),
+// 		])
+//
+// 		console.log('🔍 Loader: CMS data retrieved:', cmsData._debug)
+//
+// 		const total = employer.jobs.length
+// 		const totalPages = Math.ceil(total / $top)
+// 		const currentPage = Math.floor($skip / $top) + 1
+// 		const paginatedJobs = employer.jobs.slice($skip, $skip + $top)
+//
+// 		const paginatedEmployer = {
+// 			...employer,
+// 			jobs: paginatedJobs,
+// 		}
+//
+// 		const data: LoaderData = {
+// 			employer: paginatedEmployer,
+// 			cmsData,
+// 			pagination: {
+// 				total,
+// 				currentPage,
+// 				totalPages,
+// 				$top,
+// 				$skip,
+// 			},
+// 			baseUrl,
+// 		}
+//
+// 		return json(data)
+// 	} catch (error) {
+// 		console.error('❌ Loader Error:', error)
+// 		if (error instanceof Error && error.message === 'Employer not found') {
+// 			throw json({ message: 'Employer not found' }, { status: 404 })
+// 		}
+// 		throw json({ message: 'An unexpected error occurred' }, { status: 500 })
+// 	}
+// }
 
 // Type definition for location filter component
 type LocationGroup = {
@@ -559,6 +638,9 @@ export default function EmployerRoute() {
 	// Get company logo from s3Link
 	const companyLogo = employer.s3Link || null
 
+	// Ensure employer name is consistently displayed (keeping the database casing for display purposes)
+	const displayName = employer.name || ''
+
 	return (
 		<div className="flex flex-col">
 			{/* Hero Section with Company Name and Logo */}
@@ -567,18 +649,16 @@ export default function EmployerRoute() {
 					<div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 md:flex-row">
 						{/* TODO: On all parts using image emit an error if not found or also have backup. Not just here but everywhere */}
 						{companyLogo && (
-							<div className="rounded-lg bg-white ">
-								<LogoImage
-									employerImage={employer.s3Link}
-									employer={employer.name}
-									size={80}
-									layout="flex"
-								/>
-							</div>
+							<LogoImage
+								employerImage={employer.s3Link}
+								employer={displayName}
+								size={80}
+								layout="grid"
+							/>
 						)}
 						<div className="flex-grow">
 							<h1 className="mb-3 text-3xl font-bold md:text-4xl">
-								Good Union Jobs at {employer.name}
+								Good Union Jobs at {displayName}
 							</h1>
 							<div className="flex items-center">
 								<Icon name="map-pin" className="mr-2 h-4 w-4" />
@@ -594,7 +674,7 @@ export default function EmployerRoute() {
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-3xl">
 						<h2 className="mb-4 text-2xl font-bold">
-							Why Work for {employer.name}?
+							Why Work for {displayName}?
 						</h2>
 
 						{cmsData.whyWorkHereIntro && (
@@ -620,10 +700,10 @@ export default function EmployerRoute() {
 			</section>
 
 			{/* Section 2 - About the Department */}
-			<section className="bg-white py-10 dark:bg-gray-800">
+			<section className="bg-white pb-10 dark:bg-gray-800">
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-3xl">
-						<h2 className="mb-4 text-2xl font-bold">About {employer.name}</h2>
+						<h2 className="mb-4 text-2xl font-bold">About {displayName}</h2>
 
 						<div className="prose prose-sm dark:prose-invert max-w-none">
 							{cmsData.description ? (
@@ -633,7 +713,7 @@ export default function EmployerRoute() {
 							) : (
 								<>
 									<p>
-										{employer.name} is dedicated to providing quality job
+										{displayName} is dedicated to providing quality job
 										opportunities with strong union benefits. We are committed
 										to fair labor practices and supporting workers' rights.
 									</p>
@@ -644,7 +724,7 @@ export default function EmployerRoute() {
 										their field.
 									</p>
 									<p>
-										{employer.name} offers diverse career paths with room for
+										{displayName} offers diverse career paths with room for
 										professional growth and development. Join our team to become
 										part of an organization that values its employees and their
 										contributions.
@@ -661,7 +741,7 @@ export default function EmployerRoute() {
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-5xl">
 						<h2 className="mb-4 text-2xl font-bold">
-							{employer.name} Open Positions
+							{displayName} Open Positions
 						</h2>
 
 						<div className="mb-6 grid gap-6 lg:grid-cols-4">
@@ -795,10 +875,10 @@ export default function EmployerRoute() {
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
 						<h2 className="mb-3 text-xl font-bold">
-							Sign Up for {employer.name} Job Alerts
+							Sign Up for {displayName} Job Alerts
 						</h2>
 						<p className="mb-4 text-sm">
-							Register now and get personalized {employer.name} job postings
+							Register now and get personalized {displayName} job postings
 							delivered straight to your inbox.
 						</p>
 
