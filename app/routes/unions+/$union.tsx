@@ -5,7 +5,6 @@ import {
 	json,
 } from '@remix-run/node'
 import { sql } from 'drizzle-orm'
-import { cachified, cache } from '#app/utils/cache.server'
 import { type Timings } from '#app/utils/timing.server'
 import { db } from '#app/utils/db.server'
 import type { InferSelectModel } from 'drizzle-orm'
@@ -18,6 +17,7 @@ import { Icon } from '#app/components/ui/icon.tsx'
 import { LogoImage } from '#app/components/logo-image.tsx'
 import { useMemo } from 'react'
 import slugify from '@sindresorhus/slugify'
+import { cachified, cache } from '#app/utils/cache.server'
 
 // Meta function
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -36,41 +36,41 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	]
 }
 
-async function fetchGuildData(unionName: string, timings: Timings) {
-	const normalizedUnionName = unionName
-		.toLowerCase()
-		.trim()
-		.replace(/\s+/g, ' ')
-	console.log('🔍 DB: Querying guild:', normalizedUnionName)
-
-	return cachified({
-		key: `guild-data:${normalizedUnionName}`,
-		cache,
-		timings,
-		ttl: 1000 * 60 * 60,
-		staleWhileRevalidate: 1000 * 60 * 60 * 24,
-		getFreshValue: async () => {
-			// First get the guild
-			const guild = await db.query.guilds.findFirst({
-				where: sql`lower(${guilds.name}) = ${normalizedUnionName}`,
-			})
-
-			if (!guild) throw new Error('Union not found')
-
-			// Then fetch associated employers separately
-			const relatedEmployers = await db.query.employers.findMany({
-				where: sql`${employers.guildId} = ${guild.id}`,
-			})
-
-			// Manually combine the results
-			return {
-				...guild,
-				employers: relatedEmployers,
-			}
-		},
-		checkValue: value => value !== null && typeof value === 'object',
-	})
-}
+// async function fetchGuildData(unionName: string, timings: Timings) {
+// 	const normalizedUnionName = unionName
+// 		.toLowerCase()
+// 		.trim()
+// 		.replace(/\s+/g, ' ')
+// 	console.log('🔍 DB: Querying guild:', normalizedUnionName)
+//
+// 	return cachified({
+// 		key: `guild-data:${normalizedUnionName}`,
+// 		cache,
+// 		timings,
+// 		ttl: 1000 * 60 * 60,
+// 		staleWhileRevalidate: 1000 * 60 * 60 * 24,
+// 		getFreshValue: async () => {
+// 			// First get the guild
+// 			const guild = await db.query.guilds.findFirst({
+// 				where: sql`lower(${guilds.name}) = ${normalizedUnionName}`,
+// 			})
+//
+// 			if (!guild) throw new Error('Union not found')
+//
+// 			// Then fetch associated employers separately
+// 			const relatedEmployers = await db.query.employers.findMany({
+// 				where: sql`${employers.guildId} = ${guild.id}`,
+// 			})
+//
+// 			// Manually combine the results
+// 			return {
+// 				...guild,
+// 				employers: relatedEmployers,
+// 			}
+// 		},
+// 		checkValue: value => value !== null && typeof value === 'object',
+// 	})
+// }
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	invariant(params.union, 'Union name is required')

@@ -805,10 +805,10 @@ export default function EmployerRoute() {
 													prefetch="intent"
 													className="block w-full"
 												>
-                            {/* TODO: 1. Fix up locations only showing up for jobs showing on job positions and up at top. */}
-                            {/* 2. Fix up buttons down under to actually navgiate.  */}
-                            {/* 3. Fix up to show total job positions not "10 out of 10" for first page. */}
-                            {/* 4. Select state with whole cities as opposed to individually */}
+													{/* TODO: 1. Fix up locations only showing up for jobs showing on job positions and up at top. */}
+													{/* 2. Fix up buttons down under to actually navgiate.  */}
+													{/* 3. Fix up to show total job positions not "10 out of 10" for first page. */}
+													{/* 4. Select state with whole cities as opposed to individually */}
 													<JobHeaderDrizzle
 														color={color}
 														textColor={textColor}
