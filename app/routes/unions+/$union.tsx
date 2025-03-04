@@ -75,17 +75,43 @@ async function fetchGuildData(unionName: string, timings: Timings) {
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	invariant(params.union, 'Union name is required')
 
-	const unionName = decodeURIComponent(params.union).trim().replace(/\s+/g, ' ')
+	// Extract ID from the URL parameter (format: "123-union-name")
+	const match = params.union.match(/^(\d+)-(.+)$/)
+	if (!match) {
+		throw json({ message: 'Invalid union ID format' }, { status: 400 })
+	}
+
+	const unionId = parseInt(match[1], 10)
+	if (isNaN(unionId)) {
+		throw json({ message: 'Invalid union ID' }, { status: 400 })
+	}
+
 	const url = new URL(request.url)
 	const baseUrl = `${url.protocol}//${url.host}`
 
 	const timings: Timings = {}
 
 	try {
-		const guild = await fetchGuildData(unionName, timings)
+		// First get the guild by ID
+		const guild = await db.query.guilds.findFirst({
+			where: sql`${guilds.id} = ${unionId}`,
+		})
+
+		if (!guild) throw new Error('Union not found')
+
+		// Then fetch associated employers separately
+		const relatedEmployers = await db.query.employers.findMany({
+			where: sql`${employers.guildId} = ${guild.id}`,
+		})
+
+		// Manually combine the results
+		const guildWithEmployers = {
+			...guild,
+			employers: relatedEmployers,
+		}
 
 		return json({
-			guild,
+			guild: guildWithEmployers,
 			baseUrl,
 		})
 	} catch (error) {
@@ -129,7 +155,7 @@ export default function UnionRoute() {
 								{displayName} Union Jobs
 							</h1>
 							<div className="flex items-center">
-								<Icon name="home" className="mr-2 h-4 w-4" />
+								<Icon name="building-2" className="mr-2 h-4 w-4" />
 								<span className="text-base">
 									{sortedEmployers.length}{' '}
 									{sortedEmployers.length === 1 ? 'Employer' : 'Employers'}
@@ -200,7 +226,7 @@ export default function UnionRoute() {
 									return (
 										<Link
 											key={employer.id}
-											to={companyUrl}
+											to={`/companies/${employer.id}-${slugify(employer.name)}`}
 											prefetch="intent"
 											className="flex flex-col items-center rounded-lg border bg-white p-4 transition-all hover:shadow-md dark:bg-gray-800"
 										>

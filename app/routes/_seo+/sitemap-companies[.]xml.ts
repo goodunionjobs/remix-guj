@@ -9,6 +9,7 @@ import {
 	createSitemapResponse,
 	type SitemapURL,
 } from '#app/utils/sitemap.server'
+import slugify from '@sindresorhus/slugify'
 
 export const loader: LoaderFunction = async ({ request }) => {
 	const baseUrl = getDomainUrl(request)
@@ -25,11 +26,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 			// Map employer data to sitemap URLs
 			const employerUrls: SitemapURL[] = employersQuery.map(employer => {
-				// Assuming employer.name is the field you want to use in the URL
-				const encodedName = encodeURIComponent(employer.name)
-
 				return {
-					loc: `${baseUrl}/companies/${encodedName}`,
+					loc: `${baseUrl}/companies/${employer.id}-${slugify(employer.name)}`,
 					priority: 0.7,
 					// lastmod: employer.updatedAt || new Date(),
 					changefreq: 'weekly', // Companies don't change very often

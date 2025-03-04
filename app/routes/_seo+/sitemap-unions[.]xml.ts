@@ -9,6 +9,7 @@ import {
 	createSitemapResponse,
 	type SitemapURL,
 } from '#app/utils/sitemap.server'
+import slugify from '@sindresorhus/slugify'
 
 export const loader: LoaderFunction = async ({ request }) => {
 	const baseUrl = getDomainUrl(request)
@@ -25,11 +26,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 			// Map guild data to sitemap URLs
 			const guildUrls: SitemapURL[] = guildsQuery.map(guild => {
-				// Assuming guild.name is the field you want to use in the URL
-				const encodedName = encodeURIComponent(guild.name)
-
 				return {
-					loc: `${baseUrl}/unions/${encodedName}`,
+					loc: `${baseUrl}/unions/${guild.id}-${slugify(guild.name)}`,
 					priority: 0.7,
 					// lastmod: guild.dateScraped || new Date(),
 					changefreq: 'monthly', // Guilds/unions don't change very often
