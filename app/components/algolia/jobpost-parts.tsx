@@ -85,7 +85,7 @@ export function JobHeaderDrizzle({
 		<Link
 			to={to}
 			prefetch="intent"
-			className="flex w-full flex-row items-center" // Adjusted styling for Link
+			className="" // Adjusted styling for Link
 		>
 			{content}
 		</Link>
