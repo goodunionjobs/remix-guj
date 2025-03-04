@@ -29,18 +29,47 @@ export function getPaginationRange(
 	maxVisible = 7,
 ) {
 	const pages: (number | 'ellipsis')[] = []
+
+	// If total pages are less than or equal to maxVisible, show all pages
 	if (totalPages <= maxVisible) {
 		return Array.from({ length: totalPages }, (_, i) => i + 1)
 	}
+
+	// Always include the first page
 	pages.push(1)
-	let start = Math.max(2, currentPage - 2)
-	let end = Math.min(totalPages - 1, currentPage + 2)
-	if (start <= 3) end = maxVisible - 2
-	if (end >= totalPages - 2) start = totalPages - maxVisible + 3
-	if (start > 2) pages.push('ellipsis')
-	for (let i = start; i <= end; i++) pages.push(i)
-	if (end < totalPages - 1) pages.push('ellipsis')
+
+	// Calculate the ideal range around the current page
+	const halfVisible = Math.floor((maxVisible - 2) / 2) // -2 for first and last pages
+	let start = Math.max(2, currentPage - halfVisible)
+	let end = Math.min(totalPages - 1, currentPage + halfVisible)
+
+	// Adjust start and end to ensure we show enough pages
+	if (end - start + 1 < maxVisible - 2) {
+		if (start === 2) {
+			end = Math.min(totalPages - 1, start + maxVisible - 3)
+		} else if (end === totalPages - 1) {
+			start = Math.max(2, end - maxVisible + 3)
+		}
+	}
+
+	// Add ellipsis if there's a gap after the first page
+	if (start > 2) {
+		pages.push('ellipsis')
+	}
+
+	// Add the range of pages
+	for (let i = start; i <= end; i++) {
+		pages.push(i)
+	}
+
+	// Add ellipsis if there's a gap before the last page
+	if (end < totalPages - 1) {
+		pages.push('ellipsis')
+	}
+
+	// Always include the last page
 	pages.push(totalPages)
+
 	return pages
 }
 
