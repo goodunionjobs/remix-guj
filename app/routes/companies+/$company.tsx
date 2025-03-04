@@ -23,7 +23,6 @@ import DOMPurify from 'isomorphic-dompurify'
 import slugify from '@sindresorhus/slugify'
 import {
 	JobHeaderDrizzle,
-	JobDescription,
 	calculateFinalTime,
 } from '#app/components/algolia/jobpost-parts.tsx'
 import { useTheme } from '../resources+/theme-switch'
@@ -217,22 +216,19 @@ async function fetchCmsData(companyName: string, timings: Timings) {
 	})
 }
 
-async function fetchEmployerData(companyName: string, timings: Timings) {
-	const normalizedCompanyName = companyName
-		.toLowerCase()
-		.trim()
-		.replace(/\s+/g, ' ')
-	console.log('🔍 DB: Querying employer:', normalizedCompanyName)
+async function fetchEmployerData(companyId: number, timings: Timings) {
+	console.log('🔍 DB: Querying employer by ID:', companyId)
+	const { cachified, cache } = await import('#app/utils/cache.server')
 
 	return cachified({
-		key: `employer-data:${normalizedCompanyName}`,
+		key: `employer-data:id-${companyId}`,
 		cache,
 		timings,
-		ttl: 1000 * 60 * 60,
-		staleWhileRevalidate: 1000 * 60 * 60 * 24,
+		ttl: 1000 * 60 * 60, // 1 hour
+		staleWhileRevalidate: 1000 * 60 * 60 * 24, // 1 day
 		getFreshValue: async () => {
 			const employer = await db.query.employers.findFirst({
-				where: sql`lower(${employers.name}) = ${normalizedCompanyName}`,
+				where: sql`${employers.id} = ${companyId}`,
 				with: {
 					jobs: {
 						with: {
@@ -244,6 +240,7 @@ async function fetchEmployerData(companyName: string, timings: Timings) {
 					},
 				},
 			})
+
 			if (!employer) throw new Error('Employer not found')
 			return employer
 		},
@@ -254,9 +251,16 @@ async function fetchEmployerData(companyName: string, timings: Timings) {
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	invariant(params.company, 'Company name is required')
 
-	const companyName = decodeURIComponent(params.company)
-		.trim()
-		.replace(/\s+/g, ' ')
+	const match = params.company.match(/^(\d+)-(.+)$/)
+	if (!match) {
+		throw json({ message: 'Invalid company ID format' }, { status: 400 })
+	}
+
+	const companyId = parseInt(match[1], 10)
+	if (isNaN(companyId)) {
+		throw json({ message: 'Invalid company ID' }, { status: 400 })
+	}
+
 	const url = new URL(request.url)
 	const baseUrl = `${url.protocol}//${url.host}`
 	const $top = Number(url.searchParams.get('$top')) || 10
@@ -265,10 +269,8 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	const timings: Timings = {}
 
 	try {
-		const [employer, cmsData] = await Promise.all([
-			fetchEmployerData(companyName, timings),
-			fetchCmsData(companyName, timings),
-		])
+		const employer = await fetchEmployerData(companyId, timings)
+		const cmsData = await fetchCmsData(employer.name, timings)
 
 		const total = employer.jobs.length
 		const totalPages = Math.ceil(total / $top)
@@ -572,14 +574,6 @@ export default function EmployerRoute() {
 		return `${format(min)} - ${format(max)}${period}`
 	}
 
-	const formatDate = (dateString: Date | string) => {
-		return new Date(dateString).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-		})
-	}
-
 	// Handle location filter changes
 	const handleLocationFilterChange = (cities: string[]) => {
 		setSelectedCities(cities)
@@ -720,108 +714,107 @@ export default function EmployerRoute() {
 			</section>
 
 			{/* Open Positions Section */}
-      <section
-        className="bg-gray-50 py-10 dark:bg-gray-900"
-        itemScope
-        itemType="https://schema.org/JobPosting"
-      >
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-5xl">
-            <h2 className="mb-4 text-2xl font-bold" itemProp="title">
-              {displayName} Open Positions
-            </h2>
+			<section
+				className="bg-gray-50 py-10 dark:bg-gray-900"
+				itemScope
+				itemType="https://schema.org/JobPosting"
+			>
+				<div className="container mx-auto px-4">
+					<div className="mx-auto max-w-5xl">
+						<h2 className="mb-4 text-2xl font-bold" itemProp="title">
+							{displayName} Open Positions
+						</h2>
 
-            <div className="mb-6 grid gap-6 lg:grid-cols-4">
-              <div className="lg:col-span-1">
-                <LocationFilters
-                  jobs={employer.jobs}
-                  onFilterChange={handleLocationFilterChange}
-                />
-              </div>
+						<div className="mb-6 grid gap-6 lg:grid-cols-4">
+							<div className="lg:col-span-1">
+								<LocationFilters
+									jobs={employer.jobs}
+									onFilterChange={handleLocationFilterChange}
+								/>
+							</div>
 
-              <div className="lg:col-span-3">
-                <p className="mb-3 text-sm">
-                  Showing {filteredJobs.length} of {employer.jobs.length}{' '}
-                  positions
-                  {selectedCities.length > 0 &&
-                    ` in ${selectedCities.length} selected ${selectedCities.length === 1 ? 'location' : 'locations'}`}
-                </p>
+							<div className="lg:col-span-3">
+								<p className="mb-3 text-sm">
+									Showing {filteredJobs.length} of {employer.jobs.length}{' '}
+									positions
+									{selectedCities.length > 0 &&
+										` in ${selectedCities.length} selected ${selectedCities.length === 1 ? 'location' : 'locations'}`}
+								</p>
 
-                {filteredJobs.length === 0 ? (
-                  <div className="rounded-lg border bg-card p-6 text-center">
-                    <h3 className="mb-2 text-lg font-semibold">
-                      No jobs match your filter
-                    </h3>
-                    <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
-                      Try selecting different locations or clearing your
-                      filters.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-2">
-                    {filteredJobs.map(job => {
-                      // Calculate the necessary values for JobHeaderDrizzle
-                      const jobSlug = slugify(job.title);
-                      const unixTimestamp = Math.floor(new Date(job.timeStamp).getTime() / 1000);
-                      const finalTime = calculateFinalTime(unixTimestamp);
-                      
-                      // Default color based on theme or use employer color if available
-                      const defaultColor = theme === 'light' ? '#FFFFFF' : '#0f172a';
-                      const color = job.color 
-                        ? '#' + ('000000' + job.color.toString(16)).slice(-6)
-                        : defaultColor;
-                      const textColor = FindTextColor(color, '#FFFFFF', '#000000');
-                      
-                      // Generate URL for the job post
-                      const jobUrl = `/jobs/${job.id}-${jobSlug}`;
-                      
-                      return (
-                        <Link 
-                          key={job.id} 
-                          to={jobUrl} 
-                          prefetch="intent"
-                          className="block"
-                        >
-                          <JobHeaderDrizzle
-                            color={color}
-                            textColor={textColor}
-                            employerImage={employer.s3Link}
-                            employer={employer.name}
-                            hit={job}
-                            finalTime={finalTime}
-                            url={jobUrl}
-                            // We don't need onClick now that we're using Link
-                            // The Link component will handle the navigation
-                          />
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+								{filteredJobs.length === 0 ? (
+									<div className="rounded-lg border bg-card p-6 text-center">
+										<h3 className="mb-2 text-lg font-semibold">
+											No jobs match your filter
+										</h3>
+										<p className="mb-3 text-sm text-gray-600 dark:text-gray-300">
+											Try selecting different locations or clearing your
+											filters.
+										</p>
+									</div>
+								) : (
+									<div className="grid gap-0.5">
+										{filteredJobs.map(job => {
+											// Calculate the necessary values for JobHeaderDrizzle
+											const jobSlug = slugify(job.title)
+											const unixTimestamp = Math.floor(
+												new Date(job.timeStamp).getTime() / 1000,
+											)
+											const finalTime = calculateFinalTime(unixTimestamp)
 
-            <div className="mx-auto max-w-3xl">
-              <PaginationBar
-                total={pagination.total}
-                $top={pagination.$top}
-                $skip={pagination.$skip}
-              />
-            </div>
+											// Default color based on theme or use employer color if available
+											const defaultColor =
+												theme === 'light' ? '#FFFFFF' : '#0f172a'
+											const color = job.color
+												? '#' + ('000000' + job.color.toString(16)).slice(-6)
+												: defaultColor
+											const textColor = FindTextColor(
+												color,
+												'#FFFFFF',
+												'#000000',
+											)
 
-            <div className="mt-6 flex justify-center">
-              <Link to="/" prefetch="intent">
-                <Button
-                  size="sm"
-                  className="bg-blue-600 px-6 text-sm hover:bg-blue-700"
-                >
-                  Browse All Positions
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+											// Generate URL for the job post
+											const jobUrl = `/jobs/${job.id}-${jobSlug}`
+
+											return (
+												<JobHeaderDrizzle
+													color={color}
+													textColor={textColor}
+													employerImage={employer.s3Link}
+													employer={employer.name}
+													hit={job}
+													finalTime={finalTime}
+													url={jobUrl}
+													to={jobUrl} // Pass the navigation URL here
+												/>
+											)
+										})}
+									</div>
+								)}
+							</div>
+						</div>
+
+						<div className="mx-auto max-w-3xl">
+							<PaginationBar
+								total={pagination.total}
+								$top={pagination.$top}
+								$skip={pagination.$skip}
+							/>
+						</div>
+
+						<div className="mt-6 flex justify-center">
+							<Link to="/" prefetch="intent">
+								<Button
+									size="sm"
+									className="bg-blue-600 px-6 text-sm hover:bg-blue-700"
+								>
+									Browse All Positions
+								</Button>
+							</Link>
+						</div>
+					</div>
+				</div>
+			</section>
 			{/* Job Alerts Section */}
 			<section className="bg-blue-50 py-8 dark:bg-blue-900">
 				<div className="container mx-auto px-4">

@@ -257,8 +257,16 @@ export const categoriesRelations = relations(categories, ({ many }) => ({
 	usersCategories: many(usersToCategories),
 }))
 
-export const employersRelations = relations(employers, ({ many }) => ({
+export const guildsRelations = relations(guilds, ({ many }) => ({
+	employers: many(employers),
+}))
+
+export const employersRelations = relations(employers, ({ one, many }) => ({
 	jobs: many(jobs),
+	guild: one(guilds, {
+		fields: [employers.guildId],
+		references: [guilds.id],
+	}),
 }))
 
 export const usersToCategories = pgTable(

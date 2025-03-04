@@ -6,6 +6,7 @@ import { FinalTime } from '#app/components/final-time'
 import { LogoImage } from '#app/components/logo-image'
 import { jobs } from '../../../drizzle/schema'
 import { Icon } from '#app/components/ui/icon.tsx'
+import { Link } from '@remix-run/react'
 
 enum TimeFormat {
 	Hour = 'hr',
@@ -37,6 +38,7 @@ export function JobHeaderDrizzle({
 	finalTime,
 	url,
 	onClick,
+	to,
 }: {
 	color: string
 	textColor: string
@@ -47,8 +49,9 @@ export function JobHeaderDrizzle({
 	finalTime: [number, TimeFormat]
 	url: string
 	onClick?: () => void
+	to?: string
 }) {
-	return (
+	const content = (
 		<div
 			className="border-grey-200 border-1 relative z-10 h-max overflow-hidden rounded-md border text-black shadow-xl transition duration-300 ease-out dark:shadow-slate-800/60 lg:hover:transform-none lg:active:translate-x-0.5 lg:active:translate-y-0.5 2xl:hover:translate-x-0.5 2xl:hover:translate-y-0.5 2xl:active:translate-x-1 2xl:active:translate-y-1"
 			style={{ background: color, color: textColor }}
@@ -77,6 +80,17 @@ export function JobHeaderDrizzle({
 				/>
 			</div>
 		</div>
+	)
+	return to ? (
+		<Link
+			to={to}
+			prefetch="intent"
+			className="" // Adjusted styling for Link
+		>
+			{content}
+		</Link>
+	) : (
+		content
 	)
 }
 
@@ -141,7 +155,7 @@ export function JobDescription({
 }: {
 	description: string
 	url?: string
-	baseUrl: string
+	baseUr: string
 	objectID?: string
 	job?: string
 	isLoading?: boolean
