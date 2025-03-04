@@ -280,7 +280,8 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 		const paginatedEmployer = { ...employer, jobs: paginatedJobs }
 
 		const data: LoaderData = {
-			employer: paginatedEmployer,
+			employer: paginatedEmployer, // Paginated version for display
+			fullEmployer: employer, // Full version for total counts and locations
 			cmsData,
 			pagination: { total, currentPage, totalPages, $top, $skip },
 			baseUrl,
@@ -296,11 +297,20 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	}
 }
 
-type Employer = InferSelectModel<typeof employers>
-type Job = InferSelectModel<typeof jobs>
-
+// Update LoaderData type to include fullEmployer
 type LoaderData = {
 	employer: Employer & {
+		jobs: Array<
+			Job & {
+				address: {
+					city?: { name: string } | null
+					state?: { name: string } | null
+					country?: { name: string } | null
+				}
+			}
+		>
+	}
+	fullEmployer: Employer & {
 		jobs: Array<
 			Job & {
 				address: {
@@ -328,6 +338,9 @@ type LoaderData = {
 	}
 	baseUrl: string
 }
+
+type Employer = InferSelectModel<typeof employers>
+type Job = InferSelectModel<typeof jobs>
 
 // Type definition for location filter component
 type LocationGroup = {
@@ -493,15 +506,15 @@ function LocationFilters({
 }
 
 export default function EmployerRoute() {
-	const { employer, cmsData, pagination } = useLoaderData<LoaderData>()
+	const { employer, fullEmployer, cmsData, pagination } =
+		useLoaderData<LoaderData>()
 	const [selectedCities, setSelectedCities] = useState<string[]>([])
-	const [filteredJobs, setFilteredJobs] = useState(employer.jobs)
+	const [filteredJobs, setFilteredJobs] = useState(employer.jobs) // Current page's jobs
 
 	const theme = useTheme()
 	const displayName = employer.name || ''
 	const companyLogo = employer.s3Link || null
 
-	// Sanitize HTML content with DOMPurify
 	const sanitizedDescription = cmsData.description
 		? DOMPurify.sanitize(cmsData.description, {
 				ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li'],
@@ -525,25 +538,33 @@ export default function EmployerRoute() {
 		}),
 	)
 
-	// Filter jobs based on selected cities
+	// Filter jobs based on selected cities across all jobs
 	useEffect(() => {
 		if (selectedCities.length === 0) {
-			setFilteredJobs(employer.jobs)
+			setFilteredJobs(employer.jobs) // Show current page’s jobs if no filter
 		} else {
-			const filtered = employer.jobs.filter(
+			const filtered = fullEmployer.jobs.filter(
 				job =>
 					job.address?.city?.name &&
 					selectedCities.includes(job.address.city.name),
 			)
-			setFilteredJobs(filtered)
+			// Apply pagination to filtered results
+			const start = pagination.$skip
+			const end = start + pagination.$top
+			setFilteredJobs(filtered.slice(start, end))
 		}
-	}, [selectedCities, employer.jobs])
+	}, [
+		selectedCities,
+		employer.jobs,
+		fullEmployer.jobs,
+		pagination.$skip,
+		pagination.$top,
+	])
 
-	// Collect all locations for the jobs
+	// Compute all locations across all jobs (not just current page)
 	const jobLocations = useMemo(() => {
 		const locations = new Map<string, Set<string>>()
-
-		employer.jobs.forEach(job => {
+		fullEmployer.jobs.forEach(job => {
 			if (job.address?.state?.name && job.address?.city?.name) {
 				const state = job.address.state.name
 				if (!locations.has(state)) {
@@ -552,9 +573,8 @@ export default function EmployerRoute() {
 				locations.get(state)?.add(job.address.city.name)
 			}
 		})
-
 		return locations
-	}, [employer.jobs])
+	}, [fullEmployer.jobs])
 
 	const formatSalary = (
 		min: number | null,
@@ -562,35 +582,44 @@ export default function EmployerRoute() {
 		type: 'hr' | 'yr' | 'mo' | null,
 	) => {
 		if (!min || !max || !type) return null
-
 		const format = (num: number) =>
 			new Intl.NumberFormat('en-US', {
 				style: 'currency',
 				currency: 'USD',
 				maximumFractionDigits: 0,
 			}).format(num)
-
 		const period = type === 'yr' ? '/year' : type === 'hr' ? '/hour' : '/month'
 		return `${format(min)} - ${format(max)}${period}`
 	}
 
-	// Handle location filter changes
 	const handleLocationFilterChange = (cities: string[]) => {
 		setSelectedCities(cities)
 	}
 
-	// Format locationSummary for display
+	// Improved location summary showing all states and cities
 	const locationSummary = useMemo(() => {
 		const totalStates = jobLocations.size
 		const totalCities = [...jobLocations.values()].reduce(
 			(sum, cities) => sum + cities.size,
 			0,
 		)
-
 		if (totalStates === 0) return 'Multiple locations'
-
-		return `${totalStates} ${totalStates === 1 ? 'state' : 'states'}, ${totalCities} ${totalCities === 1 ? 'city' : 'cities'}`
+		const stateList = Array.from(jobLocations.keys())
+			.map(state => {
+				const cities = Array.from(jobLocations.get(state) || [])
+				return `${state} (${cities.join(', ')})`
+			})
+			.join('; ')
+		return `${totalStates} ${totalStates === 1 ? 'state' : 'states'}, ${totalCities} ${totalCities === 1 ? 'city' : 'cities'}: ${stateList}`
 	}, [jobLocations])
+
+	// Pagination display
+	const showingStart = pagination.$skip + 1
+	const showingEnd = Math.min(
+		pagination.$skip + filteredJobs.length,
+		pagination.total,
+	)
+	const totalPositions = fullEmployer.jobs.length // Total across all pages
 
 	return (
 		<div className="flex flex-col">
@@ -713,7 +742,7 @@ export default function EmployerRoute() {
 				</div>
 			</section>
 
-			{/* Open Positions Section */}
+			{/* {/* Open Positions Section */}
 			<section
 				className="bg-gray-50 py-10 dark:bg-gray-900"
 				itemScope
@@ -724,23 +753,20 @@ export default function EmployerRoute() {
 						<h2 className="mb-4 text-2xl font-bold" itemProp="title">
 							{displayName} Open Positions
 						</h2>
-
 						<div className="mb-6 grid gap-6 lg:grid-cols-4">
 							<div className="lg:col-span-1">
 								<LocationFilters
-									jobs={employer.jobs}
+									jobs={fullEmployer.jobs} // Pass all jobs for filtering
 									onFilterChange={handleLocationFilterChange}
 								/>
 							</div>
-
 							<div className="lg:col-span-3">
 								<p className="mb-3 text-sm">
-									Showing {filteredJobs.length} of {employer.jobs.length}{' '}
+									Showing {showingStart} to {showingEnd} of {totalPositions}{' '}
 									positions
 									{selectedCities.length > 0 &&
 										` in ${selectedCities.length} selected ${selectedCities.length === 1 ? 'location' : 'locations'}`}
 								</p>
-
 								{filteredJobs.length === 0 ? (
 									<div className="rounded-lg border bg-card p-6 text-center">
 										<h3 className="mb-2 text-lg font-semibold">
@@ -754,14 +780,11 @@ export default function EmployerRoute() {
 								) : (
 									<div className="grid gap-0.5">
 										{filteredJobs.map(job => {
-											// Calculate the necessary values for JobHeaderDrizzle
 											const jobSlug = slugify(job.title)
 											const unixTimestamp = Math.floor(
 												new Date(job.timeStamp).getTime() / 1000,
 											)
 											const finalTime = calculateFinalTime(unixTimestamp)
-
-											// Default color based on theme or use employer color if available
 											const defaultColor =
 												theme === 'light' ? '#FFFFFF' : '#0f172a'
 											const color = job.color
@@ -772,28 +795,32 @@ export default function EmployerRoute() {
 												'#FFFFFF',
 												'#000000',
 											)
-
-											// Generate URL for the job post
 											const jobUrl = `/jobs/${job.id}-${jobSlug}`
 
 											return (
-												<JobHeaderDrizzle
-													color={color}
-													textColor={textColor}
-													employerImage={employer.s3Link}
-													employer={employer.name}
-													hit={job}
-													finalTime={finalTime}
-													url={jobUrl}
-													to={jobUrl} // Pass the navigation URL here
-												/>
+												<Link
+													key={job.id}
+													to={jobUrl}
+													prefetch="intent"
+													className="block w-full"
+												>
+													<JobHeaderDrizzle
+														color={color}
+														textColor={textColor}
+														employerImage={employer.s3Link}
+														employer={employer.name}
+														hit={job}
+														finalTime={finalTime}
+														url={jobUrl}
+														to={jobUrl}
+													/>
+												</Link>
 											)
 										})}
 									</div>
 								)}
 							</div>
 						</div>
-
 						<div className="mx-auto max-w-3xl">
 							<PaginationBar
 								total={pagination.total}
@@ -801,7 +828,6 @@ export default function EmployerRoute() {
 								$skip={pagination.$skip}
 							/>
 						</div>
-
 						<div className="mt-6 flex justify-center">
 							<Link to="/" prefetch="intent">
 								<Button
@@ -815,7 +841,8 @@ export default function EmployerRoute() {
 					</div>
 				</div>
 			</section>
-			{/* Job Alerts Section */}
+
+			{/* Job Alerts Section  */}
 			<section className="bg-blue-50 py-8 dark:bg-blue-900">
 				<div className="container mx-auto px-4">
 					<div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
