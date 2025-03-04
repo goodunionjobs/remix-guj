@@ -2,7 +2,7 @@ import { useSearchParams } from '@remix-run/react'
 import { Button } from '#app/components/ui/button.tsx'
 import { Link } from '@remix-run/react'
 
-// Helper function to set search params while preserving existing ones
+// Helper function unchanged
 function setSearchParamsString(
 	searchParams: URLSearchParams,
 	changes: Record<string, string | number | undefined>,
@@ -22,6 +22,7 @@ function setSearchParamsString(
 		.join('&')
 }
 
+// Pagination range function unchanged
 export function getPaginationRange(
 	currentPage: number,
 	totalPages: number,
@@ -43,7 +44,6 @@ export function getPaginationRange(
 	return pages
 }
 
-// Updated PaginationBar
 export function PaginationBar({
 	total,
 	$top,
@@ -56,7 +56,8 @@ export function PaginationBar({
 	const [searchParams] = useSearchParams()
 	const totalPages = Math.ceil(total / $top)
 	const currentPage = Math.floor($skip / $top) + 1
-	const pages = getPaginationRange(currentPage, totalPages)
+	const pages =
+		totalPages > 1 ? getPaginationRange(currentPage, totalPages) : [1]
 
 	return (
 		<div className="flex items-center gap-1">
@@ -64,7 +65,6 @@ export function PaginationBar({
 				<Link
 					to={{ search: setSearchParamsString(searchParams, { $skip: 0 }) }}
 					preventScrollReset
-					prefetch="intent"
 				>
 					{'<<'}
 					<span className="sr-only">First page</span>
@@ -80,7 +80,8 @@ export function PaginationBar({
 						key={page}
 						size="sm"
 						variant={page === currentPage ? 'ghost' : 'outline'}
-						asChild={!page === currentPage}
+						asChild={page !== currentPage}
+						disabled={page === currentPage}
 						className={page === currentPage ? 'bg-neutral-200 text-black' : ''}
 					>
 						{page === currentPage ? (
@@ -93,7 +94,6 @@ export function PaginationBar({
 									}),
 								}}
 								preventScrollReset
-								prefetch="intent"
 							>
 								{page}
 							</Link>
@@ -104,21 +104,27 @@ export function PaginationBar({
 			<Button
 				size="sm"
 				variant="outline"
-				asChild
+				asChild={totalPages > 1 && $skip + $top < total}
 				disabled={$skip + $top >= total}
 			>
-				<Link
-					to={{
-						search: setSearchParamsString(searchParams, {
-							$skip: $skip + $top,
-						}),
-					}}
-					preventScrollReset
-					prefetch="intent"
-				>
-					{'>>'}
-					<span className="sr-only">Next page</span>
-				</Link>
+				{totalPages > 1 && $skip + $top < total ? (
+					<Link
+						to={{
+							search: setSearchParamsString(searchParams, {
+								$skip: $skip + $top,
+							}),
+						}}
+						preventScrollReset
+					>
+						{'>>'}
+						<span className="sr-only">Next page</span>
+					</Link>
+				) : (
+					<span>
+						{'>>'}
+						<span className="sr-only">Next page</span>
+					</span>
+				)}
 			</Button>
 		</div>
 	)

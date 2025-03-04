@@ -538,7 +538,18 @@ export default function EmployerRoute() {
 		}),
 	)
 
-	// Filter jobs based on selected cities across all jobs
+	// Filter jobs based on selected cities across all jobs and compute filtered total
+	const filteredTotal = useMemo(() => {
+		if (selectedCities.length === 0) {
+			return fullEmployer.jobs.length
+		}
+		return fullEmployer.jobs.filter(
+			job =>
+				job.address?.city?.name &&
+				selectedCities.includes(job.address.city.name),
+		).length
+	}, [selectedCities, fullEmployer.jobs])
+
 	useEffect(() => {
 		if (selectedCities.length === 0) {
 			setFilteredJobs(employer.jobs) // Show current page’s jobs if no filter
@@ -613,13 +624,13 @@ export default function EmployerRoute() {
 		return `${totalStates} ${totalStates === 1 ? 'state' : 'states'}, ${totalCities} ${totalCities === 1 ? 'city' : 'cities'}: ${stateList}`
 	}, [jobLocations])
 
-	// Pagination display
+	// Pagination display adjusted for filtered total
 	const showingStart = pagination.$skip + 1
 	const showingEnd = Math.min(
 		pagination.$skip + filteredJobs.length,
-		pagination.total,
+		filteredTotal,
 	)
-	const totalPositions = fullEmployer.jobs.length // Total across all pages
+	const totalPositions = filteredTotal // Use filtered total instead of fullEmployer.jobs.length
 
 	return (
 		<div className="flex flex-col">
@@ -742,7 +753,7 @@ export default function EmployerRoute() {
 				</div>
 			</section>
 
-			{/* {/* Open Positions Section */}
+			{/* Open Positions Section */}
 			<section
 				className="bg-gray-50 py-10 dark:bg-gray-900"
 				itemScope
@@ -756,7 +767,7 @@ export default function EmployerRoute() {
 						<div className="mb-6 grid gap-6 lg:grid-cols-4">
 							<div className="lg:col-span-1">
 								<LocationFilters
-									jobs={fullEmployer.jobs} // Pass all jobs for filtering
+									jobs={fullEmployer.jobs}
 									onFilterChange={handleLocationFilterChange}
 								/>
 							</div>
@@ -823,11 +834,12 @@ export default function EmployerRoute() {
 						</div>
 						<div className="mx-auto max-w-3xl">
 							<PaginationBar
-								total={pagination.total}
+								total={totalPositions} // Pass filtered total
 								$top={pagination.$top}
 								$skip={pagination.$skip}
 							/>
 						</div>
+
 						<div className="mt-6 flex justify-center">
 							<Link to="/" prefetch="intent">
 								<Button
