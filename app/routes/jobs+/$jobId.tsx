@@ -297,14 +297,6 @@ export default function JobRoute() {
 	return (
 		<div className="md:px-42 lg:px- mt-4 flex justify-center bg-white px-4 py-4 dark:bg-slate-950 sm:px-8">
 			<div className="min-h-screen [width:1115px]">
-				<Link
-					to="/"
-					className="rounded-md border-2 border-solid border-black px-1.5 pb-1.5 pt-1 text-sm font-semibold sm:text-lg"
-					style={{ background: `#ff8400`, color: `black` }}
-				>
-					<Icon className="h-6 w-6" name="arrow-big-left" />
-					Back to Search
-				</Link>
 				<div className="group pt-2">
 					<JobHeaderDrizzle
 						color={color}
