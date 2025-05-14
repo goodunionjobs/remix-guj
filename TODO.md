@@ -34,6 +34,7 @@
 - Implement the bottom and all else
   https://sergiodxa.com/tutorials/find-and-remove-unused-code-with-knip
 - Maybe dissallow robots.txt the resources we have?
+- Add constants. Like one for amount of jobs in sitemap to divide by
 
 1. Change umami. See Google analytics if bots change. I’ll keep both up.
 2. Categories Union admin

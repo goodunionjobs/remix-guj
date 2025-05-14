@@ -26,7 +26,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 	}
 
 	// Define the limit of URLs per sitemap file (Google's limit is 50,000)
-	const LIMIT = 50_000
+	const LIMIT = 10_000
 	const offset = (page - 1) * LIMIT
 
 	const sitemapKey = `sitemap-jobs-${page}`
