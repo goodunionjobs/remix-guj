@@ -15,6 +15,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 	console.log('Sitemap index loader triggered')
 	const baseUrl = getDomainUrl(request)
 
+	const LIMIT = 3_000
 	const sitemapIndex = await cachified({
 		key: 'sitemap',
 		cache,
@@ -30,7 +31,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 				console.log(`Total job count: ${jobCount}`)
 
 				// Calculate how many job sitemap files we need (50,000 URLs per file)
-				const jobSitemapCount = Math.max(1, Math.ceil(jobCount / 10_000))
+				const jobSitemapCount = Math.max(1, Math.ceil(jobCount / LIMIT))
 				console.log(`Will generate ${jobSitemapCount} job sitemap files`)
 
 				// Build the array of sitemaps for the index
