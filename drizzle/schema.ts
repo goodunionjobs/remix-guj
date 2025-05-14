@@ -140,7 +140,8 @@ export const jobs = pgTable(
 		postPaid: boolean('post_paid').default(false),
 	},
 	job => ({
-		seniorityIdIndex: index('job_seniority_id_index').on(job.employerId),
+		//TODO: Change the below to `seniorityIdIndex: index('job_seniority_id_index').on(job.seniorityId),`
+		seniorityIdIndex: index('job_seniority_id_index').on(job.seniorityId),
 		employerIdIndex: index('job_employer_id_index').on(job.employerId),
 		addressIdIndex: index('job_address_id_index').on(job.addressId),
 		timeStampIndex: index('job_time_stamp_index').on(job.timeStamp),
