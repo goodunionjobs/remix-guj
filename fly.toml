@@ -45,7 +45,7 @@ script_checks = [ ]
 
   [[services.http_checks]]
   interval = "10s"
-  grace_period = "5s"
+  grace_period = "10s"  # Increased from 5s to 10s
   method = "get"
   path = "/resources/healthcheck"
   protocol = "http"
@@ -54,8 +54,8 @@ script_checks = [ ]
   headers = { }
 
   [[services.http_checks]]
-    grace_period = "10s"
-    interval = "30s"
-    method = "GET"
-    timeout = "5s"
-    path = "/litefs/health"
+  grace_period = "10s"  
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/litefs/health"
