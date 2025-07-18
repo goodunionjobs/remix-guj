@@ -35,6 +35,7 @@
 - Think about removing orange from remix apply button
 - GO THROUGH CHATGPT. ANYTHING WITH GUJ means to look at it
 - Share this job pop out more
+- learn to code
 
 * Check CopyRight and change where needed in website
 
