@@ -15,6 +15,8 @@ enum TimeFormat {
 	Year = 'yr',
 }
 
+//I am Jerusalem
+
 // First, infer the base type from your schema
 type BaseSelectJob = typeof jobs.$inferSelect
 
