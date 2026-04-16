@@ -66,9 +66,9 @@ export function DrizzleAttributes({
 				<p className="font-Atkinson line-clamp-2 text-sm leading-none sm:leading-tight">
 					{employer}
 				</p>
-				<p className="font-Atkinson mb-1.5 line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight">
+				<h1 className="font-Atkinson mb-1.5 line-clamp-2 text-sm font-bold leading-none sm:text-lg sm:leading-tight">
 					{title}
-				</p>
+				</h1>
 				{minSalary === null ||
 				(minSalary === undefined && maxSalary === null) ||
 				maxSalary === undefined ? (
