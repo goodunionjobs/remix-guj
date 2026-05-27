@@ -309,6 +309,12 @@ function App() {
 								/>
 							</div>
 						</div>
+						<Link
+							to="/blog"
+							className="hidden rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white sm:block"
+						>
+							Blog
+						</Link>
 						{/* // TODO Add back later. Cool to look up users */}
 						{/* {isOnSearchPage ? null : (
 							<div className="ml-auto max-w-sm flex-1 pr-10">
@@ -355,7 +361,7 @@ function App() {
 						<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
 							{/* Company Info */}
 							<div>
-                {/* TODO: Fix footer logo to have full image and words link back to home */}
+								{/* TODO: Fix footer logo to have full image and words link back to home */}
 								<div className="mb-4 flex items-center">
 									<Logo />
 									<div className="ml-2">
@@ -382,6 +388,20 @@ function App() {
 									benefits, and fair pay while offering insights into union
 									advocacy.
 								</p>
+							</div>
+
+							<div>
+								<h3 className="mb-4 text-lg font-semibold">Resources</h3>
+								<ul className="space-y-2">
+									<li>
+										<Link
+											to="/blog"
+											className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+										>
+											Union Job Search Blog
+										</Link>
+									</li>
+								</ul>
 							</div>
 
 							{/* TODO: BRING BACK */}
